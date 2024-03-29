@@ -16,7 +16,7 @@ scraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifica
 
   where
     heading :: Scraper Text Text
-    heading = text "h1"
+    heading = text "h2"
 
 main :: IO ()
 main = do
