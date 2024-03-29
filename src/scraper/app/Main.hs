@@ -5,6 +5,9 @@ module Main (main) where
 import Data.Text
 import Data.Char (isSpace)         
 import Text.HTML.Scalpel
+import Text.Pandoc.Builder
+import Text.Pandoc.Writers.Docx
+import qualified Data.Text.IO as T
 
 
 -- trims the whitespace and newlines from a string. Possibly won't use this so that the formatting in the output is nice cause of the spaces
@@ -50,25 +53,29 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = text "pre"
 
 
-
+convertToDocx :: FilePath -> FilePath -> IO ()
+convertToDocx txtFile docxFile = do
+    txtContents <- T.readFile txtFile
+    let mydoc = docx (plain (T.pack txtContents))
+    T.writeFile docxFile $ writeDocx mydoc
 
 
 main :: IO ()
 main = do
   headingResult <- headingScraper
   case headingResult of
-    --Just x  -> print (Prelude.map trim x)
-    Just x  -> writeFile "output_files/headings.txt" (Prelude.unlines (Prelude.map trim x) )
+    Just x  -> do
+        writeFile "output_files/headings.txt" (Prelude.unlines (Prelude.map trim x) )
+        convertToDocx "output_files/headings.txt" "output_files/headings.docx"
     Nothing -> print "Could not find the required elements"
+    -- return somehow or have more things in the Just x statement
 
   paraResult <- paraScraper
   case paraResult of
-    -- Just x -> print ( Prelude.map (\a -> " \n " ++ a ++ " \n ") x)
     Just x  -> writeFile "output_files/paragraphs.txt" (Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x))
     Nothing -> print "Could not find the required elements"
 
   codeResult <- codeScraper
   case codeResult of
-    -- Just x -> print ( Prelude.map (\a -> " \n " ++ a ++ " \n ") x)
     Just x  -> writeFile "output_files/code_snippets.txt" (Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x))
     Nothing -> print "Could not find the required elements"
