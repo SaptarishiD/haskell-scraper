@@ -5,8 +5,8 @@ module Main (main) where
 import Data.Text
 import Data.Char (isSpace)         
 import Text.HTML.Scalpel
-import Text.Pandoc.Builder
-import Text.Pandoc.Writers.Docx
+-- import Text.Pandoc.Builder
+import Text.Pandoc
 import qualified Data.Text.IO as T
 
 
@@ -53,11 +53,15 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = text "pre"
 
 
-convertToDocx :: FilePath -> FilePath -> IO ()
-convertToDocx txtFile docxFile = do
-    txtContents <- T.readFile txtFile
-    let mydoc = docx (plain (T.pack txtContents))
-    T.writeFile docxFile $ writeDocx mydoc
+-- convertToDocx :: FilePath -> FilePath -> IO ()
+-- convertToDocx txtFile docxFile = do
+--     txtContents <- T.readFile txtFile
+--     let mydoc = readMarkdown def txtContents
+--     let wordDoc = writeDocx def mydoc
+--     T.writeFile "output.docx" wordDoc
+--     T.writeFile docxFile $ writeDocx mydoc
+
+
 
 
 main :: IO ()
@@ -66,7 +70,10 @@ main = do
   case headingResult of
     Just x  -> do
         writeFile "output_files/headings.txt" (Prelude.unlines (Prelude.map trim x) )
-        convertToDocx "output_files/headings.txt" "output_files/headings.docx"
+        txtContents <- T.readFile "output_files/headings.txt"
+        let mydoc = readMarkdown def txtContents
+        let wordDoc = writeDocx def mydoc
+        T.writeFile "output_files/output.docx" wordDoc
     Nothing -> print "Could not find the required elements"
     -- return somehow or have more things in the Just x statement
 
