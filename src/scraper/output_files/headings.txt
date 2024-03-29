@@ -1,0 +1,5 @@
+Type erasure and reification
+Types at compile time, no types at run-time
+Reification - retaining types at run-time
+Type erasure and Java generics
+Reification in dynamically typed languages
