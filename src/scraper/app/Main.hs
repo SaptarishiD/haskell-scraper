@@ -5,22 +5,25 @@ module Main (main) where
 import Data.Text
 import Data.Char (isSpace)         
 import Text.HTML.Scalpel
+import Text.Read (Lexeme(String))
 
-
+-- trims the whitespace and newlines from a string. Possibly won't use this so that the formatting in the output is nice cause of the spaces
 trim :: String -> String
 trim = f . f
   where f = Prelude.reverse . Prelude.dropWhile isSpace
 
-scraper :: IO (Maybe Text)
-scraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" heading
-
+myScraper :: IO (Maybe [String])
+myScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" headings
   where
-    heading :: Scraper Text Text
+    headings :: Scraper String [String] 
+    headings = chroots "h2" heading -- need to be careful about the first header also cause that's h1
+
+    heading :: Scraper String String
     heading = text "h2"
 
 main :: IO ()
 main = do
-  result <- scraper
-  case result of
-    Just x  -> print (trim (unpack x))
-    Nothing -> print "Didn't find the necessary items."
+  myResult <- myScraper
+  case myResult of
+    Just x  -> print (Prelude.map trim x)
+    Nothing -> print "Could not find the required elements"
