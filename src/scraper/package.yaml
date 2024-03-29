@@ -24,6 +24,7 @@ dependencies:
 - scalpel
 - text
 - pandoc
+- pandoc-types
 
 
 ghc-options:

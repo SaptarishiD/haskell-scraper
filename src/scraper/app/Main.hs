@@ -5,8 +5,10 @@ module Main (main) where
 import Data.Text
 import Data.Char (isSpace)         
 import Text.HTML.Scalpel
--- import Text.Pandoc.Builder
-import Text.Pandoc
+import Text.Pandoc.Builder
+import Text.Pandoc.Options
+import Text.Pandoc.Readers.Markdown
+import Text.Pandoc.Writers.Docx
 import qualified Data.Text.IO as T
 
 
@@ -25,10 +27,10 @@ headingScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-
     headings = (:) <$> heading1 <*> chroots "h2" heading2  -- easier way to do this?
 
     heading1 :: Scraper String String
-    heading1 = text "h1"
+    heading1 = Text.HTML.Scalpel.text "h1"
     
     heading2 :: Scraper String String
-    heading2 = text "h2"
+    heading2 = Text.HTML.Scalpel.text "h2"
 
 
 paraScraper :: IO (Maybe [String])
@@ -39,7 +41,7 @@ paraScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     paragraphs = chroots "p" paragraph
     
     paragraph :: Scraper String String
-    paragraph = text "p"
+    paragraph = Text.HTML.Scalpel.text "p"
 
 
 codeScraper :: IO (Maybe [String])
@@ -50,30 +52,33 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     code_snippets = chroots "pre" snippet
     
     snippet :: Scraper String String
-    snippet = text "pre"
+    snippet = Text.HTML.Scalpel.text "pre"
 
 
--- convertToDocx :: FilePath -> FilePath -> IO ()
--- convertToDocx txtFile docxFile = do
---     txtContents <- T.readFile txtFile
---     let mydoc = readMarkdown def txtContents
---     let wordDoc = writeDocx def mydoc
---     T.writeFile "output.docx" wordDoc
---     T.writeFile docxFile $ writeDocx mydoc
+convertToDocx :: FilePath -> FilePath -> IO ()
+convertToDocx mdFile docxFile = do
+    -- Read the contents of the Markdown file
+    mdContents <- readFile mdFile
+    
+    -- Parse Markdown contents into Pandoc document
+    let pandocDoc = readMarkdown def mdContents
+    
+    -- Convert Pandoc document to DOCX format
+    let docxContents = writeDocx def pandocDoc
+    
+    -- Write the DOCX output to file
+    writeFile docxFile docxContents
 
 
 
-
+------------------------------------------------------------------------------------------------------------------------
 main :: IO ()
 main = do
   headingResult <- headingScraper
   case headingResult of
     Just x  -> do
         writeFile "output_files/headings.txt" (Prelude.unlines (Prelude.map trim x) )
-        txtContents <- T.readFile "output_files/headings.txt"
-        let mydoc = readMarkdown def txtContents
-        let wordDoc = writeDocx def mydoc
-        T.writeFile "output_files/output.docx" wordDoc
+        convertToDocx "output_files/headings.txt" "output_files/headings.docx"
     Nothing -> print "Could not find the required elements"
     -- return somehow or have more things in the Just x statement
 
