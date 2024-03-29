@@ -5,11 +5,10 @@ module Main (main) where
 import Data.Text
 import Data.Char (isSpace)         
 import Text.HTML.Scalpel
-import Text.Pandoc.Builder
-import Text.Pandoc.Options
-import Text.Pandoc.Readers.Markdown
-import Text.Pandoc.Writers.Docx
-import qualified Data.Text.IO as T
+import Text.Pandoc
+import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+
 
 
 -- trims the whitespace and newlines from a string. Possibly won't use this so that the formatting in the output is nice cause of the spaces
@@ -55,16 +54,40 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = Text.HTML.Scalpel.text "pre"
 
 
-
-
 ------------------------------------------------------------------------------------------------------------------------
 main :: IO ()
-main = do
+main = do 
+    headingResult <- headingScraper
+    case headingResult of
+        Just x -> do
+            result <- runIO $ do
+                let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x) 
+                doc <- readMarkdown def (T.pack textToConvert)
+                writeDocx def doc
+            mydocx <- handleError result
+            putStrLn "Burh"
+            -- TIO.putStrLn rst
+        Nothing -> print "Could not find the required elements"
+
+
+
+
+
+{-    
   headingResult <- headingScraper
   case headingResult of
     Just x  -> do
         let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x)
-        writeFile "output_files/headings.txt" textToConvert
+        writeFile "output_files/headings.md" textToConvert
+        let doc = runIO (readMarkdown def "output_files/headings.md") :: IO (Either PandocError Pandoc)
+        -- let result = writePlain def doc
+        -- let docx = writeDocx def markdown
+        -- let txt = writePlain def markdown
+        -- T.writeFile "output_files/headings.docx" (writeLazyByteString docx)
+        -- T.writeFile "output_files/headings.txt" (writeLazyByteString txt)
+        -- writeFile "output_file.txt" mydoc
+        writeFile "output_files/headings.md" textToConvert
+
         
 
     Nothing -> print "Could not find the required elements"
@@ -79,3 +102,4 @@ main = do
   case codeResult of
     Just x  -> writeFile "output_files/code_snippets.txt" (Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x))
     Nothing -> print "Could not find the required elements"
+-}
