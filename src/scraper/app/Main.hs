@@ -55,20 +55,6 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = Text.HTML.Scalpel.text "pre"
 
 
-convertToDocx :: FilePath -> FilePath -> IO ()
-convertToDocx mdFile docxFile = do
-    -- Read the contents of the Markdown file
-    mdContents <- readFile mdFile
-    
-    -- Parse Markdown contents into Pandoc document
-    let pandocDoc = readMarkdown def mdContents
-    
-    -- Convert Pandoc document to DOCX format
-    let docxContents = writeDocx def pandocDoc
-    
-    -- Write the DOCX output to file
-    writeFile docxFile docxContents
-
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -77,8 +63,10 @@ main = do
   headingResult <- headingScraper
   case headingResult of
     Just x  -> do
-        writeFile "output_files/headings.txt" (Prelude.unlines (Prelude.map trim x) )
-        convertToDocx "output_files/headings.txt" "output_files/headings.docx"
+        let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x)
+        writeFile "output_files/headings.txt" textToConvert
+        
+
     Nothing -> print "Could not find the required elements"
     -- return somehow or have more things in the Just x statement
 
