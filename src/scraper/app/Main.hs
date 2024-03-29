@@ -63,11 +63,14 @@ main = do
             result <- runIO $ do
                 let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x) 
                 doc <- readMarkdown def (T.pack textToConvert)
-                writeDocx def doc
-            mydocx <- handleError result
-            putStrLn "Burh"
-            -- TIO.putStrLn rst
-        Nothing -> print "Could not find the required elements"
+                docxFile <- writeDocx def doc
+                writeRST def doc
+                -- writeFile "output_files/headings.docx" (unpack docxFile)
+            myrst <- handleError result
+            -- putStrLn "Bruh"
+            TIO.putStrLn myrst
+            
+        -- Nothing -> print "Could not find the required elements"
 
 
 
