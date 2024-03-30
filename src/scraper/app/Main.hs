@@ -105,7 +105,16 @@ fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifi
 
 -- headparaScraper :: Scraper 
 
-
+-- headparaScraper is a scraper that takes string as input and gives string as output
+headparaScraper :: Scraper String (String, String, [(String, [String])])
+headparaScraper = inSerial $ do
+    title <- seekNext $ text "h1"
+    firstpara <- seekNext $ text "p"
+    sections <- many $ do
+        section <- seekNext $ text "h2"
+        ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
+        return (section, ps)
+    return (title, firstpara, sections)    
 
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -113,19 +122,13 @@ fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifi
 
 main :: IO ()
 main = do
-    bodyhtml <- fetchHTML 
-    case bodyhtml of
-        Just myhtml -> do
-            headingParaResult <- headingParaScraper
-            case headingParaResult of
-                Just z -> do
-                    let headingParaStart = "\n\nHeading-Paragraph Start Here\n\n"
-                    let formatted3 = Prelude.unlines ( Prelude.map (\(a, b) -> "\n====================\n" ++ a ++ "\n====================\n" ++ b) z)
-                    let formatted = headingParaStart ++ formatted3
-                    Prelude.writeFile "output_files/heading_para.txt" formatted
-                Nothing -> print "Heading-Paragraph Scraping Error"
+    result <- scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" (chroot "body" headparaScraper)
+    case result of
+        Just x -> do
+            print x
+        Nothing -> print "Error"
 
-        Nothing -> print "Error in getting html"
+
 
 
 
