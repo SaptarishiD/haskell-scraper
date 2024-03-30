@@ -8,9 +8,12 @@ import Control.Applicative
 import Text.HTML.Scalpel
 import Text.HTML.TagSoup
 import Data.List
+import Data.Char (isSpace)
+
 
 trim :: String -> String
-trim = dropWhileEnd (== ' ') . dropWhile (== ' ')
+trim = f . f
+where f = reverse . dropWhile isSpace
 
 
 -- extractVisibleText :: String -> [Tag String]
@@ -25,6 +28,18 @@ trim = dropWhileEnd (== ' ') . dropWhile (== ' ')
 boolToString :: Bool -> String
 boolToString True = "TRUE"
 boolToString False = "FALSE"
+
+
+fillTrue :: [Bool] -> [Bool]
+fillTrue [] = []
+fillTrue [a] = [a]
+fillTrue (False:False:xs) = False:fillTrue(False:xs)
+fillTrue (False:True:xs) = False:fillTrue(True:xs)
+fillTrue (True:False:xs) = True:fillTrue(True:xs)
+fillTrue (True:True:xs) = True:True:fillTrue(xs)
+
+
+
 
 main :: IO ()
 main = do
@@ -46,8 +61,17 @@ main = do
     -- use the above list to filter the elements of the first list
     -- let boolean_filter = map (\x -> isTagOpenName "pre" || isTagCloseName "pre") filtered_parsed
     -- print boolean_filter
-    let bool_mapping = map boolToString ( map (isTagOpenName "pre") parsed_tags ) 
-    print bool_mapping
+    let bool_mapping_open = map (isTagOpenName "pre") parsed_tags 
+    let bool_mapping_close = map (isTagCloseName "pre") parsed_tags 
+    -- create another list which is the result of the element-wise or of the two lists above
+    let bool_mapping =  zipWith (||) bool_mapping_open bool_mapping_close 
+    let filled_true = fillTrue bool_mapping
+    -- zip the parsed_tags list with the boolean list and filter the elements of the first list based on the second list
+    let combined = zip filled_true parsed_tags
+    -- get the tuples from combined where the boolean is false
+    let without_pre = map snd (filter (\(a,b) -> not a) combined)
+    let withoutpre_text = trim (innerText without_pre)
+    writeFile "output_files/without_pre_tags.txt" withoutpre_text
     
 
     -- writeFile "output_files/sitetext.txt" (innerText (filter isTagText (parseTags html_content) ) ) 
