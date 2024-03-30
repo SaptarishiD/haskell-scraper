@@ -21,6 +21,7 @@ import qualified Data.Text.IO as TIO
 
 
 -- trims the whitespace and newlines from a string. Possibly won't use this so that the formatting in the output is nice cause of the spaces
+-- also write this better
 trim :: String -> String
 trim = f . f
   where f = Prelude.reverse . Prelude.dropWhile isSpace
@@ -110,72 +111,3 @@ main = do
             
 
 
-------------------------------------------------------------------------
-
-
-
-    
-    
-
-
-
-
-
-
--- main :: IO ()
--- main = do 
---     headingResult <- headingScraper
---     case headingResult of
---         Just x -> do
---             result <- runIO $ do
---                 let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n====================\n" ++ a ++ "\n====================\n") x)
---                 Prelude.writeFile "output_files/headings.md" (Prelude.unlines (Prelude.map trim x) )
---                 doc <- readMarkdown def (Prelude.readFile "output_files/headings.md")
---                 docxFile <- writeDocx def doc
---                 Data.Text.IO.writeFile "output_files/headings.docx" (decodeLatin1 (toStrict docxFile) )
---                 writeRST def doc
---             rst <- handleError result
---             TIO.putStrLn rst
-            
---         Nothing -> print "Could not find the required elements"
-
-
-
-
-
-
-
-
-
-
-
-{-    
-  headingResult <- headingScraper
-  case headingResult of
-    Just x  -> do
-        let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n====================\n" ++ a ++ "\n====================\n") x)
-        writeFile "output_files/headings.md" textToConvert
-        let doc = runIO (readMarkdown def "output_files/headings.md") :: IO (Either PandocError Pandoc)
-        -- let result = writePlain def doc
-        -- let docx = writeDocx def markdown
-        -- let txt = writePlain def markdown
-        -- T.writeFile "output_files/headings.docx" (writeLazyByteString docx)
-        -- T.writeFile "output_files/headings.txt" (writeLazyByteString txt)
-        -- writeFile "output_file.txt" mydoc
-        writeFile "output_files/headings.md" textToConvert
-
-        
-
-    Nothing -> print "Could not find the required elements"
-    -- return somehow or have more things in the Just x statement
-
-  paraResult <- paraScraper
-  case paraResult of
-    Just x  -> writeFile "output_files/paragraphs.txt" (Prelude.unlines ( Prelude.map (\a -> "\n====================\n" ++ a ++ "\n====================\n") x))
-    Nothing -> print "Could not find the required elements"
-
-  codeResult <- codeScraper
-  case codeResult of
-    Just x  -> writeFile "output_files/code_snippets.txt" (Prelude.unlines ( Prelude.map (\a -> "\n====================\n" ++ a ++ "\n====================\n") x))
-    Nothing -> print "Could not find the required elements"
--}
