@@ -3,9 +3,17 @@
 module Main (main) where
 
 import Data.Text
-import Data.Char (isSpace)         
+import Data.Text.IO
+import Data.Text.Encoding
+import Data.Text.Conversions
+
+import Data.Char (isSpace)
+import Data.ByteString      
 import Text.HTML.Scalpel
 import Text.Pandoc
+import Text.Pandoc.Sources
+import Text.Pandoc.Class (runIO)
+import Text.Pandoc.Writers.Docx
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 
@@ -15,8 +23,6 @@ import qualified Data.Text.IO as TIO
 trim :: String -> String
 trim = f . f
   where f = Prelude.reverse . Prelude.dropWhile isSpace
-
-
 
 headingScraper :: IO (Maybe [String])
 headingScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" headings
@@ -55,22 +61,60 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
 
 
 ------------------------------------------------------------------------------------------------------------------------
+-- have the array of Maybe Strings from headingScraper. Need to bind the result of the IO operation to the headingResult
+
+
+
 main :: IO ()
-main = do 
+main = do
     headingResult <- headingScraper
+    -- print headingResult
     case headingResult of
         Just x -> do
-            result <- runIO $ do
-                let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x) 
-                doc <- readMarkdown def (T.pack textToConvert)
-                docxFile <- writeDocx def doc
-                writeRST def doc
-                -- writeFile "output_files/headings.docx" (unpack docxFile)
-            myrst <- handleError result
-            -- putStrLn "Bruh"
-            TIO.putStrLn myrst
+            let formatted = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x)
+            -- formatted is now one string with the formatted output
+            -- now we need to put this into a docx file
+            Prelude.writeFile "output_files/headings.md" formatted
+            mydoc <- runIO $ readMarkdown def ( convertText(formatted :: String ) :: Text )
+            print mydoc
+
+
+
+
+        Nothing -> print "Could not find the required elements"
+
+
+
+
+
+
+
+
+
+
+
+-- main :: IO ()
+-- main = do 
+--     headingResult <- headingScraper
+--     case headingResult of
+--         Just x -> do
+--             result <- runIO $ do
+--                 let textToConvert = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x)
+--                 Prelude.writeFile "output_files/headings.md" (Prelude.unlines (Prelude.map trim x) )
+--                 doc <- readMarkdown def (Prelude.readFile "output_files/headings.md")
+--                 docxFile <- writeDocx def doc
+--                 Data.Text.IO.writeFile "output_files/headings.docx" (decodeLatin1 (toStrict docxFile) )
+--                 writeRST def doc
+--             rst <- handleError result
+--             TIO.putStrLn rst
             
-        -- Nothing -> print "Could not find the required elements"
+--         Nothing -> print "Could not find the required elements"
+
+
+
+
+
+
 
 
 

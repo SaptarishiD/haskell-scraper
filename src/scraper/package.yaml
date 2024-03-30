@@ -26,6 +26,7 @@ dependencies:
 - pandoc
 - pandoc-types
 - bytestring
+- text-conversions
 
 
 ghc-options:
