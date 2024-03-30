@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Redundant return" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 module Main (main) where
 
@@ -109,38 +110,21 @@ fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifi
 
 -- headparaScraper is a scraper that takes string as input and gives _ as output
 -- could do the h1 and the first two paras and the other misc stuff separately from the main h2 and ps scraper
-headparaScraper :: Scraper String [(String, [String])]
-headparaScraper = inSerial $ do
-    sections <- many $ do
-        section <- seekNext $ text "h2"
-        ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
-        return (section, ps)
-    return sections
+-- headparaScraper :: Scraper String [(String, [String])]
+-- headparaScraper = inSerial $ do
+--     sections <- many $ do
+--         section <- seekNext $ text "h2"
+--         ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
+--         return (section, ps)
+--     return sections
     
 
 
 ------------------------------------------------------------------------------------------------------------------------
 -- have the array of Maybe Strings from headingScraper. Need to bind the result of the IO operation to the headingResult
 
-main :: IO ()
-main = do
-    result <- scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" (chroot "article" headparaScraper)
-    case result of
-        Just x -> do
-            print x
-        Nothing -> print "Serial scraping error"
-
-{-
-
-
-{-# LANGUAGE OverloadedStrings #-}
-
-import Text.HTML.Scalpel
-import Control.Applicative
-
-
-exampleHtml :: String
-exampleHtml = "<article>\
+testhtml :: String
+testhtml = "<article>\
 \    <h1>title</h1>\
 \    <p>first para</p>\
 \    <p>second para</p>\
@@ -151,6 +135,42 @@ exampleHtml = "<article>\
 \    <p>Paragraph 2.1</p>\
 \    <p>Paragraph 2.2</p>\
 \</article>"
+    
+main :: IO ()
+main = do
+    
+    exampleHtml <- fetchHTML
+    case exampleHtml of
+        Just myhtml -> do
+            -- print x
+            print $ (scrapeStringLike myhtml (chroot "article" $ inSerial $ do
+                -- title <- seekNext $ text "h1"
+                -- firstpara <- seekNext $ text "p"
+                -- secondpara <- seekNext $ text "p"
+                let title = "title"
+                let firstpara = "first para"
+                let secondpara = "second para"
+                sections <- many $ do
+                    section <- seekNext $ text "h2"
+                    -- ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
+                    return (section)
+                return (title, firstpara, secondpara, sections) ) )
+
+        Nothing -> print "Error fetching HTML"
+    
+
+-- what if instead of all this we get all the text jiska class is section? That way we can just get it all at once
+-- what abt readHtml from pandoc
+
+
+{-
+
+
+{-# LANGUAGE OverloadedStrings #-}
+
+import Text.HTML.Scalpel
+import Control.Applicative
+
 
 
 
