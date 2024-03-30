@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant return" #-}
 
 module Main (main) where
 
@@ -106,16 +108,15 @@ fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifi
 -- headparaScraper :: Scraper 
 
 -- headparaScraper is a scraper that takes string as input and gives _ as output
-headparaScraper :: Scraper String (String, String, [(String, [String])])
+-- could do the h1 and the first two paras and the other misc stuff separately from the main h2 and ps scraper
+headparaScraper :: Scraper String [(String, [String])]
 headparaScraper = inSerial $ do
-    title <- seekNext $ text "h1"
-    firstpara <- seekNext $ text "p" -- problem is that first thing after h1 is a para not h2. also there are two paras
-    -- secondpara <- seekNext $ text "p"
     sections <- many $ do
         section <- seekNext $ text "h2"
         ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
         return (section, ps)
-    return (title, firstpara, sections)    
+    return sections
+    
 
 
 ------------------------------------------------------------------------------------------------------------------------
