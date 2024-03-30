@@ -8,7 +8,8 @@ import Data.Text.Encoding
 import Data.Text.Conversions
 
 import Data.Char (isSpace)
-import Data.ByteString      
+import Data.ByteString     
+import qualified Data.ByteString.Lazy as BytL
 import Text.HTML.Scalpel
 import Text.Pandoc
 import Text.Pandoc.Sources
@@ -16,6 +17,7 @@ import Text.Pandoc.Class (runIO)
 import Text.Pandoc.Writers.Docx
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
+
 
 
 
@@ -74,9 +76,20 @@ main = do
             let formatted = Prelude.unlines ( Prelude.map (\a -> "\n========================================\n" ++ a ++ "\n========================================\n") x)
             -- formatted is now one string with the formatted output
             -- now we need to put this into a docx file
+            -- readMarkdown was giving error that no instance of pandocmonad IO, so need to run IO actions using runIO where $ is function application. def is default options. and need to convert String to Text. 
+            -- mypandoc is now a pandoc
             Prelude.writeFile "output_files/headings.md" formatted
-            mydoc <- runIO $ readMarkdown def ( convertText(formatted :: String ) :: Text )
-            print mydoc
+            mypandoc <- runIO $ readMarkdown def ( convertText(formatted :: String ) :: Text )
+            -- print mypandoc
+            -- write this pandoc into a .docx file
+            case mypandoc of 
+                Left err -> show err
+                Right mypandoc -> do 
+                    byte_docx <- writeDocx def mypandoc
+                    BytL.writeFile "output_files/headings.docx" byte_docx
+                    Prelude.putStrLn "\nNot an error\n"
+            -- byte_docx <- writeDocx def mypandoc
+
 
 
 
