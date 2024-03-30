@@ -1,4 +1,5 @@
 *.pptx
 *.ppt
-*.txt
+notes.txt
 *.DS_Store
+!report/main.pdf
