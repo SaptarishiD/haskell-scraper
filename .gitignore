@@ -2,4 +2,6 @@
 *.ppt
 notes.txt
 *.DS_Store
+*.html
 !report/main.pdf
+!report/main.tex
