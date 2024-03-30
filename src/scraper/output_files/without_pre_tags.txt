@@ -1,7 +1,4 @@
-
-
-
-    Type erasure and reification - Eli Bendersky's website
+Type erasure and reification - Eli Bendersky's website
     
     
     
@@ -264,14 +261,3 @@ For comments, please send me
             © 2003-2024 Eli Bendersky
          
           Back to top
-      
-   
-
-
-
-
-
-
-
-
-
