@@ -105,11 +105,12 @@ fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reifi
 
 -- headparaScraper :: Scraper 
 
--- headparaScraper is a scraper that takes string as input and gives string as output
+-- headparaScraper is a scraper that takes string as input and gives _ as output
 headparaScraper :: Scraper String (String, String, [(String, [String])])
 headparaScraper = inSerial $ do
     title <- seekNext $ text "h1"
-    firstpara <- seekNext $ text "p"
+    firstpara <- seekNext $ text "p" -- problem is that first thing after h1 is a para not h2. also there are two paras
+    -- secondpara <- seekNext $ text "p"
     sections <- many $ do
         section <- seekNext $ text "h2"
         ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
@@ -122,11 +123,11 @@ headparaScraper = inSerial $ do
 
 main :: IO ()
 main = do
-    result <- scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" (chroot "body" headparaScraper)
+    result <- scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" (chroot "article" headparaScraper)
     case result of
         Just x -> do
             print x
-        Nothing -> print "Error"
+        Nothing -> print "Serial scraping error"
 
 
 
