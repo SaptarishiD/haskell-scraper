@@ -6,6 +6,7 @@ import Data.Text
 import Data.Text.IO
 import Data.Text.Encoding
 import Data.Text.Conversions
+import Control.Applicative
 
 import Data.Char (isSpace)
 import Data.ByteString     
@@ -25,6 +26,18 @@ import qualified Data.Text.IO as TIO
 trim :: String -> String
 trim = f . f
   where f = Prelude.reverse . Prelude.dropWhile isSpace
+
+
+-- heading1Scraper :: IO (Maybe [String])
+-- heading1Scraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" heading1
+
+--   where 
+
+--     heading1 :: Scraper String String
+--     heading1 = Text.HTML.Scalpel.text "h1"
+
+
+
 
 headingScraper :: IO (Maybe [String])
 headingScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" headings
@@ -54,6 +67,7 @@ paraScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
 codeScraper :: IO (Maybe [String])
 codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" code_snippets
 
+
   where 
     code_snippets :: Scraper String [String] 
     code_snippets = chroots "pre" snippet
@@ -61,13 +75,69 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet :: Scraper String String
     snippet = Text.HTML.Scalpel.text "pre"
 
+
 -- headingToDocx:: Maybe [String] -> IO
+
+
+-- headingParaScraper ::  IO (Maybe [String])
+-- headingParaScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" headparas
+--   where
+--     headparas = chroot "article" $ inSerial $ do 
+--         title <- seekNext $ text "h1"
+--         firstpara <- seekNext $ text "p"
+--         sections <- many $ do
+--             section <- seekNext $ text "h2"
+--             ps <- untilNext (matches "h2") (many $ seekNext $ text "p")
+--             return (section, ps)
+--         return (title, firstpara, sections)
+
+
+
+fetchHTML :: IO (Maybe String)
+fetchHTML = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-reification/" htmlbody
+
+  where 
+    -- htmlbodies :: Scraper String [String] 
+    -- htmlbodies = chroots "h1" htmlbody
+    
+    htmlbody :: Scraper String String
+    htmlbody = innerHTML "body"
+
+-- headparaScraper :: Scraper 
+
+
+
 
 ------------------------------------------------------------------------------------------------------------------------
 -- have the array of Maybe Strings from headingScraper. Need to bind the result of the IO operation to the headingResult
 
 main :: IO ()
 main = do
+    bodyhtml <- fetchHTML 
+    case bodyhtml of
+        Just myhtml -> do
+            headingParaResult <- headingParaScraper
+            case headingParaResult of
+                Just z -> do
+                    let headingParaStart = "\n\nHeading-Paragraph Start Here\n\n"
+                    let formatted3 = Prelude.unlines ( Prelude.map (\(a, b) -> "\n====================\n" ++ a ++ "\n====================\n" ++ b) z)
+                    let formatted = headingParaStart ++ formatted3
+                    Prelude.writeFile "output_files/heading_para.txt" formatted
+                Nothing -> print "Heading-Paragraph Scraping Error"
+
+        Nothing -> print "Error in getting html"
+
+
+
+
+
+
+
+
+{-
+
+
+
     headingResult <- headingScraper
     paraResult <- paraScraper
     codeResult <- codeScraper
@@ -108,6 +178,9 @@ main = do
     case codeResult of
         Just x  -> Prelude.writeFile "output_files/code_snippets.txt" (Prelude.unlines ( Prelude.map (\a -> "\n====================\n" ++ a ++ "\n====================\n") x))
         Nothing -> print "Code Scraping Error"
-            
+
+
+
+-}    
 
 
