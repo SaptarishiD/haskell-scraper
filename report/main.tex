@@ -1,65 +1,51 @@
-\documentclass{article}
-
-\usepackage{amsmath, amsthm, amssymb, amsfonts}
-\usepackage{thmtools}
-\usepackage{graphicx}
-\usepackage{setspace}
-\usepackage{geometry}
-\usepackage{float}
-\usepackage{soul}
-\usepackage{hyperref}
+\documentclass{scrreprt}
+\usepackage{listings}
+\usepackage{underscore}
+\usepackage[bookmarks=true]{hyperref}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{framed}
-\usepackage[dvipsnames]{xcolor}
-\usepackage{tcolorbox}
-\usepackage{tikz}
-\usepackage{parskip}
-\usepackage{graphicx}
-% \usepackage{pgfplots}
-% \usepackage{minted}
-\usepackage{subfig}
+\hypersetup{
+    bookmarks=false,    % show bookmarks bar?
+    pdftitle={FP PROJECT REPORT},    % title
+    pdfauthor={Saptarishi Dhanuka},                     % author
+    pdfsubject={TeX and LaTeX},                        % subject of the document
+    pdfkeywords={TeX, LaTeX, graphics, images}, % list of keywords
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,       % color of internal links
+    citecolor=black,       % color of links to bibliography
+    filecolor=black,        % color of file links
+    urlcolor=purple,        % color of external links
+    linktoc=page            % only page is linked
+}%
+\def\myversion{1.0 }
+\date{}
+%\title{%
 
-\colorlet{LightGray}{White!90!Periwinkle}
-\colorlet{LightOrange}{Orange!15}
-\colorlet{LightGreen}{Green!15}
-\colorlet{LightBlue}{Blue!15}
-\colorlet{LightRed}{Red!15}
-
-
-\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
-
-\setstretch{1.2}
-\geometry{
-    textheight=9in,
-    textwidth=5.5in,
-    top=1in,
-    headheight=12pt,
-    headsep=25pt,
-    footskip=30pt
-}
-
+%}
+\usepackage{hyperref}
 \begin{document}
 
-\title{ \normalsize \textsc{}
-		\\ [2.0cm]
-		\HRule{1.5pt} \\
-		\LARGE \textbf{\uppercase{Haskell Scraper} 
-		\HRule{1.5pt} \\ [0.6cm] \LARGE{CS-IS-2010-1	 - Functional Programming \\ Project Report} \vspace*{10\baselineskip}}
-		}
-\date{}
-{ \LARGE \author{Saptarishi Dhanuka} }
+\begin{flushright}
+    \rule{16cm}{5pt}\vskip1cm
+    \begin{bfseries}
+        \Huge{FUNCTIONAL PROGRAMMING \\ CS-IS-2010-1 \\ FINAL PROJECT REPORT}\\
+        \vspace{1.9cm}
+        Haskell Web Scraper\\
+        \vspace{1.9cm}
+        Saptarishi Dhanuka\\
+        \vspace{1.9cm}
+        Ashoka University\\
+    \end{bfseries}
+\end{flushright}
 
-\maketitle
-\newpage
-
-% \tableofcontents
-\newpage
-\section*{Problem Statement}
-Develop a scraper that extracts text and code snippets from the given text source
+\tableofcontents
 
 
 
+\chapter{Introduction}
+
+\section{Problem Statement}
+The problem is
 
 
 \end{document}
