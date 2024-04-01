@@ -6,6 +6,7 @@ import Control.Applicative
 
 import Text.HTML.Scalpel
 import Text.HTML.TagSoup
+import qualified Text.HTML.TagSoup.Match as TagMatch
 
 import Text.Pandoc
 import Text.Pandoc.Sources
@@ -83,8 +84,8 @@ main = do
     -- get tags of tuples from combined where the boolean is false
     let without_pre = map snd (filter (\(a,b) -> not a) combined)
     let pre_text = innerText (map snd (filter (\(a,b) -> a) combined))
-    print without_pre
-    let without_pre_text_new = map maybeTagText without_pre
+    -- print without_pre
+    let without_pre_text_new = filter (TagMatch.tagText (const True)) without_pre
     print without_pre_text_new
 
     {-
