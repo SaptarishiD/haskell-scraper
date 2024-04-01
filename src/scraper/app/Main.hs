@@ -86,7 +86,23 @@ main = do
     let pre_text = innerText (map snd (filter (\(a,b) -> a) combined))
     -- print without_pre
     let without_pre_text_new = filter (TagMatch.tagText (const True)) without_pre
-    print without_pre_text_new
+    -- print without_pre_text_new
+    let just_text_no_pre = unlines (map (trim . fromTagText) without_pre_text_new)
+    print just_text_no_pre
+    writeFile "output_files/head_para_new.md" just_text_no_pre
+    writeFile "output_files/head_para_new2.docx" just_text_no_pre
+    pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
+    case pandocResult of
+        Right mypandoc -> do
+            -- write pandoc to docx
+            byte_docx <- runIO $ writeDocx def mypandoc
+            case byte_docx of
+                Right mypandoc1 -> do
+                    BytL.writeFile "output_files/head_para_new.docx" mypandoc1
+                    
+                Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+                
+        Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
 
     {-
     let withoutpre_text = innerText without_pre
