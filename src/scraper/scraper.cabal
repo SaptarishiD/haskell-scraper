@@ -7,10 +7,10 @@ cabal-version: 2.2
 name:           scraper
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/scraper#readme>
-homepage:       https://github.com/githubuser/scraper#readme
-bug-reports:    https://github.com/githubuser/scraper/issues
-author:         Author name here
-maintainer:     example@example.com
+homepage:       https://github.com/github.com/SaptarishiD#readme
+bug-reports:    https://github.com/github.com/SaptarishiD/issues
+author:         SD
+maintainer:     saptarishi.dhanuka@gmail.com
 copyright:      2024 Author name here
 license:        BSD-3-Clause
 license-file:   LICENSE
@@ -21,7 +21,8 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/scraper
+  location: https://github.com/github.com/SaptarishiD
+  subdir: haskell-scraper
 
 library
   exposed-modules:

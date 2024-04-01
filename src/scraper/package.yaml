@@ -1,9 +1,9 @@
 name:                scraper
 version:             0.1.0.0
-github:              "githubuser/scraper"
+github:              "github.com/SaptarishiD/haskell-scraper"
 license:             BSD-3-Clause
-author:              "Author name here"
-maintainer:          "example@example.com"
+author:              "SD"
+maintainer:          "saptarishi.dhanuka@gmail.com"
 copyright:           "2024 Author name here"
 
 extra-source-files:
