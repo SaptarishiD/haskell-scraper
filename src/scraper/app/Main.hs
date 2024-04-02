@@ -18,16 +18,17 @@ import Text.Pandoc.Writers.Docx
 import Data.List
 import Data.Char (isSpace)
 import Data.Text.Encoding
+import Data.Text.Lazy as TL
 import Data.Text.Conversions
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
-import qualified Data.ByteString.Lazy as BytL
-import qualified Data.ByteString.Lazy.Char8 as LBS
+import qualified Data.ByteString.Lazy as LBS
+import qualified Data.ByteString.Lazy.Char8 as LBSC
 
 
 trim :: String -> String
 trim = f . f
-  where f = reverse . dropWhile isSpace
+  where f = Prelude.reverse . Prelude.dropWhile isSpace
 
 
 boolToString :: Bool -> String
@@ -66,41 +67,51 @@ main = do
     response <- httpLbs request manager
     let response_html = responseBody response
 
-    -- writeFile "output_files/target.html" (LBS.unpack response_html)
+    -- writeFile "output_files/target.html" (LBSC.unpack response_html)
 
     -- html_content <- readFile "output_files/target.html"
-    let parsed_tags = parseTags (LBS.unpack response_html)
+    let parsed_tags = parseTags (LBSC.unpack response_html)
 
     -- get all the elements of the list that are not enclosed between an open pre tag and a close pre tag
     -- create a list of booleans whose elements are true if for the corresponding element in the above list, we have isTagOpenName = "pre" or isTagCloseName = "pre"
-    -- use the above list to filter the elements of the first list
+    -- use the above list to Prelude.filter the elements of the first list
 
     -- so idea is get boolean list which has True corresponding to all pre tags and everything in between and remove those corresponding tags
-    let bool_mapping_open = map (isTagOpenName "pre") parsed_tags 
-    let bool_mapping_close = map (isTagCloseName "pre") parsed_tags 
+    let bool_mapping_open = Prelude.map (isTagOpenName "pre") parsed_tags 
+    let bool_mapping_close = Prelude.map (isTagCloseName "pre") parsed_tags 
     -- do element-vise or of the two lists
-    let bool_mapping =  zipWith (||) bool_mapping_open bool_mapping_close 
+    let bool_mapping =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close 
     let filled_true = fillTrue bool_mapping
-    -- zip parsed_tags list with the boolean list and filter elements of the first list based on the second list to create tuple list
-    let combined = zip filled_true parsed_tags
+    -- Prelude.zip parsed_tags list with the boolean list and Prelude.filter elements of the first list based on the second list to create tuple list
+    let combined = Prelude.zip filled_true parsed_tags
     -- get tags of tuples from combined where the boolean is false
-    let without_pre = map snd (filter (\(a,b) -> not a) combined)
-    let pre_text = innerText (map snd (filter (\(a,b) -> a) combined))
+    let without_pre = Prelude.map snd (Prelude.filter (\(a,b) -> not a) combined)
+    let pre_text = innerText (Prelude.map snd (Prelude.filter (\(a,b) -> a) combined))
     -- print without_pre
-    let without_pre_text_new = filter (TagMatch.tagText (const True)) without_pre
+    let without_pre_text_new = Prelude.filter (TagMatch.tagText (const True)) without_pre
     -- print without_pre_text_new
-    let just_text_no_pre = unlines (map (trim . fromTagText) without_pre_text_new)
-    print just_text_no_pre
+    let just_text_no_pre = Data.List.unlines (Prelude.map (trim . fromTagText) without_pre_text_new)
+    -- print just_text_no_pre
     -- writeFile "output_files/head_para_new.md" just_text_no_pre
     -- Str T.Text
+    -- print (Plain [Str(T.pack just_text_no_pre)])
     let text_pandoc = Pandoc mempty [Plain [Str (T.pack just_text_no_pre)]]
-    -- print text_pandoc
+    print text_pandoc
     byte_docx1 <- runIO $ writeDocx def text_pandoc
+    plain_text <- runIO $ writePlain def text_pandoc
+    case plain_text of
+        Right plain_pandoc -> do
+            print plain_pandoc
+            TIO.writeFile "output_files/direct_headpara.txt" plain_pandoc
+        Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+
     -- print byte_docx1
     case byte_docx1 of
         Right text_pandoc1 -> do
-            BytL.writeFile "output_files/direct_head_para.docx" text_pandoc1
-            
+            -- Prelude.putStrLn  $ TL.unpack . Data.Text.Encoding.decodeUtf8Lenient $ text_pandoc1
+            print text_pandoc1
+            LBS.writeFile "output_files/direct_head_para.docx" text_pandoc1
+
         Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
 
 
@@ -113,7 +124,7 @@ main = do
             byte_docx <- runIO $ writeDocx def mypandoc
             case byte_docx of
                 Right mypandoc1 -> do
-                    BytL.writeFile "output_files/head_para_new.docx" mypandoc1
+                    LBS.writeFile "output_files/head_para_new.docx" mypandoc1
                     
                 Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
                 
@@ -121,7 +132,7 @@ main = do
 
     
     let withoutpre_text = innerText without_pre
-    -- i can trim this by using the lines function then mapping trim to each element but that would mess up the original formatting but that is fine
+    -- i can trim this by using the lines function then Prelude.mapping trim to each element but that would mess up the original formatting but that is fine
     -- also need to figure out out to demarcate that this is a heading and this is something else
 
     -- try to do something without converting to .md and back to docx
@@ -134,7 +145,7 @@ main = do
             byte_docx <- runIO $ writeDocx def mypandoc
             case byte_docx of
                 Right mypandoc1 -> do
-                    BytL.writeFile "output_files/head_para.docx" mypandoc1
+                    LBS.writeFile "output_files/head_para.docx" mypandoc1
                     
                 Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
                 
