@@ -56,6 +56,17 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = Text.HTML.Scalpel.text "pre"
 
 
+-- inserts newlines before every instances of a particular element (tagclose pre) of the array
+-- insertNewlines :: [Tag str] -> Tag str -> Tag str -> [Tag str]
+-- insertNewlines tags newline pre_close = go tags
+--   where
+--     go :: [Tag str] -> [Tag str]
+--     go [] = []
+--     go [pre_close] = newline:pre_close
+--     go (pre_close:xs) = newline:pre_close:go(xs)
+--     go (x:xs) = x:go(xs)
+            
+
 
 
 
@@ -80,10 +91,56 @@ main = do
     -- use the above list to Prelude.filter the elements of the first list
 
     -- so idea is get boolean list which has True corresponding to all pre tags and everything in between and remove those corresponding tags
+    -- print parsed_tags
     let bool_mapping_open = Prelude.map (isTagOpenName "pre") parsed_tags 
-    let bool_mapping_close = Prelude.map (isTagCloseName "pre") parsed_tags 
+    let bool_mapping_close = Prelude.map (isTagCloseName "pre") parsed_tags
+
     -- do element-vise or of the two lists
-    let bool_mapping =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close 
+    let bool_mapping1 =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close 
+
+
+    let filled_true_pre = fillTrue bool_mapping1
+    let combined_pre = Prelude.zip filled_true_pre parsed_tags
+    let with_pre = Prelude.map snd (Prelude.filter (\(a,b) -> a) combined_pre)
+    -- print with_pre
+
+    -- idea can be that before every TagClose "pre" in this array of Tag Strs, you can insert a TagText delimiter with some string like "=====\n" which will delimit the code snippets
+
+    let newline_text = TagText "\n\n========\n\n"
+    let pre_close = TagClose "pre"
+    -- let separated = insertNewlines with_pre (newline_text pre_close)
+    -- print separated
+    print (innerText (with_pre ++ [newline_text]))
+
+
+
+
+    
+
+
+
+    let html_pre = renderTags with_pre
+    pand_pre_tags <- runIO $ readHtml def ( convertText(html_pre :: String ) :: T.Text )
+    -- print dir_pand_html
+
+    case pand_pre_tags of
+        Right x -> do
+            -- print x 
+            y <- runIO $ writePlain def x
+            case y of
+                Right direct_pan_pre -> do
+                    TIO.writeFile "output_files/direct_pre.txt" direct_pan_pre
+                    
+                Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+            
+        Left err -> print "Error direct html"
+
+    let bool_mapping_img_open = Prelude.map (isTagOpenName "img") parsed_tags
+    let bool_mapping_img_close = Prelude.map (isTagCloseName "img") parsed_tags
+    let bool_mapping2 =  Prelude.zipWith (||) bool_mapping_img_open bool_mapping_img_close
+
+    let bool_mapping =  Prelude.zipWith (||) bool_mapping1 bool_mapping2
+
     let filled_true = fillTrue bool_mapping
     -- Prelude.zip parsed_tags list with the boolean list and Prelude.filter elements of the first list based on the second list to create tuple list
     let combined = Prelude.zip filled_true parsed_tags
@@ -98,7 +155,7 @@ main = do
     let html_no_pre = renderTags without_pre 
     -- print html_no_pre
     dir_pand_html <- runIO $ readHtml def ( convertText(html_no_pre :: String ) :: T.Text )
-    print dir_pand_html
+    -- print dir_pand_html
 
     case dir_pand_html of
         Right x -> do
@@ -111,6 +168,11 @@ main = do
                 Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
             
         Left err -> print "Error direct html"
+
+
+    
+
+
 
         -- CAN JUST REMOVE ALL IMG TAGS SINCE ONLY INTERESTED IN THE TEXT AND THE CODE
 
@@ -127,18 +189,18 @@ main = do
     --     Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
     
     
-    pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
-    case pandocResult of
-        Right mypandoc -> do
-            -- write pandoc to docx
-            byte_docx <- runIO $ writeDocx def mypandoc
-            case byte_docx of
-                Right mypandoc1 -> do
-                    LBS.writeFile "output_files/head_para_new.docx" mypandoc1
+    -- pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
+    -- case pandocResult of
+    --     Right mypandoc -> do
+    --         -- write pandoc to docx
+    --         byte_docx <- runIO $ writeDocx def mypandoc
+    --         case byte_docx of
+    --             Right mypandoc1 -> do
+    --                 LBS.writeFile "output_files/head_para_new.docx" mypandoc1
                     
-                Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+    --             Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
                 
-        Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
+    --     Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
 
 
 
