@@ -104,7 +104,7 @@ main = do
 
 
 
-    {-
+    
     pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
     case pandocResult of
         Right mypandoc -> do
@@ -118,7 +118,7 @@ main = do
                 
         Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
 
-    
+    {-
     let withoutpre_text = innerText without_pre
     -- i can trim this by using the lines function then mapping trim to each element but that would mess up the original formatting but that is fine
     -- also need to figure out out to demarcate that this is a heading and this is something else
