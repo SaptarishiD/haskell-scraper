@@ -90,12 +90,13 @@ main = do
     let without_pre_text_new = filter (TagMatch.tagText (const True)) without_pre
     -- print without_pre_text_new
     let just_text_no_pre = unlines (map (trim . fromTagText) without_pre_text_new)
-    -- print just_text_no_pre
+    print just_text_no_pre
     -- writeFile "output_files/head_para_new.md" just_text_no_pre
     -- Str T.Text
     let text_pandoc = Pandoc mempty [Plain [Str (T.pack just_text_no_pre)]]
-    print text_pandoc
+    -- print text_pandoc
     byte_docx1 <- runIO $ writeDocx def text_pandoc
+    -- print byte_docx1
     case byte_docx1 of
         Right text_pandoc1 -> do
             BytL.writeFile "output_files/direct_head_para.docx" text_pandoc1
@@ -104,7 +105,7 @@ main = do
 
 
 
-    
+    {-
     pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
     case pandocResult of
         Right mypandoc -> do
@@ -118,7 +119,7 @@ main = do
                 
         Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
 
-    {-
+    
     let withoutpre_text = innerText without_pre
     -- i can trim this by using the lines function then mapping trim to each element but that would mess up the original formatting but that is fine
     -- also need to figure out out to demarcate that this is a heading and this is something else
