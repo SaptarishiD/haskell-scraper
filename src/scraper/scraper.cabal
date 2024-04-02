@@ -35,14 +35,14 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      HTTP
+    , base >=4.7 && <5
     , bytestring
     , http-client
     , http-client-tls
     , http-conduit
     , pandoc
     , pandoc-types
-    , scalpel
     , tagsoup
     , text
     , text-conversions
@@ -58,14 +58,14 @@ executable scraper-exe
       app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      HTTP
+    , base >=4.7 && <5
     , bytestring
     , http-client
     , http-client-tls
     , http-conduit
     , pandoc
     , pandoc-types
-    , scalpel
     , scraper
     , tagsoup
     , text
@@ -83,14 +83,14 @@ test-suite scraper-test
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      HTTP
+    , base >=4.7 && <5
     , bytestring
     , http-client
     , http-client-tls
     , http-conduit
     , pandoc
     , pandoc-types
-    , scalpel
     , scraper
     , tagsoup
     , text
