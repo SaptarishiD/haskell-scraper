@@ -56,6 +56,9 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
     snippet = Text.HTML.Scalpel.text "pre"
 
 
+
+
+
 -- write all the types of everything so that it's clear
 -- type annotation
 
@@ -96,23 +99,24 @@ main = do
     -- Str T.Text
     -- print (Plain [Str(T.pack just_text_no_pre)])
     let text_pandoc = Pandoc mempty [Plain [Str (T.pack just_text_no_pre)]]
-    print text_pandoc
+    -- print text_pandoc
     byte_docx1 <- runIO $ writeDocx def text_pandoc
-    plain_text <- runIO $ writePlain def text_pandoc
-    case plain_text of
-        Right plain_pandoc -> do
-            print plain_pandoc
-            TIO.writeFile "output_files/direct_headpara.txt" plain_pandoc
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
-
-    -- print byte_docx1
+    print byte_docx1
     case byte_docx1 of
         Right text_pandoc1 -> do
             -- Prelude.putStrLn  $ TL.unpack . Data.Text.Encoding.decodeUtf8Lenient $ text_pandoc1
-            print text_pandoc1
-            LBS.writeFile "output_files/direct_head_para.docx" text_pandoc1
+            -- print text_pandoc1
+            -- text_pandoc1 is a LBSC.ByteString
+
+            let splittedpandoc = LBSC.intercalate "\n\n" (LBSC.lines text_pandoc1)
+            LBSC.writeFile "output_files/splitted.docx" splittedpandoc
+
+
+            LBSC.writeFile "output_files/direct_head_para.docx" text_pandoc1
 
         Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+    
+    -- read_docx <-
 
 
 
