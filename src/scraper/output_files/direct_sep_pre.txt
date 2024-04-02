@@ -1,0 +1,124 @@
+    typedef struct Frob_t {
+      int x;
+      int y;
+      int arr[10];
+    } Frob;
+
+    int extract(Frob* frob) {
+      return frob->y * frob->arr[7];
+    }
+
+
+    ========
+
+    0:   8b 47 04                mov    0x4(%rdi),%eax
+    3:   0f af 47 24             imul   0x24(%rdi),%eax
+    7:   c3                      retq
+
+
+    ========
+
+    int extract_cast(void* p) {
+      Frob* frob = p;
+      return frob->y * frob->arr[7];
+    }
+
+
+    ========
+
+    SomeOtherStruct ss;
+    extract_cast(&ss);    // oops
+
+
+    ========
+
+    class Main {
+      public static void main(String[] args) {
+        String strings[] = {"a", "b"};
+        Object objects[] = strings;
+        objects[0] = 5;
+      }
+    }
+
+
+    ========
+
+    Exception in thread "main" java.lang.ArrayStoreException: java.lang.Integer
+        at Main.main(Main.java:5)
+
+
+    ========
+
+    struct Base {
+      virtual void basefunc() {
+        printf("basefunc\n");
+      }
+    };
+
+    struct Derived : public Base {
+      void derivedfunc() {
+        printf("derived\n");
+      }
+    };
+
+    void call_derived(Base* b) {
+      Derived* d = dynamic_cast<Derived*>(b);
+      if (d != nullptr) {
+        d->derivedfunc();
+      } else {
+        printf("cast failed\n");
+      }
+    }
+
+
+    ========
+
+    int main() {
+      Derived d;
+      call_derived(&d);
+
+      Base b;
+      call_derived(&b);
+    }
+
+
+    ========
+
+    import java.util.List;
+    import java.util.ArrayList;
+
+    class Main {
+      public static void main(String[] args) {
+        List<String> list = new ArrayList<String>();
+        list.add("Hi");
+        String x = list.get(0);
+        System.out.println(x);
+      }
+    }
+
+
+    ========
+
+    import java.util.List;
+    import java.util.ArrayList;
+
+    class Main {
+      public static void main(String[] args) {
+        List list = new ArrayList();
+        list.add("Hi");
+        String x = (String) list.get(0);
+        System.out.println(x);
+      }
+    }
+
+
+    ========
+
+    class Foo:
+      def bar(self): pass
+
+    f = Foo()
+    f.joe()         # <--- calling non-existent method
+
+
+    ========

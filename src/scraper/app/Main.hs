@@ -57,14 +57,11 @@ codeScraper = scrapeURL "https://eli.thegreenplace.net/2018/type-erasure-and-rei
 
 
 -- inserts newlines before every instances of a particular element (tagclose pre) of the array
--- insertNewlines :: [Tag str] -> Tag str -> Tag str -> [Tag str]
--- insertNewlines tags newline pre_close = go tags
---   where
---     go :: [Tag str] -> [Tag str]
---     go [] = []
---     go [pre_close] = newline:pre_close
---     go (pre_close:xs) = newline:pre_close:go(xs)
---     go (x:xs) = x:go(xs)
+insertNewlines :: [Tag String] -> [Tag String]
+insertNewlines [] = []
+insertNewlines (x:xs) = if (isTagCloseName "pre" x) 
+    then TagText "\n\n========\n\n":x:insertNewlines(xs)
+    else x:insertNewlines(xs)
             
 
 
@@ -108,18 +105,13 @@ main = do
 
     let newline_text = TagText "\n\n========\n\n"
     let pre_close = TagClose "pre"
-    -- let separated = insertNewlines with_pre (newline_text pre_close)
+    let separated = insertNewlines with_pre
     -- print separated
-    print (innerText (with_pre ++ [newline_text]))
+    -- print (innerText (with_pre ++ [newline_text]))
 
 
 
-
-    
-
-
-
-    let html_pre = renderTags with_pre
+    let html_pre = renderTags separated
     pand_pre_tags <- runIO $ readHtml def ( convertText(html_pre :: String ) :: T.Text )
     -- print dir_pand_html
 
@@ -129,11 +121,11 @@ main = do
             y <- runIO $ writePlain def x
             case y of
                 Right direct_pan_pre -> do
-                    TIO.writeFile "output_files/direct_pre.txt" direct_pan_pre
+                    TIO.writeFile "output_files/direct_sep_pre.txt" direct_pan_pre
                     
                 Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
             
-        Left err -> print "Error direct html"
+        Left err -> print "Error direct html pre"
 
     let bool_mapping_img_open = Prelude.map (isTagOpenName "img") parsed_tags
     let bool_mapping_img_close = Prelude.map (isTagCloseName "img") parsed_tags
