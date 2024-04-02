@@ -94,33 +94,39 @@ main = do
     let without_pre_text_new = Prelude.filter (TagMatch.tagText (const True)) without_pre
     -- print without_pre_text_new
     let just_text_no_pre = Data.List.unlines (Prelude.map (trim . fromTagText) without_pre_text_new)
-    -- print just_text_no_pre
-    -- writeFile "output_files/head_para_new.md" just_text_no_pre
-    -- Str T.Text
-    -- print (Plain [Str(T.pack just_text_no_pre)])
-    let text_pandoc = Pandoc mempty [Plain [Str (T.pack just_text_no_pre)]]
-    -- print text_pandoc
-    byte_docx1 <- runIO $ writeDocx def text_pandoc
-    print byte_docx1
-    case byte_docx1 of
-        Right text_pandoc1 -> do
-            -- Prelude.putStrLn  $ TL.unpack . Data.Text.Encoding.decodeUtf8Lenient $ text_pandoc1
-            -- print text_pandoc1
-            -- text_pandoc1 is a LBSC.ByteString
 
-            let splittedpandoc = LBSC.intercalate "\n\n" (LBSC.lines text_pandoc1)
-            LBSC.writeFile "output_files/splitted.docx" splittedpandoc
+    let html_no_pre = renderTags without_pre 
+    -- print html_no_pre
+    dir_pand_html <- runIO $ readHtml def ( convertText(html_no_pre :: String ) :: T.Text )
+    print dir_pand_html
 
+    case dir_pand_html of
+        Right x -> do
+            -- print x 
+            y <- runIO $ writeDocx def x
+            case y of
+                Right direct_pan -> do
+                    LBS.writeFile "output_files/direct_html.docx" direct_pan
+                    
+                Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+            
+        Left err -> print "Error direct html"
 
-            LBSC.writeFile "output_files/direct_head_para.docx" text_pandoc1
+        -- CAN JUST REMOVE ALL IMG TAGS SINCE ONLY INTERESTED IN THE TEXT AND THE CODE
 
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+    -- case dir_pand_html of
+    --     Right direct_html -> do
+    --         -- write pandoc to docx
+    --         byte_direct_html <- runIO $ writeDocx def direct_html
+    --         case byte_direct_html of
+    --             Right direct_html_1 -> do
+    --                 LBS.writeFile "output_files/direct_html.docx" direct_html_1
+                    
+    --             Left err -> Prelude.putStrLn $ "Error parsing pandoc: " ++ show err
+                
+    --     Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
     
-    -- read_docx <-
-
-
-
-    {-
+    
     pandocResult <- runIO $ readMarkdown def ( convertText(just_text_no_pre :: String ) :: T.Text )
     case pandocResult of
         Right mypandoc -> do
@@ -134,7 +140,10 @@ main = do
                 
         Left err -> Prelude.putStrLn $ "Error parsing the markdown: " ++ show err
 
-    
+
+
+
+    {-
     let withoutpre_text = innerText without_pre
     -- i can trim this by using the lines function then Prelude.mapping trim to each element but that would mess up the original formatting but that is fine
     -- also need to figure out out to demarcate that this is a heading and this is something else
