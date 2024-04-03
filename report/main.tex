@@ -134,7 +134,7 @@ The given web page is made of text and code snippets, which we need to scrape an
     \label{fig:high-level-arch}
 \end{figure}
 
-The high level architecture consists of the following:
+The \textbf{high-level architecture} consists of the following:
 \begin{enumerate}
     \item Functionality for getting the target web page using HTTP libraries.
     \item Parsing the response obtained from the HTTP libraries into Tags from the \texttt{tagsoup} library.
@@ -143,9 +143,25 @@ The high level architecture consists of the following:
     \item Extracting the visible content from the code tags and writing them into a \texttt{.txt} file
 \end{enumerate}
 
-The high-level design which implements the above architecture consists of the following:
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{figures/high-design.png}
+%     \caption{High-Level Design}
+%     \label{fig:high-level-design}
+% \end{figure}
+
+The \textbf{high-level design} which implements the above architecture consists of the following:
 \begin{enumerate}
-    \item 
+    \item A TLS manager for handling HTTPS requests, since the given URL is prefixed with \texttt{https}
+    \item Parsing the url into a request
+    \item Executing the request with the TLS manager
+    \item Get the body i.e. the HTML content from the response received after executing the request
+    \item Parse the HTML into a list of Tags according to the \texttt{tagsoup} library
+    \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content
+    \item Insert newlines between each \texttt{<pre>} tag for formatting purposes. 
+    \item Convert the list of Tag Strings corresponding to the code and to the text each back into an HTML-formatted string, which we then convert into a \texttt{pandoc} document as intermediate representation
+    \item Convert the pandocs into another intermediate format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
 \end{enumerate}
 
 
