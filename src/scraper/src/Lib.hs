@@ -1,19 +1,45 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( fillTrue, insertNewlines, separateTextCode, pandocProcessTags
+    ( getHTML, parseTheTags, separateTextCode, pandocProcessTags
     ) where
 
 -- don't need to export insertnewlines?
 -- also you should modularise further so that eliminate importing lbsc and tagsoup in main
 
+import qualified Network.HTTP.Client as Client
+import qualified Network.HTTP.Client.TLS as ClientTLS
+
 import Text.HTML.TagSoup
-import Text.Pandoc
+
 import Data.Text.Conversions
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
+
+import Text.Pandoc
+
+
+-- mymanager <- newTlsManager -- client.tls  newTlsManager :: MonadIO m => m Manager
+-- myrequest <- parseRequest url -- client  parseRequest :: MonadThrow m => String -> m Request
+-- response <- httpLbs myrequest mymanager -- client httpLbs :: Request -> Manager -> IO (Response ByteString)
+-- let response_html = responseBody response -- client responseBody :: Response body -> body
+
+-- need to make http thing more robust for error handling, so can use status code for that
+
+getHTML :: String -> IO LBSC.ByteString
+getHTML url = do
+    mymanager <- ClientTLS.newTlsManager
+    myrequest <- Client.parseRequest url
+    response <- Client.httpLbs myrequest mymanager
+    let response_html = Client.responseBody response
+    return response_html
+
+
+parseTheTags :: LBSC.ByteString -> [Tag String]
+parseTheTags response_html = (parseTags :: String -> [Tag String]) (LBSC.unpack response_html)
+
 
 
 fillTrue :: [Bool] -> [Bool]
@@ -29,12 +55,17 @@ fillTrue (True:False:xs) = True:fillTrue (True:xs)
 fillTrue (True:True:xs) = True:True:fillTrue (xs) 
 
 
+
+
 -- inserts a delimiter before every closing <pre> tag for formatted output
 insertNewlines :: [Tag String] -> [Tag String]
 insertNewlines [] = []
 insertNewlines (x:xs) = if (isTagCloseName "pre" x)
     then TagText "\n\n=======================\n\n":x:insertNewlines (xs)
     else x:insertNewlines (xs)
+
+
+
 
 
 {-
@@ -68,6 +99,9 @@ separateTextCode parsed_tags =
         nonPreTags = Prelude.map snd (Prelude.filter (\(a,b) -> not a) combined)
 
     in (preTags, nonPreTags)
+
+
+
 
 
 -- write the text into .docx and code into .txt
