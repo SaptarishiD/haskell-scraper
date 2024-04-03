@@ -17,5 +17,6 @@ main = do
     let preTags             = fst separated_text_code
     let nonPreTags          = snd separated_text_code
 
-    writeToFiles preTags nonPreTags
+    writeToTxt preTags
+    writeToDocx nonPreTags
 

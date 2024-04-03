@@ -129,7 +129,7 @@ The given web page is made of text and code snippets, which we need to scrape an
 % insert image here
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/high-arch.png}
+    \includegraphics[width=1.0\textwidth]{figures/high-arch.png}
     \caption{High-Level Architecture}
     \label{fig:high-level-arch}
 \end{figure}
@@ -144,12 +144,16 @@ The \textbf{high-level architecture} consists of the following:
 \end{enumerate}
 
 
-% \begin{figure}[h]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{figures/high-design.png}
-%     \caption{High-Level Design}
-%     \label{fig:high-level-design}
-% \end{figure}
+
+\section{High-Level Design}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figures/high-design.png}
+    \caption{High-Level Design with functions in highlighted in cyan}
+    \label{fig:high-level-design}
+\end{figure}
 
 The \textbf{high-level design} which implements the above architecture consists of the following:
 \begin{enumerate}
@@ -157,14 +161,15 @@ The \textbf{high-level design} which implements the above architecture consists 
     \item Parsing the url into a request
     \item Executing the request with the TLS manager
     \item Get the body i.e. the HTML content from the response received after executing the request
-    \item Parse the HTML into a list of Tags according to the \texttt{tagsoup} library
+    \item Parse the HTML into a list of Tag Strings according to the \texttt{tagsoup} library
     \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content
-    \item Insert newlines between each \texttt{<pre>} tag for formatting purposes. 
+    \item Insert delimiters between each \texttt{<pre>} tag for formatting purposes. 
     \item Convert the list of Tag Strings corresponding to the code and to the text each back into an HTML-formatted string, which we then convert into a \texttt{pandoc} document as intermediate representation
-    \item Convert the pandocs into another intermediate format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
+    \item Convert the pandocs into another intermediate string-like format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
 \end{enumerate}
 
 
+% \section{Low-level design}?????????????????????
 
 
 
@@ -174,9 +179,41 @@ The \textbf{high-level design} which implements the above architecture consists 
 
 
 
-\chapter {Choice of Tools, Platforms, and Languages}
+
+
+\chapter {Tools and Languages}
 % tech stack
 % need to be clear on cabal stack and haskell and stuff
+
+
+\section{Languages}
+
+Only Haskell was used for the project as mentioned in the problem statement
+
+\section{Tools}
+
+\begin{enumerate}
+    \item The Glasgow Haskell Compiler (GHC) is used for compilation.
+    \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
+    \item Libraries:
+    \begin{enumerate}
+        \item \texttt{Network.HTTP.Client.TLS} was chosen for handling HTTPS connections in order to use the \texttt{newTlsManager} function
+        \item \texttt{Network.HTTP.Client} was chosen for parsing the url into a request, executing the request with the manager, and getting the body from the response. The functions used were \texttt{parseRequest, httpLbs, responseBody} respectively.
+        \item \texttt{Tagsoup} was used to parse the HTML into a list of Tag Strings, and then also to convert the separated Tag Strings back into an HTML-formatted string . It was also used in a helper function that inserted a delimiter between the code snippets. The functions used were \texttt{parseTags, isTagOpenName, isTagCloseName, renderTags}, along with the \texttt{TagText} constructor and \texttt{Tag} for \texttt{Tag String}.
+        \item \texttt{Pandoc} was used to 
+        
+
+
+
+
+
+
+        \item \texttt{Data.ByteString.Lazy.Char8} was used to convert the ByteString obtained from the response body into a string for further processing. The function used was \texttt{unpack}
+        \item 
+    \end{enumerate} 
+\end{enumerate}
+
+
 
 
 

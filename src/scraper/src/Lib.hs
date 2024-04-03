@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 module Lib
-    ( getHTML, parseTheTags, separateTextCode, writeToFiles
+    ( getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
     ) where
 
 -- don't need to export insertnewlines?
@@ -10,15 +12,15 @@ module Lib
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as ClientTLS
 
-import Text.HTML.TagSoup
+import qualified Text.HTML.TagSoup as Soup
+import Text.Pandoc
 
-import Data.Text.Conversions
+import qualified Data.Text.Conversions as TextConv
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 
-import Text.Pandoc
 
 
 -- mymanager <- newTlsManager -- client.tls  newTlsManager :: MonadIO m => m Manager
@@ -37,8 +39,8 @@ getHTML url = do
     return response_html
 
 
-parseTheTags :: LBSC.ByteString -> [Tag String]
-parseTheTags response_html = (parseTags :: String -> [Tag String]) (LBSC.unpack response_html)
+parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
+parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
 
 
 
@@ -58,10 +60,10 @@ fillTrue (True:True:xs) = True:True:fillTrue (xs)
 
 
 -- inserts a delimiter before every closing <pre> tag for formatted output
-insertNewlines :: [Tag String] -> [Tag String]
+insertNewlines :: [Soup.Tag String] -> [Soup.Tag String]
 insertNewlines [] = []
-insertNewlines (x:xs) = if (isTagCloseName "pre" x)
-    then TagText "\n\n=======================\n\n":x:insertNewlines (xs)
+insertNewlines (x:xs) = if (Soup.isTagCloseName "pre" x)
+    then Soup.TagText "\n\n=======================\n\n":x:insertNewlines (xs)
     else x:insertNewlines (xs)
 
 
@@ -75,10 +77,10 @@ insertNewlines (x:xs) = if (isTagCloseName "pre" x)
 -}
 
 -- can modularise this further
-separateTextCode :: [Tag String] -> ([Tag String], [Tag String])
+separateTextCode :: [Soup.Tag String] -> ([Soup.Tag String], [Soup.Tag String])
 separateTextCode parsed_tags =
-    let bool_mapping_open = Prelude.map (isTagOpenName "pre") parsed_tags
-        bool_mapping_close = Prelude.map (isTagCloseName "pre") parsed_tags
+    let bool_mapping_open = Prelude.map (Soup.isTagOpenName "pre") parsed_tags
+        bool_mapping_close = Prelude.map (Soup.isTagCloseName "pre") parsed_tags
 
         -- do element-vise or of the two lists
         bool_mapping1 =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close
@@ -87,8 +89,8 @@ separateTextCode parsed_tags =
         combined_pre = Prelude.zip filled_true_pre parsed_tags
         preTags = Prelude.map snd (Prelude.filter (fst) combined_pre)
 
-        bool_mapping_img_open = Prelude.map (isTagOpenName "img") parsed_tags
-        bool_mapping_img_close = Prelude.map (isTagCloseName "img") parsed_tags
+        bool_mapping_img_open = Prelude.map (Soup.isTagOpenName "img") parsed_tags
+        bool_mapping_img_close = Prelude.map (Soup.isTagCloseName "img") parsed_tags
         bool_mapping2 =  Prelude.zipWith (||) bool_mapping_img_open bool_mapping_img_close
 
         bool_mapping =  Prelude.zipWith (||) bool_mapping1 bool_mapping2
@@ -106,12 +108,11 @@ separateTextCode parsed_tags =
 
 -- can modularise this further
 -- write the text into .docx and code into .txt
-writeToFiles :: [Tag String] -> [Tag String] -> IO ()
-writeToFiles preTags nonPreTags = do
-    let htmlPre = renderTags (insertNewlines preTags)
-    let htmlNonPre = renderTags nonPreTags
 
-    pandocPre <- runIO $ readHtml def ( convertText (htmlPre :: String ) :: T.Text )
+writeToTxt :: [Soup.Tag String] -> IO ()
+writeToTxt preTags = do
+    let htmlPre = Soup.renderTags (insertNewlines preTags)
+    pandocPre <- runIO $ readHtml def ( TextConv.convertText (htmlPre :: String ) :: T.Text )
 
     case pandocPre of
         Right x -> do
@@ -123,9 +124,14 @@ writeToFiles preTags nonPreTags = do
                 Left err -> Prelude.putStrLn $ "Error with pandoc writePlain: " ++ show err
 
         Left err -> Prelude.putStrLn $ "Error parsing pandoc for pre tags: " ++ show err
+    
+    putStrLn "Completed writing to txt"
 
 
-    pandocNoPre <- runIO $ readHtml def ( convertText (htmlNonPre :: String ) :: T.Text )
+writeToDocx :: [Soup.Tag String] -> IO ()
+writeToDocx nonPreTags = do
+    let htmlNonPre = Soup.renderTags nonPreTags
+    pandocNoPre <- runIO $ readHtml def ( TextConv.convertText (htmlNonPre :: String ) :: T.Text )
 
     case pandocNoPre of
         Right x -> do
@@ -137,4 +143,6 @@ writeToFiles preTags nonPreTags = do
                 Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
 
         Left err -> Prelude.putStrLn $ "Error parsing pandoc for non pre tags: " ++ show err
+
+    putStrLn "Completed writing to docx"
 
