@@ -98,7 +98,6 @@ The given web page is made of text and code snippets, which we need to scrape an
     \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file mainly using the \texttt{tagsoup} and \texttt{pandoc} libraries, along with some standard Haskell libraries.
     \item The \texttt{.txt} file will be formatted such that the code snippets are visibly delimited for readability purposes.
     \item The \texttt{.docx} file will be formatted in a mannger similar to the original web page in terms of demarcating headings, footnotes and the order of the text. 
-    \item The scraper will handle errors gracefully.
 \end{enumerate}
 
 
@@ -162,14 +161,63 @@ The \textbf{high-level design} which implements the above architecture consists 
     \item Executing the request with the TLS manager
     \item Get the body i.e. the HTML content from the response received after executing the request
     \item Parse the HTML into a list of Tag Strings according to the \texttt{tagsoup} library
-    \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content
+    \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content. We also remove images. 
     \item Insert delimiters between each \texttt{<pre>} tag for formatting purposes. 
     \item Convert the list of Tag Strings corresponding to the code and to the text each back into an HTML-formatted string, which we then convert into a \texttt{pandoc} document as intermediate representation
     \item Convert the pandocs into another intermediate string-like format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
 \end{enumerate}
 
 
-% \section{Low-level design}?????????????????????
+\section{Low-level design}
+
+
+\begin{enumerate}
+    \item \textbf{Algorithm to separate text from code} \\ 
+    \\ \textbf{Idea:} Create a boolean list corresponding to every element of the list of Tag Strings. A boolean list element will be True if a Tag is a \texttt{<pre>} tag or within a \texttt{<pre>} tag, or if it's an \texttt{<img>} tag. Then zip the boolean list with the original list and divide into two lists based on the boolean value.\\
+    % \begin{verbatim}
+
+    %     fillTrue :: [Bool] -> [Bool]
+    %     fillTrue [] = []
+    %     fillTrue [a] = [a]
+    %     fillTrue (False:False:xs) = False:fillTrue (False:xs)
+    %     fillTrue (False:True:xs) = False:fillTrue (True:xs)
+
+    %     -- fill True for elements after a <pre> tag starts
+    %     fillTrue (True:False:xs) = True:fillTrue (True:xs) 
+
+    %     -- seeing 2 consecutive Trues denotes end of <pre> tag, so skip them
+    %     fillTrue (True:True:xs) = True:True:fillTrue (xs) 
+
+
+
+
+    %     separateTextCode :: [Soup.Tag String] -> ([Soup.Tag String], [Soup.Tag String])
+    %     separateTextCode parsed_tags =
+    % let bool_mapping_open = Prelude.map (Soup.isTagOpenName "pre") parsed_tags
+    %     bool_mapping_close = Prelude.map (Soup.isTagCloseName "pre") parsed_tags
+
+    %     -- do element-vise or of the two lists
+    %     bool_mapping1 =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close
+
+    %     filled_true_pre = fillTrue bool_mapping1
+    %     combined_pre = Prelude.zip filled_true_pre parsed_tags
+    %     preTags = Prelude.map snd (Prelude.filter (fst) combined_pre)
+
+    %     bool_mapping_img_open = Prelude.map (Soup.isTagOpenName "img") parsed_tags
+    %     bool_mapping_img_close = Prelude.map (Soup.isTagCloseName "img") parsed_tags
+    %     bool_mapping2 =  Prelude.zipWith (||) bool_mapping_img_open bool_mapping_img_close
+
+    %     bool_mapping =  Prelude.zipWith (||) bool_mapping1 bool_mapping2
+
+    %     filled_true = fillTrue bool_mapping
+    %     -- zip parsed_tags list with the boolean list and Prelude.filter elements of the first list based on the second list to create tuple list
+    %     combined = Prelude.zip filled_true parsed_tags
+    %     -- get tags of tuples from combined where the boolean is false
+    %     nonPreTags = Prelude.map snd (Prelude.filter (\(a,_) -> not a) combined)
+
+    % in (preTags, nonPreTags)
+    % \end{verbatim}
+\end{enumerate}
 
 
 
@@ -195,21 +243,18 @@ Only Haskell was used for the project as mentioned in the problem statement
 \begin{enumerate}
     \item The Glasgow Haskell Compiler (GHC) is used for compilation.
     \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
-    \item Libraries:
+    \item \textbf{Libraries}:
     \begin{enumerate}
         \item \texttt{Network.HTTP.Client.TLS} was chosen for handling HTTPS connections in order to use the \texttt{newTlsManager} function
         \item \texttt{Network.HTTP.Client} was chosen for parsing the url into a request, executing the request with the manager, and getting the body from the response. The functions used were \texttt{parseRequest, httpLbs, responseBody} respectively.
         \item \texttt{Tagsoup} was used to parse the HTML into a list of Tag Strings, and then also to convert the separated Tag Strings back into an HTML-formatted string . It was also used in a helper function that inserted a delimiter between the code snippets. The functions used were \texttt{parseTags, isTagOpenName, isTagCloseName, renderTags}, along with the \texttt{TagText} constructor and \texttt{Tag} for \texttt{Tag String}.
-        \item \texttt{Pandoc} was used to 
-        
-
-
-
-
-
-
+        \item \texttt{Pandoc} was used to read the HTML-formatted strings for both the code and the text into intermediate Pandoc representation. Then it was used to write the content into another intermediate string-like representation, which in turn was written into the final files with a standard library. The functions used were \texttt{readHtml, writePlain, writeDocx, runIO}.
         \item \texttt{Data.ByteString.Lazy.Char8} was used to convert the ByteString obtained from the response body into a string for further processing. The function used was \texttt{unpack}
-        \item 
+        \item \texttt{Data.ByteString.Lazy} was used to write the ByteString obtained from the \texttt{writeDocx} function from \texttt{pandoc}, into the final \texttt{.docx} file. The function used was \texttt{writeFile}
+        \item \texttt{Data.Text.Conversions} was used to convert the separated HTML strings into the \texttt{Text} type defined under \texttt{Data.Text}, so that it could be converted into intermediate pandoc representation by \texttt{readHtml}. The function used was \texttt{convertText}.
+        \item \texttt{Data.Text} was used in order to use the \texttt{Text} type
+        \item \texttt{Data.Text.IO} was used to write the Text obtained from the \texttt{writePlain} function from \texttt{pandoc}, into the final \texttt{.txt} file. The function used was \texttt{writeFile}
+        \item The standard \texttt{Prelude} was used for various operations.
     \end{enumerate} 
 \end{enumerate}
 
@@ -220,6 +265,16 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 \chapter{Test Plan}
 % test individual functions 
+
+\begin{enumerate}
+    \item \textbf{Unit Testing}:
+    \begin{enumerate}
+        \item 
+    \end{enumerate}
+    \item 
+\end{enumerate}
+
+
 
 
 
