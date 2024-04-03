@@ -29,7 +29,6 @@ dependencies:
 - text-conversions
 - http-client
 - http-client-tls
-- http-conduit
 - tagsoup
 
 

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( getHTML, parseTheTags, separateTextCode, pandocProcessTags
+    ( getHTML, parseTheTags, separateTextCode, writeToFiles
     ) where
 
 -- don't need to export insertnewlines?
@@ -74,6 +74,7 @@ insertNewlines (x:xs) = if (isTagCloseName "pre" x)
     use the above list to filter the elements of the tag list
 -}
 
+-- can modularise this further
 separateTextCode :: [Tag String] -> ([Tag String], [Tag String])
 separateTextCode parsed_tags =
     let bool_mapping_open = Prelude.map (isTagOpenName "pre") parsed_tags
@@ -96,17 +97,17 @@ separateTextCode parsed_tags =
         -- zip parsed_tags list with the boolean list and Prelude.filter elements of the first list based on the second list to create tuple list
         combined = Prelude.zip filled_true parsed_tags
         -- get tags of tuples from combined where the boolean is false
-        nonPreTags = Prelude.map snd (Prelude.filter (\(a,b) -> not a) combined)
+        nonPreTags = Prelude.map snd (Prelude.filter (\(a,_) -> not a) combined)
 
     in (preTags, nonPreTags)
 
 
 
 
-
+-- can modularise this further
 -- write the text into .docx and code into .txt
-pandocProcessTags :: [Tag String] -> [Tag String] -> IO ()
-pandocProcessTags preTags nonPreTags = do
+writeToFiles :: [Tag String] -> [Tag String] -> IO ()
+writeToFiles preTags nonPreTags = do
     let htmlPre = renderTags (insertNewlines preTags)
     let htmlNonPre = renderTags nonPreTags
 

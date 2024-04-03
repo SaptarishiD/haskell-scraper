@@ -7,15 +7,15 @@ import Lib
 -- can modularise code further for testing purposes
 main :: IO ()
 main = do
-    let og_url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    let url = "GET " ++ og_url
+    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
 
     let parsed_tags = parseTheTags response_html
 
     let separated_text_code = separateTextCode parsed_tags
-    let preTags = fst separated_text_code
-    let nonPreTags = snd separated_text_code
+    
+    let preTags             = fst separated_text_code
+    let nonPreTags          = snd separated_text_code
 
-    pandocProcessTags preTags nonPreTags
+    writeToFiles preTags nonPreTags
 

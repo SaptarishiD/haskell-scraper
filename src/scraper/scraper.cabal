@@ -40,7 +40,6 @@ library
     , bytestring
     , http-client
     , http-client-tls
-    , http-conduit
     , pandoc
     , pandoc-types
     , tagsoup
@@ -63,7 +62,6 @@ executable scraper-exe
     , bytestring
     , http-client
     , http-client-tls
-    , http-conduit
     , pandoc
     , pandoc-types
     , scraper
@@ -88,7 +86,6 @@ test-suite scraper-test
     , bytestring
     , http-client
     , http-client-tls
-    , http-conduit
     , pandoc
     , pandoc-types
     , scraper

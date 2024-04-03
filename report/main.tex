@@ -65,9 +65,9 @@ The given web page is made of text and code snippets, which we need to scrape an
 \section{Requirements}
 
 \begin{enumerate}
-    \item The scraper will be written entirely in Haskell
-    \item The scraper will get all text of the given page and write it into a \texttt{.docx} file.
-    \item The scraper will get all the code snippets of the given page and write it into a \texttt{.txt} file.
+    \item The scraper shall be written entirely in Haskell
+    \item The scraper shall get all text of the given page and write it into a \texttt{.docx} file.
+    \item The scraper shall get all the code snippets of the given page and write it into a \texttt{.txt} file.
 \end{enumerate}
 
 
@@ -93,9 +93,12 @@ The given web page is made of text and code snippets, which we need to scrape an
 
 
 \begin{enumerate}
-    \item The scraper will use Haskell HTTP libraries for fetching the contents of the given web page.
-    \item The scraper will separate the code snippets from the rest of the textual content using the \texttt{tagsoup} library
+    \item The scraper will use Haskell HTTP libraries for fetching the HTML content of the given web page.
+    \item The scraper will separate the code snippets from the rest of the textual content using an algorithm that utilizes the \texttt{tagsoup} library to parse the HTML content, along with other standard libraries for string and text handling.
     \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file mainly using the \texttt{tagsoup} and \texttt{pandoc} libraries, along with some standard Haskell libraries.
+    \item The \texttt{.txt} file will be formatted such that the code snippets are visibly delimited for readability purposes.
+    \item The \texttt{.docx} file will be formatted in a mannger similar to the original web page in terms of demarcating headings, footnotes and the order of the text. 
+    \item The scraper will handle errors gracefully.
 \end{enumerate}
 
 
@@ -103,7 +106,7 @@ The given web page is made of text and code snippets, which we need to scrape an
 
 % \begin{enumerate}
 %     \item \textbf{Limitations} % should limitations go here or later on cause it's seeming out of place here
-%     % this can go in the design and architecture part
+%     % this can go in the design and architecture part or in the specs part
 %     \begin{enumerate}
 %         \item Since the HTML structure of different web pages can vary, it is not necessary that this particular scraper will work for all web pages. It is designed specifically for the given page and may work for some other pages. But no generalisation can be made about the correctness of its text and code extraction for other pages.
 %         \item Moreover, it will not necessarily work for web pages with malformed HTML or different structure.
@@ -119,6 +122,33 @@ The given web page is made of text and code snippets, which we need to scrape an
 \chapter{Design and Architecture}
 % need to put functions into Lib and main stuff in main
 % mention directory structure here along with basic ideas of the functions and code what it's doing
+
+
+\section{High-Level Architecture}
+
+% insert image here
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/high-arch.png}
+    \caption{High-Level Architecture}
+    \label{fig:high-level-arch}
+\end{figure}
+
+The high level architecture consists of the following:
+\begin{enumerate}
+    \item Functionality for getting the target web page using HTTP libraries.
+    \item Parsing the response obtained from the HTTP libraries into Tags from the \texttt{tagsoup} library.
+    \item Separating the text from the code snippets using the descriptions of each Tag from the above Tags
+    \item Extracting the visible content from the text tags and writing them into a \texttt{.docx} file
+    \item Extracting the visible content from the code tags and writing them into a \texttt{.txt} file
+\end{enumerate}
+
+The high-level design which implements the above architecture consists of the following:
+\begin{enumerate}
+    \item 
+\end{enumerate}
+
+
 
 
 
