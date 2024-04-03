@@ -46,7 +46,7 @@
 
 
 
-\chapter{Problem Statement}
+\chapter{Problem Statement and Requirements}
 \begin{tcolorbox}[colback=white,colframe=gray,title={Assigned Project Statement}]
     Develop a scraper using Haskell to extract text and code snippets separately.
     \begin{enumerate}
@@ -62,29 +62,44 @@
 The given web page is made of text and code snippets, which we need to scrape and extract separately into a \texttt{.docx} file containing the text portions and a \texttt{.txt} file which has the code snippets. \\ For this, we need to fetch the given web page, parse and analyze its HTML structure to identify the HTML tags of the code snippets and the tags of the rest of the text, so that we can effectively separate them into different documents.
 
 
-
-
-\chapter{Requirements and Specifications}
-
 \section{Requirements}
 
 \begin{enumerate}
-    \item \textbf{Functional}
-    \begin{enumerate}
-        \item The scraper will be written entirely in Haskell
-        \item The scraper will accurately get all text of the given page and write it in a formatted manner into the \texttt{.txt} file. It will preserve the order and structure of the text on the page
-        \item The scraper will accurately get the code snippets of the given page and write it in ordered manner into a \texttt{.docx} file.
-    \end{enumerate}
-    
-    \item \textbf{Non-functional}
-    \begin{enumerate}
-        \item The scraper will gracefully handle any errors that occur during it's running
-    \end{enumerate}
-        
+    \item The scraper will be written entirely in Haskell
+    \item The scraper will get all text of the given page and write it into a \texttt{.docx} file.
+    \item The scraper will get all the code snippets of the given page and write it into a \texttt{.txt} file.
 \end{enumerate}
 
 
-\section{Specifications}
+
+% \begin{enumerate}
+%     \item \textbf{Functional}
+%     \begin{enumerate}
+%         \item The scraper will be written entirely in Haskell
+%         \item The scraper will accurately get all text of the given page and write it in a formatted manner into the \texttt{.txt} file. It will preserve the order and structure of the text on the page
+%         \item The scraper will accurately get the code snippets of the given page and write it in ordered manner into a \texttt{.docx} file.
+%     \end{enumerate}
+    
+%     \item \textbf{Non-functional}
+%     \begin{enumerate}
+%         \item The scraper will gracefully handle any errors that occur during it's running
+%     \end{enumerate}
+        
+% \end{enumerate}
+
+
+
+\chapter{Specifications}
+
+
+\begin{enumerate}
+    \item The scraper will use Haskell HTTP libraries for fetching the contents of the given web page.
+    \item The scraper will separate the code snippets from the rest of the textual content using the \texttt{tagsoup} library
+    \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file using the \texttt{tagsoup} and \texttt{pandoc} libraries. 
+\end{enumerate}
+
+
+
 
 \begin{enumerate}
     \item The scraper will mainly utilise the \texttt{tagsoup} and \texttt{scalpel} libraries for the parsing and extraction of the HTML content and separation of the text and code snippets
