@@ -9,14 +9,14 @@
     }
 
 
-    ========
+    =======================
 
     0:   8b 47 04                mov    0x4(%rdi),%eax
     3:   0f af 47 24             imul   0x24(%rdi),%eax
     7:   c3                      retq
 
 
-    ========
+    =======================
 
     int extract_cast(void* p) {
       Frob* frob = p;
@@ -24,13 +24,13 @@
     }
 
 
-    ========
+    =======================
 
     SomeOtherStruct ss;
     extract_cast(&ss);    // oops
 
 
-    ========
+    =======================
 
     class Main {
       public static void main(String[] args) {
@@ -41,13 +41,13 @@
     }
 
 
-    ========
+    =======================
 
     Exception in thread "main" java.lang.ArrayStoreException: java.lang.Integer
         at Main.main(Main.java:5)
 
 
-    ========
+    =======================
 
     struct Base {
       virtual void basefunc() {
@@ -71,7 +71,7 @@
     }
 
 
-    ========
+    =======================
 
     int main() {
       Derived d;
@@ -82,7 +82,7 @@
     }
 
 
-    ========
+    =======================
 
     import java.util.List;
     import java.util.ArrayList;
@@ -97,7 +97,7 @@
     }
 
 
-    ========
+    =======================
 
     import java.util.List;
     import java.util.ArrayList;
@@ -112,7 +112,7 @@
     }
 
 
-    ========
+    =======================
 
     class Foo:
       def bar(self): pass
@@ -121,4 +121,4 @@
     f.joe()         # <--- calling non-existent method
 
 
-    ========
+    =======================

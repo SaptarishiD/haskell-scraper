@@ -95,24 +95,21 @@ The given web page is made of text and code snippets, which we need to scrape an
 \begin{enumerate}
     \item The scraper will use Haskell HTTP libraries for fetching the contents of the given web page.
     \item The scraper will separate the code snippets from the rest of the textual content using the \texttt{tagsoup} library
-    \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file using the \texttt{tagsoup} and \texttt{pandoc} libraries. 
+    \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file mainly using the \texttt{tagsoup} and \texttt{pandoc} libraries, along with some standard Haskell libraries.
 \end{enumerate}
 
 
 
 
-\begin{enumerate}
-    \item The scraper will mainly utilise the \texttt{tagsoup} and \texttt{scalpel} libraries for the parsing and extraction of the HTML content and separation of the text and code snippets
-    \item The scraper will use the HTTP libraries for fetching the given web page
-    \item The scraper will use the standard module \texttt{Prelude} for writing the code snippets data into a \texttt{.txt} file
-    \item The scraper will use \texttt{Pandoc} library for writing the textual data into a \texttt{.docx} file
-    \item \textbf{Limitations} % should limitations go here or later on cause it's seeming out of place here
-    \begin{enumerate}
-        \item Since the HTML structure of different web pages can vary, it is not necessary that this particular scraper will work for all web pages. It is designed specifically for the given page and may work for some other pages. But no generalisation can be made about the correctness of its text and code extraction for other pages.
-        \item Moreover, it will not necessarily work for web pages with malformed HTML or different structure.
-        \item It is not designed to be robust to design changes, which is in line with the \href{https://hackage.haskell.org/package/tagsoup-0.6/src/tagsoup.htm#:~:text=Rule%202%3A%0ADo%20not%20be%20robust%20to%20design%20changes%2C%20do%20not%20even%20consider%20the%20possibility%20when%20writing%20the%20code.}{rule} stated on the \texttt{tagsoup} library's documentation example. If the site's HTML structure changes, for instance if the code snippets change from being enclosed in \texttt{<pre>} tags to \texttt{<code>} tags, then the scraper will not be able to separate out the code from the text and extract them accurately.
-    \end{enumerate}
-\end{enumerate}
+% \begin{enumerate}
+%     \item \textbf{Limitations} % should limitations go here or later on cause it's seeming out of place here
+%     % this can go in the design and architecture part
+%     \begin{enumerate}
+%         \item Since the HTML structure of different web pages can vary, it is not necessary that this particular scraper will work for all web pages. It is designed specifically for the given page and may work for some other pages. But no generalisation can be made about the correctness of its text and code extraction for other pages.
+%         \item Moreover, it will not necessarily work for web pages with malformed HTML or different structure.
+%         \item It is not designed to be robust to design changes, which is in line with the \href{https://hackage.haskell.org/package/tagsoup-0.6/src/tagsoup.htm#:~:text=Rule%202%3A%0ADo%20not%20be%20robust%20to%20design%20changes%2C%20do%20not%20even%20consider%20the%20possibility%20when%20writing%20the%20code.}{rule} stated on the \texttt{tagsoup} library's documentation example. If the site's HTML structure changes, for instance if the code snippets change from being enclosed in \texttt{<pre>} tags to \texttt{<code>} tags, then the scraper will not be able to separate out the code from the text and extract them accurately.
+%     \end{enumerate}
+% \end{enumerate}
 
 
 
