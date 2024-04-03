@@ -4,7 +4,8 @@ module Lib
     ( fillTrue, insertNewlines, separateTextCode, pandocProcessTags
     ) where
 
-
+-- don't need to export insertnewlines?
+-- also you should modularise further so that eliminate importing lbsc and tagsoup in main
 
 import Text.HTML.TagSoup
 import Text.Pandoc

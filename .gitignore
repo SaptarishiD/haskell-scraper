@@ -3,5 +3,10 @@
 notes.txt
 *.DS_Store
 *.html
-!report/main.pdf
-!report/main.tex
+report/main.aux
+report/main.fdb_latexmk
+report/main.fls
+report/main.log
+report/main.out
+report/main.synctex.gz
+report/main.toc
