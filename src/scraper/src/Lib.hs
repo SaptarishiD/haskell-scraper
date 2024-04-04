@@ -1,6 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-{-# HLINT ignore "Redundant bracket" #-}
 
 module Lib
     ( getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
@@ -119,7 +117,7 @@ writeToTxt preTags = do
             y <- runIO $ writePlain def x
             case y of
                 Right direct_pan_pre -> do
-                    TIO.writeFile "output_files/direct_sep_pre.txt" direct_pan_pre
+                    TIO.writeFile "output_files/final_code.txt" direct_pan_pre
 
                 Left err -> Prelude.putStrLn $ "Error with pandoc writePlain: " ++ show err
 
@@ -138,7 +136,7 @@ writeToDocx nonPreTags = do
             y <- runIO $ writeDocx def x
             case y of
                 Right direct_pan -> do
-                    LBS.writeFile "output_files/direct_html.docx" direct_pan
+                    LBS.writeFile "output_files/final_text.docx" direct_pan
 
                 Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
 
