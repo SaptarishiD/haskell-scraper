@@ -1,4 +1,0 @@
-\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
-\PYG{n+nf}{parseTheTags}\PYG{+w}{ }\PYG{o+ow}{::}\PYG{+w}{ }\PYG{k+kt}{LBSC}\PYG{o}{.}\PYG{k+kt}{ByteString}\PYG{+w}{ }\PYG{o+ow}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{[}\PYG{k+kt}{Soup}\PYG{o}{.}\PYG{k+kt}{Tag}\PYG{+w}{ }\PYG{k+kt}{String}\PYG{p}{]}
-\PYG{n+nf}{parseTheTags}\PYG{+w}{ }\PYG{n}{response\PYGZus{}html}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{Soup}\PYG{o}{.}\PYG{n}{parseTags}\PYG{+w}{ }\PYG{o+ow}{::}\PYG{+w}{ }\PYG{k+kt}{String}\PYG{+w}{ }\PYG{o+ow}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{[}\PYG{k+kt}{Soup}\PYG{o}{.}\PYG{k+kt}{Tag}\PYG{+w}{ }\PYG{k+kt}{String}\PYG{p}{])}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{LBSC}\PYG{o}{.}\PYG{n}{unpack}\PYG{+w}{ }\PYG{n}{response\PYGZus{}html}\PYG{p}{)}
-\end{Verbatim}
