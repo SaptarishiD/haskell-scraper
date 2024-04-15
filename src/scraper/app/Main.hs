@@ -2,9 +2,6 @@ module Main (main) where
 
 import Lib
 
--- write all the types of everything so that it's clear (type annotation)
--- know the types and stuff of everything
--- can modularise code further for testing purposes
 main :: IO ()
 main = do
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"

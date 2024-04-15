@@ -1,0 +1,10 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{n+nf}{getHTML}\PYG{+w}{ }\PYG{o+ow}{::}\PYG{+w}{ }\PYG{k+kt}{String}\PYG{+w}{ }\PYG{o+ow}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{k+kt}{IO}\PYG{+w}{ }\PYG{k+kt}{LBSC}\PYG{o}{.}\PYG{k+kt}{ByteString}
+\PYG{n+nf}{getHTML}\PYG{+w}{ }\PYG{n}{url}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kr}{do}
+\PYG{+w}{    }\PYG{n}{mymanager}\PYG{+w}{ }\PYG{o+ow}{\PYGZlt{}\PYGZhy{}}\PYG{+w}{ }\PYG{k+kt}{ClientTLS}\PYG{o}{.}\PYG{n}{newTlsManager}
+\PYG{+w}{    }\PYG{n}{myrequest}\PYG{+w}{ }\PYG{o+ow}{\PYGZlt{}\PYGZhy{}}\PYG{+w}{ }\PYG{k+kt}{Client}\PYG{o}{.}\PYG{n}{parseRequest}\PYG{+w}{ }\PYG{n}{url}
+\PYG{+w}{    }\PYG{n}{response}\PYG{+w}{ }\PYG{o+ow}{\PYGZlt{}\PYGZhy{}}\PYG{+w}{ }\PYG{k+kt}{Client}\PYG{o}{.}\PYG{n}{httpLbs}\PYG{+w}{ }\PYG{n}{myrequest}\PYG{+w}{ }\PYG{n}{mymanager}
+\PYG{+w}{    }\PYG{k+kr}{let}\PYG{+w}{ }\PYG{n}{response\PYGZus{}html}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{Client}\PYG{o}{.}\PYG{n}{responseBody}\PYG{+w}{ }\PYG{n}{response}
+\PYG{+w}{    }\PYG{n}{return}\PYG{+w}{ }\PYG{n}{response\PYGZus{}html}
+
+\end{Verbatim}

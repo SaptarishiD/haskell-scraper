@@ -4,8 +4,6 @@ module Lib
     ( getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
     ) where
 
--- don't need to export insertnewlines?
--- also you should modularise further so that eliminate importing lbsc and tagsoup in main
 
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as ClientTLS
@@ -19,14 +17,6 @@ import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 
-
-
--- mymanager <- newTlsManager -- client.tls  newTlsManager :: MonadIO m => m Manager
--- myrequest <- parseRequest url -- client  parseRequest :: MonadThrow m => String -> m Request
--- response <- httpLbs myrequest mymanager -- client httpLbs :: Request -> Manager -> IO (Response ByteString)
--- let response_html = responseBody response -- client responseBody :: Response body -> body
-
--- need to make http thing more robust for error handling, so can use status code for that
 
 getHTML :: String -> IO LBSC.ByteString
 getHTML url = do
@@ -74,7 +64,6 @@ insertNewlines (x:xs) = if (Soup.isTagCloseName "pre" x)
     use the above list to filter the elements of the tag list
 -}
 
--- can modularise this further
 separateTextCode :: [Soup.Tag String] -> ([Soup.Tag String], [Soup.Tag String])
 separateTextCode parsed_tags =
     let bool_mapping_open = Prelude.map (Soup.isTagOpenName "pre") parsed_tags
@@ -103,8 +92,6 @@ separateTextCode parsed_tags =
 
 
 
-
--- can modularise this further
 -- write the text into .docx and code into .txt
 
 writeToTxt :: [Soup.Tag String] -> IO ()

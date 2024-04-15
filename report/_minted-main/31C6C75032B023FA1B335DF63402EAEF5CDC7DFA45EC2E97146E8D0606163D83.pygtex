@@ -1,0 +1,15 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{c+cm}{\PYGZob{}\PYGZhy{}\PYGZsh{} LANGUAGE OverloadedStrings \PYGZsh{}\PYGZhy{}\PYGZcb{}}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Network.HTTP.Client}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{Client}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Network.HTTP.Client.TLS}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{ClientTLS}
+
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Text.HTML.TagSoup}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{Soup}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{n+nn}{Text.Pandoc}
+
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Data.Text.Conversions}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{TextConv}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Data.Text}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{T}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Data.Text.IO}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{TIO}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Data.ByteString.Lazy}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{LBS}
+\PYG{k+kr}{import}\PYG{+w}{ }\PYG{k}{qualified}\PYG{+w}{ }\PYG{n+nn}{Data.ByteString.Lazy.Char8}\PYG{+w}{ }\PYG{k}{as}\PYG{+w}{ }\PYG{n}{LBSC}
+
+\end{Verbatim}

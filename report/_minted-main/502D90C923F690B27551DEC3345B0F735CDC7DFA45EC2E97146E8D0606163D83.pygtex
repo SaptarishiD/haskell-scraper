@@ -1,0 +1,13 @@
+\begin{Verbatim}[commandchars=\\\{\},codes={\catcode`\$=3\catcode`\^=7\catcode`\_=8\relax}]
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{o+ow}{::}\PYG{+w}{ }\PYG{p}{[}\PYG{k+kt}{Bool}\PYG{p}{]}\PYG{+w}{ }\PYG{o+ow}{\PYGZhy{}\PYGZgt{}}\PYG{+w}{ }\PYG{p}{[}\PYG{k+kt}{Bool}\PYG{p}{]}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{k+kt}{[]}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{[]}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{p}{[}\PYG{n}{a}\PYG{p}{]}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{False:False:}\PYG{n}{xs}\PYG{p}{)}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{False:}\PYG{n}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{False:}\PYG{n}{xs}\PYG{p}{)}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{False:True:}\PYG{n}{xs}\PYG{p}{)}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{False:}\PYG{n}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{True:}\PYG{n}{xs}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZhy{}\PYGZhy{} fill True for elements after a \PYGZlt{}pre\PYGZgt{} tag starts}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{True:False:}\PYG{n}{xs}\PYG{p}{)}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{True:}\PYG{n}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{True:}\PYG{n}{xs}\PYG{p}{)}
+
+\PYG{c+c1}{\PYGZhy{}\PYGZhy{} seeing 2 consecutive Trues denotes end of \PYGZlt{}pre\PYGZgt{} tag, so skip them}
+\PYG{n+nf}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{k+kt}{True:True:}\PYG{n}{xs}\PYG{p}{)}\PYG{+w}{ }\PYG{o+ow}{=}\PYG{+w}{ }\PYG{k+kt}{True:True:}\PYG{n}{fillTrue}\PYG{+w}{ }\PYG{p}{(}\PYG{n}{xs}\PYG{p}{)}
+\end{Verbatim}
