@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
+    ( allPageText, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
     ) where
 
 
@@ -16,6 +16,10 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
+
+
+allPageText :: [Soup.Tag String] -> String
+allPageText tagstrings = Soup.innerText tagstrings
 
 
 getHTML :: String -> IO LBSC.ByteString
@@ -94,8 +98,8 @@ separateTextCode parsed_tags =
 
 -- write the text into .docx and code into .txt
 
-writeToTxt :: [Soup.Tag String] -> IO ()
-writeToTxt preTags = do
+writeToTxt :: [Soup.Tag String] -> String -> IO ()
+writeToTxt preTags filepath = do
     let htmlPre = Soup.renderTags (insertNewlines preTags)
     pandocPre <- runIO $ readHtml def ( TextConv.convertText (htmlPre :: String ) :: T.Text )
 
@@ -104,7 +108,7 @@ writeToTxt preTags = do
             y <- runIO $ writePlain def x
             case y of
                 Right direct_pan_pre -> do
-                    TIO.writeFile "output_files/final_code.txt" direct_pan_pre
+                    TIO.writeFile filepath direct_pan_pre
 
                 Left err -> Prelude.putStrLn $ "Error with pandoc writePlain: " ++ show err
 
@@ -113,8 +117,8 @@ writeToTxt preTags = do
     putStrLn "Completed writing to txt"
 
 
-writeToDocx :: [Soup.Tag String] -> IO ()
-writeToDocx nonPreTags = do
+writeToDocx :: [Soup.Tag String] -> String -> IO ()
+writeToDocx nonPreTags filepath = do
     let htmlNonPre = Soup.renderTags nonPreTags
     pandocNoPre <- runIO $ readHtml def ( TextConv.convertText (htmlNonPre :: String ) :: T.Text )
 
@@ -123,7 +127,7 @@ writeToDocx nonPreTags = do
             y <- runIO $ writeDocx def x
             case y of
                 Right direct_pan -> do
-                    LBS.writeFile "output_files/final_text.docx" direct_pan
+                    LBS.writeFile filepath direct_pan
 
                 Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
 

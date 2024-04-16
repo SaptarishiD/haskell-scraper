@@ -9,11 +9,15 @@ main = do
 
     let parsed_tags = parseTheTags response_html
 
+    -- let all_text = allPageText parsed_tags
+    -- writeToTxt all_text
+    
+
     let separated_text_code = separateTextCode parsed_tags
     
     let preTags             = fst separated_text_code
     let nonPreTags          = snd separated_text_code
 
-    writeToTxt preTags
-    writeToDocx nonPreTags
+    writeToTxt preTags "output_files/final_text.docx"
+    writeToDocx nonPreTags "output_files/final_text.docx"
 
