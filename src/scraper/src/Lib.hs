@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( allPageText, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
     ) where
 
 
@@ -18,8 +18,8 @@ import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 
 
-allPageText :: [Soup.Tag String] -> String
-allPageText tagstrings = Soup.innerText tagstrings
+writeFullSrc :: [Soup.Tag String] -> IO ()
+writeFullSrc tagstrings = writeFile "output_files/full_text.txt" (Soup.innerText tagstrings)
 
 
 getHTML :: String -> IO LBSC.ByteString

@@ -9,9 +9,7 @@ main = do
 
     let parsed_tags = parseTheTags response_html
 
-    -- let all_text = allPageText parsed_tags
-    -- writeToTxt all_text
-    
+    writeFullSrc parsed_tags
 
     let separated_text_code = separateTextCode parsed_tags
     
