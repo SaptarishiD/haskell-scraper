@@ -30,6 +30,9 @@ dependencies:
 - http-client
 - http-client-tls
 - tagsoup
+- regex-tdfa
+- array
+- vector
 
 
 ghc-options:

@@ -7,7 +7,7 @@ main = do
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
     let parsed_tags = parseTheTags response_html
-    print (concat (tokenize  parsed_tags))
+    print (concat (getWords (getText parsed_tags)))
 
 
 
@@ -15,11 +15,7 @@ main = do
 
 
 
-
-
-
-
-
+    -- print (concat (tokenize  parsed_tags))
 
     -- let parsed_tags = parseTheTags response_html
     -- let trimmed = trimText parsed_tags

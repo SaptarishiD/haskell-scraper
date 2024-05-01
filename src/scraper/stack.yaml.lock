@@ -3,7 +3,18 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    commit: d700738c02cbf3a22053c08ab8ae5a8601b664a0
+    git: https://github.com/mikeizbicki/hmm.git
+    name: hmm
+    pantry-tree:
+      sha256: 0c60f8014b9c9f2f0247cd01b420b251b8fe107dac254f008f0841466fd21589
+      size: 1195
+    version: '0.3'
+  original:
+    commit: d700738c02cbf3a22053c08ab8ae5a8601b664a0
+    git: https://github.com/mikeizbicki/hmm.git
 snapshots:
 - completed:
     sha256: 48ac4445a1906866c846cd2a3a9c28fcdf3b2066237e49405dbe56ce1974a043

@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, trimText, tokenize
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords
     ) where
 
 
@@ -16,6 +18,10 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
+-- import Text.Regex.TDFA
+-- import Text.Regex.TDFA.Text ()
+
+
 
 
 -- trim :: String -> String
@@ -29,12 +35,13 @@ import qualified Data.ByteString.Lazy.Char8 as LBSC
 
 
 
-tokenize :: [Soup.Tag String] -> [[String]]
+
+
+
+
 -- for this can use regex later but even that won't capture everything then could use tokenize from library so will need to see how that works
-
-
-
-
+-- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
+tokenize :: [Soup.Tag String] -> [[String]]
 tokenize [] = []
 tokenize (x:xs) = case x of
     Soup.TagText text -> case (words (T.unpack . T.toLower . T.pack $ text)) of
@@ -45,6 +52,7 @@ tokenize (x:xs) = case x of
 
     where stringTokenize [] = []
           stringTokenize (y : ys)
+
             | y == " " = "SPACE" : stringTokenize (ys)
             | y == "\n" = "NEWLINE" : stringTokenize (ys)
             | y `elem` ["for", "if", "else", "while", "return", "int", "float", "double", "char", "void", "bool", "string", "struct", "class", "public"] = "KEYWORD" : stringTokenize (ys)
@@ -56,12 +64,19 @@ tokenize (x:xs) = case x of
             | all (\c -> c `elem` ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~']) y = y : stringTokenize (ys)
             | all (\c -> c `elem` [' ', '\t']) y = "SPACE" : stringTokenize (ys)
             | all (\c -> c `elem` ['0', '1', '2', '3', '4', '5', '6', '7', '8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x','y','z'] || c `elem` ['A'..'Z']) y = "NUMWORD" : stringTokenize (ys)
-            | otherwise = "OTHER" : stringTokenize (ys)
+            | otherwise = y : stringTokenize (ys)
         
 
 
-trimText :: [Soup.Tag String] -> [String]
-trimText tagstrings = map Soup.fromTagText (Prelude.filter Soup.isTagText tagstrings)
+getWords :: [String] -> [[String]]
+getWords [] = []
+getWords (x:xs)
+    | words x == [] = ["NEWLINE"]:getWords(xs)
+    | otherwise = (words x):getWords(xs)
+    
+
+getText :: [Soup.Tag String] -> [String]
+getText tagstrings = map Soup.fromTagText (Prelude.filter Soup.isTagText tagstrings)
 
 writeFullSrc :: [Soup.Tag String] -> IO ()
 writeFullSrc tagstrings = writeFile "output_files/full_text.txt" (Soup.innerText tagstrings)
