@@ -3,7 +3,7 @@
 {-# HLINT ignore "Eta reduce" #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords, regextest
     ) where
 
 
@@ -18,7 +18,8 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
--- import Text.Regex.TDFA
+-- import Text.Regex.Posix
+import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
 
@@ -34,6 +35,8 @@ import qualified Data.ByteString.Lazy.Char8 as LBSC
 
 
 
+regextest :: String -> [String]
+regextest str = getAllTextMatches $ str =~ ("[a-z]+":: String) :: [String]
 
 
 
@@ -72,7 +75,7 @@ getWords :: [String] -> [[String]]
 getWords [] = []
 getWords (x:xs)
     | words x == [] = ["NEWLINE"]:getWords(xs)
-    | otherwise = (words x):getWords(xs)
+    | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
     
 
 getText :: [Soup.Tag String] -> [String]

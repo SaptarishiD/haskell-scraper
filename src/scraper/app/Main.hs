@@ -2,12 +2,38 @@ module Main (main) where
 
 import Lib
 
+
 main :: IO ()
 main = do
-    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    response_html <- getHTML url
-    let parsed_tags = parseTheTags response_html
-    print (concat (getWords (getText parsed_tags)))
+    -- let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    -- response_html <- getHTML url
+    -- let parsed_tags = parseTheTags response_html
+    -- print (concat (getWords (getText parsed_tags)))
+
+
+
+    print (regextest "these are all english words but 10 isn't")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
