@@ -36,8 +36,9 @@ packages:
 # forks / in-progress versions pinned to a git hash. For example:
 #
 extra-deps:
-- git: https://github.com/mikeizbicki/hmm.git
-  commit: 'd700738c02cbf3a22053c08ab8ae5a8601b664a0'
+# - url: https://hackage.haskell.org/package/hext-0.1.0.4/hext-0.1.0.4.tar.gz
+#   subdirs:
+#   - src/NLP/Hext
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a

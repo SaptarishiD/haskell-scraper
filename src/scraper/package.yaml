@@ -31,7 +31,9 @@ dependencies:
 - http-client-tls
 - tagsoup
 - regex-tdfa
-
+- unordered-containers
+- containers
+- split
 
 
 ghc-options:

@@ -3,7 +3,7 @@
 {-# HLINT ignore "Eta reduce" #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords, regextest, tokenizer
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc
     ) where
 
 
@@ -18,12 +18,21 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
+import qualified Data.List.Split as DLS
 -- import Text.Regex.Posix
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
 
 
+splitOnNewline :: [String] -> [[String]]
+splitOnNewline = DLS.splitWhen (== "NEWLINE")
+
+
+preProc :: [[String]] -> [String]
+preProc splitted = filter (not . null) $ map unwords splitted
+
+     
 
 -- trim :: String -> String
 -- trim = f . f
@@ -33,41 +42,11 @@ import Text.Regex.TDFA
 -- define a function that takes a list of tag strings as input and returns a string that has as it's elements every single word of the textual content of the tag strings. Newlines should also be included here
 
 
-
--- for this can use regex later but even that won't capture everything then could use tokenize from library so will need to see how that works
--- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
-tokenize :: [Soup.Tag String] -> [[String]]
-tokenize [] = []
-tokenize (x:xs) = case x of
-    Soup.TagText text -> case (words (T.unpack . T.toLower . T.pack $ text)) of
-        [] -> ["NEWLINE"]:tokenize (xs)
-        (y:ys) -> stringTokenize (y:ys) : tokenize (xs)
-
-    _ -> tokenize (xs)
-
-    where stringTokenize [] = []
-          stringTokenize (y : ys)
-
-            | y == " " = "SPACE" : stringTokenize (ys)
-            | y == "\n" = "NEWLINE" : stringTokenize (ys)
-            | y `elem` ["for", "if", "else", "while", "return", "int", "float", "double", "char", "void", "bool", "string", "struct", "class", "public"] = "KEYWORD" : stringTokenize (ys)
-            | all (\c -> c `elem` ['0'..'9']) y = "NUMBER" : stringTokenize (ys)
-            | all (\c -> c `elem` ['a'..'z'] || c `elem` ['A'..'Z']) y = "WORD" : stringTokenize (ys)
-            | all (\c -> c `elem` ['_', 'a'..'z'] || c `elem` ['_', 'A'..'Z']) y = "UNDERSCORE_WORD" : stringTokenize (ys)
-            | all (\c -> c `elem` ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y','z','\'']) y = "APOS_WORD" : stringTokenize (ys)
-            | all (\c -> c `elem` ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y','z','!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~'] || c `elem` ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~', 'A','B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z']) y = "SYMB_WORD" : stringTokenize (ys)
-            | all (\c -> c `elem` ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~']) y = y : stringTokenize (ys)
-            | all (\c -> c `elem` [' ', '\t']) y = "SPACE" : stringTokenize (ys)
-            | all (\c -> c `elem` ['0', '1', '2', '3', '4', '5', '6', '7', '8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x','y','z'] || c `elem` ['A'..'Z']) y = "NUMWORD" : stringTokenize (ys)
-            | otherwise = y : stringTokenize (ys)
-        
-
-
-
 regextest :: String -> String -> Bool
 regextest input regex = input =~ (regex:: String) :: Bool
 
-
+-- for this can use regex more but even that won't capture everything then could use tokenize from library so will need to see how that works
+-- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
 -- \169 is copyright sign
 -- boundary \\b needed to match whole word and not substring like int in intuition
 -- can add more detail to the tokenizer regexes later for stuff like fun() and struct->pointer and system.out etc

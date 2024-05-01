@@ -8,13 +8,16 @@ main = do
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
     let parsed_tags = parseTheTags response_html
+
+    let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+    print splitted
     
-    let newline_words = concat (getWords (getText parsed_tags))
+    -- let newline_words = concat (getWords (getText parsed_tags))
 
 
     -- print (tokenizer ["intuition", "reification", "for", "glint", "01", "word10", "10word", "hyphen-word", "println"])
 
-    print (tokenizer newline_words)
+    -- print (tokenizer newline_words)
 
 
     -- print (map regextest ["word", "englush", "01"])

@@ -38,14 +38,17 @@ library
       HTTP
     , base >=4.7 && <5
     , bytestring
+    , containers
     , http-client
     , http-client-tls
     , pandoc
     , pandoc-types
     , regex-tdfa
+    , split
     , tagsoup
     , text
     , text-conversions
+    , unordered-containers
   default-language: Haskell2010
 
 executable scraper-exe
@@ -61,15 +64,18 @@ executable scraper-exe
       HTTP
     , base >=4.7 && <5
     , bytestring
+    , containers
     , http-client
     , http-client-tls
     , pandoc
     , pandoc-types
     , regex-tdfa
     , scraper
+    , split
     , tagsoup
     , text
     , text-conversions
+    , unordered-containers
   default-language: Haskell2010
 
 test-suite scraper-test
@@ -86,13 +92,16 @@ test-suite scraper-test
       HTTP
     , base >=4.7 && <5
     , bytestring
+    , containers
     , http-client
     , http-client-tls
     , pandoc
     , pandoc-types
     , regex-tdfa
     , scraper
+    , split
     , tagsoup
     , text
     , text-conversions
+    , unordered-containers
   default-language: Haskell2010
