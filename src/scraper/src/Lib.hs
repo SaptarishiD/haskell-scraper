@@ -66,7 +66,8 @@ tokenizer (x:xs)
 getWords :: [String] -> [[String]]
 getWords [] = []
 getWords (x:xs)
-    | words x == [] = ["NEWLINE"]:getWords(xs)
+    | '\n' `elem` x && length x == 1 = ["NEWLINE"]:getWords(xs)
+    -- | words x == [] = x:getWords(xs) -- here need to check if newline to do newline, otherwise spaces also getting included which makes it bad 
     | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
     
 

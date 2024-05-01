@@ -9,7 +9,11 @@ main = do
     response_html <- getHTML url
     let parsed_tags = parseTheTags response_html
 
+    -- print concat (getWords (getText parsed_tags))
+
+
     let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+
     print splitted
     
     -- let newline_words = concat (getWords (getText parsed_tags))
