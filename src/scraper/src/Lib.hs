@@ -3,7 +3,7 @@
 {-# HLINT ignore "Eta reduce" #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords, regextest
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, tokenize, getWords, regextest, tokenizer
     ) where
 
 
@@ -34,14 +34,6 @@ import Text.Regex.TDFA
 
 
 
-
-regextest :: String -> [String]
-regextest str = getAllTextMatches $ str =~ ("[a-z]+":: String) :: [String]
-
-
-
-
-
 -- for this can use regex later but even that won't capture everything then could use tokenize from library so will need to see how that works
 -- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
 tokenize :: [Soup.Tag String] -> [[String]]
@@ -69,6 +61,26 @@ tokenize (x:xs) = case x of
             | all (\c -> c `elem` ['0', '1', '2', '3', '4', '5', '6', '7', '8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x','y','z'] || c `elem` ['A'..'Z']) y = "NUMWORD" : stringTokenize (ys)
             | otherwise = y : stringTokenize (ys)
         
+
+
+
+regextest :: String -> String -> Bool
+regextest input regex = input =~ (regex:: String) :: Bool
+
+
+-- \169 is copyright sign
+tokenizer :: [String] -> [String]
+tokenizer [] = []
+tokenizer (x:xs)
+    | x == "NEWLINE" = x:tokenizer(xs)
+    -- use regextest to test if the string is a word or number
+    -- test for programming keyword
+    | regextest x "for|if|else|while|return|int|float|double|char|void|bool|string|struct|class|public" = "KEYWORD":tokenizer(xs)
+    | regextest x "\\b[a-zA-Z]+\\b" = "WORD":tokenizer(xs)
+    | regextest x "[a-zA-Z_]+" = "UNDERSCORE_WORD":tokenizer(xs)
+    | regextest x "[0-9]+" = "NUMBER":tokenizer(xs)
+    | otherwise = x:tokenizer(xs)
+
 
 
 getWords :: [String] -> [[String]]

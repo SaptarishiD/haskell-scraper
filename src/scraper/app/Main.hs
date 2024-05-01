@@ -5,30 +5,19 @@ import Lib
 
 main :: IO ()
 main = do
-    -- let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    -- response_html <- getHTML url
-    -- let parsed_tags = parseTheTags response_html
-    -- print (concat (getWords (getText parsed_tags)))
+    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    response_html <- getHTML url
+    let parsed_tags = parseTheTags response_html
+    
+    let newline_words = concat (getWords (getText parsed_tags))
 
 
+    -- print (tokenizer ["word_with_underscore", "WHST", "01"])
 
-    print (regextest "these are all english words but 10 isn't")
-
-
-
+    print (tokenizer newline_words)
 
 
-
-
-
-
-
-
-
-
-
-
-
+    -- print (map regextest ["word", "englush", "01"])
 
 
 
