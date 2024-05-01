@@ -69,17 +69,18 @@ regextest input regex = input =~ (regex:: String) :: Bool
 
 
 -- \169 is copyright sign
-tokenizer :: [String] -> [String]
+-- boundary \\b needed to match whole word and not substring like int in intuition
+-- can add more detail to the tokenizer regexes later for stuff like fun() and struct->pointer and system.out etc
+
+tokenizer :: [String] -> [(String,String)]
 tokenizer [] = []
 tokenizer (x:xs)
-    | x == "NEWLINE" = x:tokenizer(xs)
-    -- use regextest to test if the string is a word or number
-    -- test for programming keyword
-    | regextest x "for|if|else|while|return|int|float|double|char|void|bool|string|struct|class|public" = "KEYWORD":tokenizer(xs)
-    | regextest x "\\b[a-zA-Z]+\\b" = "WORD":tokenizer(xs)
-    | regextest x "[a-zA-Z_]+" = "UNDERSCORE_WORD":tokenizer(xs)
-    | regextest x "[0-9]+" = "NUMBER":tokenizer(xs)
-    | otherwise = x:tokenizer(xs)
+    | x == "NEWLINE" = (x,x):tokenizer(xs)
+    | regextest x "\\b(for|if|else|while|return|int|float|double|char|void|bool|string|struct|class|public)\\b" = (x,"KEYWORD"):tokenizer(xs)
+    | regextest x "\\b[a-zA-Z]+\\b" = (x,"WORD"):tokenizer(xs)
+    | regextest x "\\b[a-zA-Z_]+\\b" = (x,"UNDERSCORE_WORD"):tokenizer(xs)
+    | regextest x "\\b[0-9]+\\b" = (x,"NUMBER"):tokenizer(xs)
+    | otherwise = (x,x):tokenizer(xs)
 
 
 

@@ -12,7 +12,7 @@ main = do
     let newline_words = concat (getWords (getText parsed_tags))
 
 
-    -- print (tokenizer ["word_with_underscore", "WHST", "01"])
+    -- print (tokenizer ["intuition", "reification", "for", "glint", "01", "word10", "10word", "hyphen-word", "println"])
 
     print (tokenizer newline_words)
 
