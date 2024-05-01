@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, trimText, tokenize
     ) where
 
 
@@ -17,6 +17,51 @@ import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 
+
+-- trim :: String -> String
+-- trim = f . f
+--   where f = Prelude.reverse . Prelude.dropWhile isSpace
+
+
+-- define a function that takes a list of tag strings as input and returns a string that has as it's elements every single word of the textual content of the tag strings. Newlines should also be included here
+
+
+
+
+
+tokenize :: [Soup.Tag String] -> [[String]]
+-- for this can use regex later but even that won't capture everything then could use tokenize from library so will need to see how that works
+
+
+
+
+tokenize [] = []
+tokenize (x:xs) = case x of
+    Soup.TagText text -> case (words (T.unpack . T.toLower . T.pack $ text)) of
+        [] -> ["NEWLINE"]:tokenize (xs)
+        (y:ys) -> stringTokenize (y:ys) : tokenize (xs)
+
+    _ -> tokenize (xs)
+
+    where stringTokenize [] = []
+          stringTokenize (y : ys)
+            | y == " " = "SPACE" : stringTokenize (ys)
+            | y == "\n" = "NEWLINE" : stringTokenize (ys)
+            | y `elem` ["for", "if", "else", "while", "return", "int", "float", "double", "char", "void", "bool", "string", "struct", "class", "public"] = "KEYWORD" : stringTokenize (ys)
+            | all (\c -> c `elem` ['0'..'9']) y = "NUMBER" : stringTokenize (ys)
+            | all (\c -> c `elem` ['a'..'z'] || c `elem` ['A'..'Z']) y = "WORD" : stringTokenize (ys)
+            | all (\c -> c `elem` ['_', 'a'..'z'] || c `elem` ['_', 'A'..'Z']) y = "UNDERSCORE_WORD" : stringTokenize (ys)
+            | all (\c -> c `elem` ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y','z','\'']) y = "APOS_WORD" : stringTokenize (ys)
+            | all (\c -> c `elem` ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y','z','!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~'] || c `elem` ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~', 'A','B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y','Z']) y = "SYMB_WORD" : stringTokenize (ys)
+            | all (\c -> c `elem` ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '{', '}', '[', ']', '|', '\\', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', '`', '~']) y = y : stringTokenize (ys)
+            | all (\c -> c `elem` [' ', '\t']) y = "SPACE" : stringTokenize (ys)
+            | all (\c -> c `elem` ['0', '1', '2', '3', '4', '5', '6', '7', '8','9','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x','y','z'] || c `elem` ['A'..'Z']) y = "NUMWORD" : stringTokenize (ys)
+            | otherwise = "OTHER" : stringTokenize (ys)
+        
+
+
+trimText :: [Soup.Tag String] -> [String]
+trimText tagstrings = map Soup.fromTagText (Prelude.filter Soup.isTagText tagstrings)
 
 writeFullSrc :: [Soup.Tag String] -> IO ()
 writeFullSrc tagstrings = writeFile "output_files/full_text.txt" (Soup.innerText tagstrings)
@@ -43,10 +88,10 @@ fillTrue (False:False:xs) = False:fillTrue (False:xs)
 fillTrue (False:True:xs) = False:fillTrue (True:xs)
 
 -- fill True for elements after a <pre> tag starts
-fillTrue (True:False:xs) = True:fillTrue (True:xs) 
+fillTrue (True:False:xs) = True:fillTrue (True:xs)
 
 -- seeing 2 consecutive Trues denotes end of <pre> tag, so skip them
-fillTrue (True:True:xs) = True:True:fillTrue (xs) 
+fillTrue (True:True:xs) = True:True:fillTrue (xs)
 
 
 
@@ -113,7 +158,7 @@ writeToTxt preTags filepath = do
                 Left err -> Prelude.putStrLn $ "Error with pandoc writePlain: " ++ show err
 
         Left err -> Prelude.putStrLn $ "Error parsing pandoc for pre tags: " ++ show err
-    
+
     putStrLn "Completed writing to txt"
 
 

@@ -6,16 +6,32 @@ main :: IO ()
 main = do
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
-
     let parsed_tags = parseTheTags response_html
+    print (concat (tokenize  parsed_tags))
 
-    writeFullSrc parsed_tags
 
-    let separated_text_code = separateTextCode parsed_tags
+
+
+
+
+
+
+
+
+
+
+
+    -- let parsed_tags = parseTheTags response_html
+    -- let trimmed = trimText parsed_tags
+
+    -- print trimmed
+    -- writeFullSrc parsed_tags
+
+    -- let separated_text_code = separateTextCode parsed_tags
     
-    let preTags             = fst separated_text_code
-    let nonPreTags          = snd separated_text_code
+    -- let preTags             = fst separated_text_code
+    -- let nonPreTags          = snd separated_text_code
 
-    writeToTxt preTags "output_files/final_text.docx"
-    writeToDocx nonPreTags "output_files/final_text.docx"
+    -- writeToTxt preTags "output_files/final_text.txt"
+    -- writeToDocx nonPreTags "output_files/final_text.docx"
 
