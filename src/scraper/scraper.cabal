@@ -41,6 +41,7 @@ library
     , containers
     , http-client
     , http-client-tls
+    , matrix
     , pandoc
     , pandoc-types
     , regex-tdfa
@@ -67,6 +68,7 @@ executable scraper-exe
     , containers
     , http-client
     , http-client-tls
+    , matrix
     , pandoc
     , pandoc-types
     , regex-tdfa
@@ -95,6 +97,7 @@ test-suite scraper-test
     , containers
     , http-client
     , http-client-tls
+    , matrix
     , pandoc
     , pandoc-types
     , regex-tdfa

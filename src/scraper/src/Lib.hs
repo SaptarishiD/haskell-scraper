@@ -3,7 +3,7 @@
 {-# HLINT ignore "Eta reduce" #-}
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords
     ) where
 
 
@@ -22,6 +22,29 @@ import qualified Data.List.Split as DLS
 -- import Text.Regex.Posix
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
+
+
+
+
+
+getUniqueWords :: [String] -> [String]
+-- get all unique strings from list of strings
+getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) []
+
+
+-- you have a list of words as a vocabulary and a list of strings/documents. for each string, count the occurence of each word in that string. You should output XTrain which is a n × V dimensional matrix describing the n documents used for training your Naive Bayes classifier where V is the number of words in the vocabulary. The entry XTrain[i,j] is 1 if word j appears in the ith training document and 0 otherwise.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
