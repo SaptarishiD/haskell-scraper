@@ -224,8 +224,12 @@ main = do
 
     let final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (DM.toLists combined_mat)
 
+    let mapping = zip splitted final_probs
 
-    print (final_probs)
+
+
+
+    print (mapping)
 
     print "done" {-
 
