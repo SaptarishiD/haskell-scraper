@@ -179,7 +179,6 @@ main = do
     -- put log_src and long_lang into a new list that has these two lists as it's two elements
     let log_matrix = DM.transpose (DM.fromLists [log_src, log_lang])
 
-    print "done"
     -- [Double,Double]
     -- print (map typeOf (head (DM.toLists log_matrix)))
 
@@ -188,7 +187,6 @@ main = do
 
 
     let prob1 = DM.multStrassen (DM.fromLists xTest) log_matrix
-    print "done"
 
 
     -- [Double,Double]
@@ -213,12 +211,33 @@ main = do
     let prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
 
 
+    -- combine the two above lists into one list where the first element is the first list and the second element is the second list
+    let combined = [prob2, prob3]
+    let combined_mat = DM.transpose (DM.fromLists combined)
 
-    
+    -- print (DM.nrows combined_mat) -- 104
+    -- print (DM.ncols combined_mat) -- 2
 
 
+
+
+
+    let final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (DM.toLists combined_mat)
+
+
+    print (final_probs)
 
     print "done" {-
+
+
+
+
+
+
+
+
+
+
 
     let prob2 = DM.mapCol (+ logp) 1 
     let prob3 = DM.mapCol (\x -> x + log_not_p) 2 prob2
