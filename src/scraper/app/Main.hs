@@ -1,10 +1,12 @@
-module Main (main) where 
+module Main (main) where
 
 import Lib
+import Data.Typeable
 -- import Data.List (elemIndex)
 import Data.Map (fromListWith, toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Matrix as DM
+import GHC.Float (int2Double)
 
 type Document = String
 type Vocabulary = [String]
@@ -139,53 +141,90 @@ main = do
 
 
 
-    let xgivenY_src = map (\x -> fromIntegral (x) + 0.001 / fromIntegral(src_len) + 0.9 ) sum_src_cols
-
-    -- print xgivenY_src
+    let xgivenY_src = map (\x -> int2Double (x) + 0.001 / int2Double (src_len) + 0.9 ) sum_src_cols
 
 
 
-    print "done" {-
-    let xgivenY_lang = map (\x -> fromIntegral (x) +0.001 / fromIntegral(natural_len) + 0.9) sum_lang_cols
 
-    let prob_src_prior = (fromIntegral src_len) / (fromIntegral src_len + fromIntegral natural_len)
+    let xgivenY_lang = map (\x -> int2Double (x) +0.001 / int2Double (natural_len) + 0.9) sum_lang_cols
+
+    let prob_src_prior = (int2Double src_len) / (int2Double src_len + fromIntegral natural_len)
 
 
     -- print prob_lang_prior
     -- print xgivenY_src
 
 
-    let xTest = vectorizer vocab (splitted)
+
+-- vectorizer :: Vocabulary -> [Document] -> MyMatrix i.e. [[Int]]
+    -- xTest is of type [[Double]]
+    let xTest = map (map int2Double) (vectorizer vocab (splitted))
+
+
+
 
     -- print (length (head xTest))
 
     let num_samples = length (splitted)
-    let y = DM.zero 1 num_samples
+    let y = DM.zero 1 num_samples -- here int could be a problem
 
+
+    -- these are of type [Double]
     let log_src = map log xgivenY_src
     let log_lang = map log xgivenY_lang
+
+    -- print (map typeOf log_src)
+
 
     -- put log_src and long_lang into a new list that has these two lists as it's two elements
     let log_matrix = DM.transpose (DM.fromLists [log_src, log_lang])
 
+    print "done"
+    -- [Double,Double]
+    -- print (map typeOf (head (DM.toLists log_matrix)))
+
+
+
+
 
     let prob1 = DM.multStrassen (DM.fromLists xTest) log_matrix
-    
+    print "done"
+
+
+    -- [Double,Double]
+    -- print (map typeOf (head (DM.toLists prob1)))
+
+
+
 
     let logp = log prob_src_prior
     let log_not_p = log (1 - prob_src_prior)
 
-    -- add 1 to every element of the first column of prob1
+    -- can also just store the matrices and their multiplied results ekbar
+    -- presentation mein ofc can't show entire thing so just show results of the trained model on some tests
 
-    print prob1
-
-    -- let prob2 = DM.mapCol (\x -> x * logp) 1 prob1
-    -- let prob3 = DM.mapCol (\x -> x * log_not_p) 2 prob2
-
-
-    -- print prob3
+    -- print (DM.nrows prob1) -- 104
+    -- print (DM.ncols prob1) -- 2
 
 
+    let prob1_trans = DM.toLists (DM.transpose prob1)
+
+    let prob2 = map (\x -> x + logp) (head prob1_trans)
+    let prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
+
+
+
+    
+
+
+
+    print "done" {-
+
+    let prob2 = DM.mapCol (+ logp) 1 
+    let prob3 = DM.mapCol (\x -> x + log_not_p) 2 prob2
+
+
+    print (take 20 prob3)
 
 -}
 
@@ -206,7 +245,7 @@ main = do
 
 
 
-    
+
     -- let newline_words = concat (getWords (getText parsed_tags))
 
 
@@ -228,7 +267,7 @@ main = do
     -- writeFullSrc parsed_tags
 
     -- let separated_text_code = separateTextCode parsed_tags
-    
+
     -- let preTags             = fst separated_text_code
     -- let nonPreTags          = snd separated_text_code
 
