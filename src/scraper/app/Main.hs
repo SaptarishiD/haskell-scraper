@@ -1,7 +1,7 @@
 module Main (main) where 
 
 import Lib
-import Data.List (elemIndex)
+-- import Data.List (elemIndex)
 import Data.Map (fromListWith, toList)
 import Data.Maybe (fromMaybe)
 import qualified Data.Matrix as DM
@@ -47,14 +47,14 @@ sumCols matrix = map sum (DM.toLists (DM.transpose matrix))
 
 main :: IO ()
 main = do
-    -- let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    -- response_html <- getHTML url
-    -- let parsed_tags = parseTheTags response_html
+    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    response_html <- getHTML url
+    let parsed_tags = parseTheTags response_html
 
-    -- -- print concat (getWords (getText parsed_tags))
+    -- print concat (getWords (getText parsed_tags))
 
 
-    -- let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+    let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
 
     -- print splitted
 
@@ -129,14 +129,65 @@ main = do
     let naturalLanguageMatrix = DM.fromLists (xTrain_natural)
 
 
+
+    -- DM.Matrix Int -> [Int]
     let sum_src_cols = (sumCols sourceCodeMatrix)
     let sum_lang_cols = (sumCols naturalLanguageMatrix)
 
-    let xgivenY_src = map (\x -> fromIntegral (x) / fromIntegral(src_len) ) sum_src_cols
+
+    -- maybe change these all to floats or smth explicitly
 
 
-    let xgivenY_lang = map (\x -> fromIntegral (x) / fromIntegral(natural_len) ) sum_lang_cols
 
+    let xgivenY_src = map (\x -> fromIntegral (x) + 0.001 / fromIntegral(src_len) + 0.9 ) sum_src_cols
+
+    -- print xgivenY_src
+
+
+
+    print "done" {-
+    let xgivenY_lang = map (\x -> fromIntegral (x) +0.001 / fromIntegral(natural_len) + 0.9) sum_lang_cols
+
+    let prob_src_prior = (fromIntegral src_len) / (fromIntegral src_len + fromIntegral natural_len)
+
+
+    -- print prob_lang_prior
+    -- print xgivenY_src
+
+
+    let xTest = vectorizer vocab (splitted)
+
+    -- print (length (head xTest))
+
+    let num_samples = length (splitted)
+    let y = DM.zero 1 num_samples
+
+    let log_src = map log xgivenY_src
+    let log_lang = map log xgivenY_lang
+
+    -- put log_src and long_lang into a new list that has these two lists as it's two elements
+    let log_matrix = DM.transpose (DM.fromLists [log_src, log_lang])
+
+
+    let prob1 = DM.multStrassen (DM.fromLists xTest) log_matrix
+    
+
+    let logp = log prob_src_prior
+    let log_not_p = log (1 - prob_src_prior)
+
+    -- add 1 to every element of the first column of prob1
+
+    print prob1
+
+    -- let prob2 = DM.mapCol (\x -> x * logp) 1 prob1
+    -- let prob3 = DM.mapCol (\x -> x * log_not_p) 2 prob2
+
+
+    -- print prob3
+
+
+
+-}
 
 
 
