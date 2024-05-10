@@ -2,10 +2,12 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Eta reduce" #-}
 
-module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords
-    ) where
+-- maybe can also build a progress bar thing for the matrix multiplications stuff so know how long it's taking
+-- also need to do performance testing stuff and all
 
+module Lib
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY
+    ) where
 
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as ClientTLS
@@ -23,8 +25,38 @@ import qualified Data.List.Split as DLS
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
+import Data.Typeable
+import Data.Map (fromListWith, toList)
+import Data.Maybe (fromMaybe)
+import qualified Data.Matrix as DM
+import GHC.Float (int2Double)
+
+type Document = String
+type Vocabulary = [String]
+type MyMatrix = [[Int]]
 
 
+myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
+myVectorizer vocab docs = DM.fromLists [matrixRow vocab doc | doc <- docs]
+
+
+matrixRow :: Vocabulary -> Document -> [Int]
+matrixRow vocab doc = [fromMaybe 0 (lookup word counts) | word <- vocab]
+  where counts = wordCounts doc
+
+wordCounts :: Document -> [(String, Int)]
+wordCounts doc = toList $ fromListWith (+) [(word, 1) | word <- words doc]
+
+
+
+
+
+sumCols :: DM.Matrix Int -> [Int]
+sumCols matrix = map sum (DM.toLists (DM.transpose matrix))
+
+
+calcXGivenY :: Int -> [Int] -> [Double]
+calcXGivenY mylen my_cols_len =  map (\x -> int2Double (x) + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
 
 
 getUniqueWords :: [String] -> [String]
