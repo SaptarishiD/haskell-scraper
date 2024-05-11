@@ -14,17 +14,22 @@ type Vocabulary = [String]
 type MyMatrix = [[Int]]
 
 
+-- also need to be careful abt hyperparameter tuning and stuff
+-- also can have heuristics in the sense of full stop and colon at end of line meaning natural language and not code
+-- need to compare performance with the test set
 
 
 main :: IO ()
 main = do
-  
-    classified <- readFile "output_files/prelim_classify.txt"
-    let split_class = DLS.splitOn ",\n" classified
-    -- remove the square bracket from the last element of the list
-    let split_class2 = init(split_class) ++ [init (last split_class)]
 
-    print (readMaybe (head split_class2) :: Maybe (String, String))
+  
+    
+    let code_class = [x | x <- classified, snd x == 0]
+    let lang_class = [x | x <- classified, snd x == 1]
+
+    -- print (map fst code_class)
+    writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
+    writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
 
 
     -- let classified_lines = read classified :: [(String, String)]
@@ -33,8 +38,7 @@ main = do
     -- let code = [ fst x | x <- fst classified_lines, snd x == 0]
     -- print code
 
-    print "done" 
-    print 1{-
+
     
 
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
@@ -148,7 +152,10 @@ main = do
 
     print (mapping)
 
-
+    print "done" 
+    print 1
+    
+    {-
     let prob2 = DM.mapCol (+ logp) 1 
     let prob3 = DM.mapCol (\x -> x + log_not_p) 2 prob2
 
