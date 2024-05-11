@@ -6,7 +6,7 @@
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayesSrc , trainNaiveBayesLang, classifyNaiveBayes
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -33,8 +33,96 @@ import GHC.Float (int2Double)
 
 type Document = String
 type Vocabulary = [String]
-type MyMatrix = [[Int]]
 
+
+
+
+classifyNaiveBayes :: String -> String -> DM.Matrix Int -> DM.Matrix Int -> Vocabulary -> Int -> Int -> [Int]
+classifyNaiveBayes lang_test src_test trainedSrc trainedLang vocab src_len natural_len =
+    let lang_test_data = lines lang_test
+        src_test_data = lines src_test
+
+        xTrain_src = trainedSrc
+        xTrain_natural = trainedLang
+
+        sourceCodeMatrix = xTrain_src
+        naturalLanguageMatrix = xTrain_natural
+
+        -- DM.Matrix Int -> [Int]
+        sum_src_cols = sumCols sourceCodeMatrix
+        sum_lang_cols = sumCols naturalLanguageMatrix
+
+
+        xgivenY_src = calcXGivenY src_len sum_src_cols
+        xgivenY_lang = calcXGivenY natural_len sum_lang_cols
+        prob_src_prior = (int2Double src_len) / (int2Double src_len + fromIntegral natural_len)
+
+        xTest_src = map (map int2Double) (DM.toLists (myVectorizer vocab (src_test_data)))
+        xTest_lang = map (map int2Double) (DM.toLists (myVectorizer vocab (lang_test_data)))
+
+        src_test_len = length (xTest_src)
+        lang_test_len = length (xTest_lang)
+
+        yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+
+        xTest = xTest_src ++ xTest_lang
+
+        y = DM.zero 1 (src_test_len + lang_test_len)
+
+        -- [Double]
+        log_src = map log xgivenY_src
+        log_lang = map log xgivenY_lang
+
+        log_matrix = DM.transpose (DM.fromLists [log_src, log_lang])
+
+        -- [Double,Double]
+        -- print (map typeOf (head (DM.toLists log_matrix)))
+
+        prob1 = DM.multStrassen (DM.fromLists xTest) log_matrix
+
+        -- [Double,Double]
+        -- print (map typeOf (head (DM.toLists prob1)))
+
+        logp = log prob_src_prior
+        log_not_p = log (1 - prob_src_prior)
+
+        prob1_trans = DM.toLists (DM.transpose prob1)
+
+        prob2 = map (\x -> x + logp) (head prob1_trans)
+        prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
+
+        combined = [prob2, prob3]
+        combined_mat = DM.transpose (DM.fromLists combined)
+        
+        final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (DM.toLists combined_mat)
+
+    in final_probs
+
+
+
+
+-- trainNaiveBayes :: [String] -> [String] -> ( ( [String] , Double ), ( [Double] , [Double] ))
+trainNaiveBayesSrc :: [String] -> [String] -> DM.Matrix Int
+trainNaiveBayesSrc natural_data source_data = 
+    let source_words = concat (getWords source_data)
+        natural_words = concat (getWords natural_data)
+        unique_src_words = getUniqueWords source_words
+        unique_natural_words = getUniqueWords natural_words
+        vocab = unique_src_words ++ unique_natural_words
+        xTrain_src = myVectorizer vocab (source_data)
+    in xTrain_src
+    
+
+trainNaiveBayesLang :: [String] -> [String] -> DM.Matrix Int
+trainNaiveBayesLang natural_data source_data = 
+    let source_words = concat (getWords source_data)
+        natural_words = concat (getWords natural_data)
+        unique_src_words = getUniqueWords source_words
+        unique_natural_words = getUniqueWords natural_words
+        vocab = unique_src_words ++ unique_natural_words
+        xTrain_lang = myVectorizer vocab (natural_data)
+    in xTrain_lang
+    
 
 myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
 myVectorizer vocab docs = DM.fromLists [matrixRow vocab doc | doc <- docs]
