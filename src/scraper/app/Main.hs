@@ -2,7 +2,9 @@ module Main (main) where
 
 import Lib
 import Data.Typeable
+import Text.Read
 import Data.Map (fromListWith, toList)
+import qualified Data.List.Split as DLS
 import Data.Maybe (fromMaybe)
 import qualified Data.Matrix as DM
 import GHC.Float (int2Double)
@@ -14,9 +16,27 @@ type MyMatrix = [[Int]]
 
 
 
-
 main :: IO ()
 main = do
+  
+    classified <- readFile "output_files/prelim_classify.txt"
+    let split_class = DLS.splitOn ",\n" classified
+    -- remove the square bracket from the last element of the list
+    let split_class2 = init(split_class) ++ [init (last split_class)]
+
+    print (readMaybe (head split_class2) :: Maybe (String, String))
+
+
+    -- let classified_lines = read classified :: [(String, String)]
+    -- print classified_lines
+
+    -- let code = [ fst x | x <- fst classified_lines, snd x == 0]
+    -- print code
+
+    print "done" 
+    print 1{-
+    
+
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
     let parsed_tags = parseTheTags response_html
@@ -128,7 +148,6 @@ main = do
 
     print (mapping)
 
-    print "done" {-
 
     let prob2 = DM.mapCol (+ logp) 1 
     let prob3 = DM.mapCol (\x -> x + log_not_p) 2 prob2
