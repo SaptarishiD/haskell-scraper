@@ -12,7 +12,6 @@ int arr [ 10 ];
 } frob ; int extract ( frob * frob ) {
 return frob -> y * frob -> arr [ 7 ];
 }
-when compiling the function extract , the compiler will perform type checking. it won't let us access fields that were not declared in the struct, for example. neither will it let us pass a pointer to a different struct (or to a float ) into extract . but once it's done helping us, the compiler generates code which is completely type-free:
 0: 8b 47 04 mov 0x4(%rdi),%eax 3: 0f af 47 24 imul 0x24(%rdi),%eax 7: c3 retq
 a slightly adjusted example will clarify this:
 int extract_cast ( void * p ) {
@@ -55,11 +54,9 @@ call_derived ( & d ); base b ;
 call_derived ( & b );
 }
 type erasure and java generics
-the solution was to use type erasure to implement generics entirely in the compiler. here's a quote from the official java generics tutorial :
 replace all type parameters in generic types with their bounds or object if the type parameters are unbounded. the produced bytecode, therefore, contains only ordinary classes, interfaces, and methods.
 insert type casts if necessary to preserve type safety.
 generate bridge methods to preserve polymorphism in extended generic types.
-here's a very simple example to demonstrate what's going on, taken from a stack overflow answer . this code:
 import java.util.list ;
 import java.util.arraylist ; class main {
 public static void main ( string [] args ) {
@@ -69,7 +66,6 @@ string x = list . get ( 0 );
 system . out . println ( x );
 }
 }
-uses a generic list . however, what the compiler creates prior to emitting bytecode is equivalent to:
 import java.util.list ;
 import java.util.arraylist ; class main {
 public static void main ( string [] args ) {
@@ -80,7 +76,6 @@ system . out . println ( x );
 }
 }
 reification in dynamically typed languages
-i hope it's obvious that the theory and techniques described above only apply to statically-typed languages. in dynamically-typed languages, like python, there is almost no concept of types at compile-time, and types are a fully reified concept. even trivial errors like:
 class foo : def bar ( self ): pass f = foo ()
 f . joe () # <--- calling non-existent method
 fire at run-time, because there's no static type checking [2] . types obviously exist at run-time, with functions like type() and isinstance() providing complete reflection capabilities. the type() function can even create new types entirely at run-time .

@@ -1,5 +1,10 @@
-You will rejoice to hear that no disaster has accompanied the
-commencement of an enterprise which you have regarded with such
-evil forebodings.  I arrived here yesterday, and my first task is
-to assure my dear sister of my welfare and increasing confidence in
-the success of my undertaking.
+Comments are fundamental parts of a computer program, where you leave 
+explanatory remarks to yourself and others that may be collaborating with 
+you regarding your code.
+All code you create for this course must include robust comments.
+Typically each comment is a few words or more, providing the reader an 
+opportunity to understand what is happening in a specific block of code. 
+Further, such comments serve as a reminder for you later when you need to 
+revise your code.
+Comments involve placing backslashes into your code, followed by a comment. Modify your code as follows to integrate comments:
+
