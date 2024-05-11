@@ -6,7 +6,7 @@
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, tokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayesSrc , trainNaiveBayesLang, classifyNaiveBayes
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayes, classifyNaiveBayes
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -15,6 +15,11 @@ import qualified Network.HTTP.Client.TLS as ClientTLS
 import qualified Text.HTML.TagSoup as Soup
 import Text.Pandoc
 
+import Data.Typeable
+import Data.Map (fromListWith, toList)
+import Data.Maybe (fromMaybe)
+import qualified Data.Matrix as DM
+import GHC.Float (int2Double)
 import qualified Data.Text.Conversions as TextConv
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -25,11 +30,6 @@ import qualified Data.List.Split as DLS
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
-import Data.Typeable
-import Data.Map (fromListWith, toList)
-import Data.Maybe (fromMaybe)
-import qualified Data.Matrix as DM
-import GHC.Float (int2Double)
 
 type Document = String
 type Vocabulary = [String]
@@ -37,26 +37,13 @@ type Vocabulary = [String]
 
 
 
-classifyNaiveBayes :: String -> String -> DM.Matrix Int -> DM.Matrix Int -> Vocabulary -> Int -> Int -> [Int]
-classifyNaiveBayes lang_test src_test trainedSrc trainedLang vocab src_len natural_len =
+classifyNaiveBayes :: String -> String -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
+classifyNaiveBayes lang_test src_test trainedModel =
     let lang_test_data = lines lang_test
         src_test_data = lines src_test
 
-        xTrain_src = trainedSrc
-        xTrain_natural = trainedLang
-
-        sourceCodeMatrix = xTrain_src
-        naturalLanguageMatrix = xTrain_natural
-
-        -- DM.Matrix Int -> [Int]
-        sum_src_cols = sumCols sourceCodeMatrix
-        sum_lang_cols = sumCols naturalLanguageMatrix
-
-
-        xgivenY_src = calcXGivenY src_len sum_src_cols
-        xgivenY_lang = calcXGivenY natural_len sum_lang_cols
-        prob_src_prior = (int2Double src_len) / (int2Double src_len + fromIntegral natural_len)
-
+        vocab = snd trainedModel
+        
         xTest_src = map (map int2Double) (DM.toLists (myVectorizer vocab (src_test_data)))
         xTest_lang = map (map int2Double) (DM.toLists (myVectorizer vocab (lang_test_data)))
 
@@ -70,6 +57,12 @@ classifyNaiveBayes lang_test src_test trainedSrc trainedLang vocab src_len natur
         y = DM.zero 1 (src_test_len + lang_test_len)
 
         -- [Double]
+
+        xgivenY_src = fst (snd (fst trainedModel))
+        xgivenY_lang = snd (snd (fst trainedModel))
+        prob_src_prior = fst (fst trainedModel)
+
+
         log_src = map log xgivenY_src
         log_lang = map log xgivenY_lang
 
@@ -100,28 +93,35 @@ classifyNaiveBayes lang_test src_test trainedSrc trainedLang vocab src_len natur
 
 
 
-
 -- trainNaiveBayes :: [String] -> [String] -> ( ( [String] , Double ), ( [Double] , [Double] ))
-trainNaiveBayesSrc :: [String] -> [String] -> DM.Matrix Int
-trainNaiveBayesSrc natural_data source_data = 
+trainNaiveBayes :: [String] -> [String] -> (( Double, ([Double] , [Double]) ), Vocabulary )
+trainNaiveBayes natural_data source_data = 
     let source_words = concat (getWords source_data)
         natural_words = concat (getWords natural_data)
         unique_src_words = getUniqueWords source_words
         unique_natural_words = getUniqueWords natural_words
         vocab = unique_src_words ++ unique_natural_words
         xTrain_src = myVectorizer vocab (source_data)
-    in xTrain_src
-    
-
-trainNaiveBayesLang :: [String] -> [String] -> DM.Matrix Int
-trainNaiveBayesLang natural_data source_data = 
-    let source_words = concat (getWords source_data)
-        natural_words = concat (getWords natural_data)
-        unique_src_words = getUniqueWords source_words
-        unique_natural_words = getUniqueWords natural_words
-        vocab = unique_src_words ++ unique_natural_words
         xTrain_lang = myVectorizer vocab (natural_data)
-    in xTrain_lang
+
+        sourceCodeMatrix = xTrain_src
+        naturalLanguageMatrix = xTrain_lang
+
+        -- DM.Matrix Int -> [Int]
+        sum_src_cols = sumCols sourceCodeMatrix
+        sum_lang_cols = sumCols naturalLanguageMatrix
+
+
+        src_len = length source_data
+        natural_len = length natural_data
+
+        xgivenY_src = calcXGivenY src_len sum_src_cols
+        xgivenY_lang = calcXGivenY natural_len sum_lang_cols
+
+        prob_src_prior = (int2Double src_len) / (int2Double src_len + fromIntegral natural_len)
+
+    in ((prob_src_prior, (xgivenY_src,xgivenY_lang)), vocab )
+    
     
 
 myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
@@ -134,8 +134,6 @@ matrixRow vocab doc = [fromMaybe 0 (lookup word counts) | word <- vocab]
 
 wordCounts :: Document -> [(String, Int)]
 wordCounts doc = toList $ fromListWith (+) [(word, 1) | word <- words doc]
-
-
 
 
 
@@ -153,16 +151,6 @@ getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) 
 
 
 -- you have a list of words as a vocabulary and a list of strings/documents. for each string, count the occurence of each word in that string. You should output XTrain which is a n × V dimensional matrix describing the n documents used for training your Naive Bayes classifier where V is the number of words in the vocabulary. The entry XTrain[i,j] is 1 if word j appears in the ith training document and 0 otherwise.
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -192,17 +180,17 @@ regextest input regex = input =~ (regex:: String) :: Bool
 -- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
 -- \169 is copyright sign
 -- boundary \\b needed to match whole word and not substring like int in intuition
--- can add more detail to the tokenizer regexes later for stuff like fun() and struct->pointer and system.out etc
+-- can add more detail to the regexTokenizer regexes later for stuff like fun() and struct->pointer and system.out etc
 
-tokenizer :: [String] -> [(String,String)]
-tokenizer [] = []
-tokenizer (x:xs)
-    | x == "NEWLINE" = (x,x):tokenizer(xs)
-    | regextest x "\\b(for|if|else|while|return|int|float|double|char|void|bool|string|struct|class|public)\\b" = (x,"KEYWORD"):tokenizer(xs)
-    | regextest x "\\b[a-zA-Z]+\\b" = (x,"WORD"):tokenizer(xs)
-    | regextest x "\\b[a-zA-Z_]+\\b" = (x,"UNDERSCORE_WORD"):tokenizer(xs)
-    | regextest x "\\b[0-9]+\\b" = (x,"NUMBER"):tokenizer(xs)
-    | otherwise = (x,x):tokenizer(xs)
+regexTokenizer :: [String] -> [(String,String)]
+regexTokenizer [] = []
+regexTokenizer (x:xs)
+    | x == "NEWLINE" = (x,x):regexTokenizer(xs)
+    | regextest x "\\b(for|if|else|while|return|int|float|double|char|void|bool|string|struct|class|public)\\b" = (x,"KEYWORD"):regexTokenizer(xs)
+    | regextest x "\\b[a-zA-Z]+\\b" = (x,"WORD"):regexTokenizer(xs)
+    | regextest x "\\b[a-zA-Z_]+\\b" = (x,"UNDERSCORE_WORD"):regexTokenizer(xs)
+    | regextest x "\\b[0-9]+\\b" = (x,"NUMBER"):regexTokenizer(xs)
+    | otherwise = (x,x):regexTokenizer(xs)
 
 
 

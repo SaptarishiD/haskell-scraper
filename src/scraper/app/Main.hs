@@ -1,16 +1,6 @@
 module Main (main) where
 
 import Lib
-import Data.Typeable
-import Text.Read
-import Data.Map (fromListWith, toList)
-import qualified Data.List.Split as DLS
-import Data.Maybe (fromMaybe)
-import qualified Data.Matrix as DM
-import GHC.Float (int2Double)
-
-type Document = String
-type Vocabulary = [String]
 
 
 -- also need to be careful abt hyperparameter tuning and stuff
@@ -35,44 +25,31 @@ main = do
     let parsed_tags = parseTheTags response_html
     let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
 
-
-
     natural <- readFile "input/natural_language_text.txt"
     let natural_data = lines natural
     source <- readFile "input/source_code.txt"
     let source_data = lines source
 
-    let trainedSrc = Lib.trainNaiveBayesSrc natural_data source_data
-    let trainedLang = Lib.trainNaiveBayesLang natural_data source_data
+    let trained = Lib.trainNaiveBayes natural_data source_data
 
-    let source_words = concat (getWords source_data)
-    let natural_words = concat (getWords natural_data)
-    let unique_src_words = getUniqueWords source_words
-    let unique_natural_words = getUniqueWords natural_words
-    let vocab = unique_src_words ++ unique_natural_words
-    let src_len = length source_data
-    let natural_len = length natural_data
 
     lang_test <- readFile "input/lang_test.txt"
     src_test <- readFile "input/code_test.txt"
 
-    let final_probs = Lib.classifyNaiveBayes lang_test src_test trainedSrc trainedLang vocab src_len natural_len
+    let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
 
 
     let mapping = zip ((lines src_test) ++ (lines lang_test)) final_probs
-
     let src_test_len = length (lines src_test)
     let lang_test_len = length (lines lang_test)
 
     let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-    let 
 
     let test_accuracy_mapping = zip yTest final_probs
 
     print mapping
 
     print test_accuracy_mapping
-
 
     print "DONE" {-
 
