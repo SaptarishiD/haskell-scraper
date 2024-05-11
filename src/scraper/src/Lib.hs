@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Eta reduce" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 -- maybe can also build a progress bar thing for the matrix multiplications stuff so know how long it's taking
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayes, classifyNaiveBayes
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayes, classifyNaiveBayes, evaluateNaiveBayes
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -33,7 +34,36 @@ import Text.Regex.TDFA
 
 type Document = String
 type Vocabulary = [String]
+type Dummy  = String
 
+
+-- 0 means code 1 means lang. left is actual right is predicted
+evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
+evaluateNaiveBayes mydata = 
+    let total_actual_lang = sum (map fst mydata)
+        total_actual_code = (length mydata) - total_actual_lang
+        code_correct = filter (== (0,0)) mydata
+        lang_correct = filter (== (1,1)) mydata
+        code_wrong  = filter (== (0,1)) mydata
+        lang_wrong  = filter (== (1,0)) mydata
+
+        num_code_correct = length code_correct
+        num_lang_correct = length lang_correct
+        num_code_wrong = length code_wrong
+        num_lang_wrong = length lang_wrong
+
+        -- need to keep in mind that paper has used different metrics
+        
+
+        precision_code = int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong)
+
+        recall_code = int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong)
+
+        precision_lang = int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong)
+
+        recall_lang = int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong)
+
+    in (precision_code, recall_code, precision_lang, recall_lang)
 
 
 

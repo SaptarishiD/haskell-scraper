@@ -20,36 +20,45 @@ import Lib
 main :: IO ()
 main = do
 
-    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    response_html <- getHTML url
-    let parsed_tags = parseTheTags response_html
-    let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+    -- let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    -- response_html <- getHTML url
+    -- let parsed_tags = parseTheTags response_html
+    -- let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
 
-    natural <- readFile "input/natural_language_text.txt"
-    let natural_data = lines natural
-    source <- readFile "input/source_code.txt"
-    let source_data = lines source
+    -- natural <- readFile "input/natural_language_text.txt"
+    -- let natural_data = lines natural
+    -- source <- readFile "input/source_code.txt"
+    -- let source_data = lines source
 
-    let trained = Lib.trainNaiveBayes natural_data source_data
-
-
-    lang_test <- readFile "input/lang_test.txt"
-    src_test <- readFile "input/code_test.txt"
-
-    let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
+    -- let trained = Lib.trainNaiveBayes natural_data source_data
 
 
-    let mapping = zip ((lines src_test) ++ (lines lang_test)) final_probs
-    let src_test_len = length (lines src_test)
-    let lang_test_len = length (lines lang_test)
+    -- lang_test <- readFile "input/lang_test.txt"
+    -- src_test <- readFile "input/code_test.txt"
 
-    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    -- let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
 
-    let test_accuracy_mapping = zip yTest final_probs
+    -- let mapping = zip ((lines src_test) ++ (lines lang_test)) final_probs
+    -- let src_test_len = length (lines src_test)
+    -- let lang_test_len = length (lines lang_test)
+    -- let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    -- let test_accuracy_mapping = zip yTest final_probs
 
-    print mapping
+    let realVSpredicted = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,1),(1,1),(1,0),(1,1),(1,0),(1,1),(1,1),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,1),(1,1),(1,1),(1,0),(1,0),(1,0),(1,1),(1,1),(1,1),(1,1),(1,0),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,0),(1,0),(1,0),(1,0)]
 
-    print test_accuracy_mapping
+    let evals = Lib.evaluateNaiveBayes realVSpredicted
+
+    print evals
+    -- num_code_correct, num_lang_correct, num_code_wrong, num_lang_wrong, total_actual_code, total_actual_lang)
+    --(91,22,0,28,91,50)
+    -- (precision_code, recall_code, precision_lang, recall_lang)
+    -- (0.7647058823529411,1.0,1.0,0.44)
+
+
+
+    -- print mapping
+
+    -- print test_accuracy_mapping
 
     print "DONE" {-
 
