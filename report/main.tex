@@ -1,4 +1,4 @@
-\documentclass{scrreprt}
+\documentclass[12pt]{scrreprt}
 \usepackage{listings}
 \usepackage{underscore}
 \usepackage{minted}
@@ -51,6 +51,8 @@
 % ·        Problem Statement / Objectives
 
 % ·        Scope, Methodology, and Design – Architecture, HLD / LLD, if applicable
+
+%  can have naive bayes in the methodology
 
 % ·        Work Done – Implementations, Challenges, Mitigations, etc.
 
@@ -134,14 +136,16 @@
 
 \chapter{Acknowledgements}
 
-I would like to thank Professor Das for taking this ISM and giving us the incentive to work on a software project in an unfamilar yet elegant language. I would also like to thank my fellow students as well as the teaching volunteers Gautam and Adwaiya for creating a wholesome learning environment. 
+I would like to thank Professor Das for taking this Independent Study Module and giving us the incentive to work on a software project in an unfamilar yet elegant language. I would also like to thank my fellow students as well as the teaching volunteers Gautam and Adwaiya for creating a wholesome learning environment. 
 
 
 \chapter{Introduction}
 
 %  cite stuff here cause references page is there and can't just say stuff in the air
+%  maybe some motivation part here can go into the motivation section instead of the intro 
 
 The large amounts of data in the form of interspersed code and natural language make it useful to extract knowledge from them in order to benefit various areas of software development. Examples like natural language comments accompanying code, stackoverflow questions and answers with code blocks, and developer emails containing discussions about code with reference to it are all important forms of such data. \\ 
+\\ INSERT STUFF HERE!!!!!!!\\   
 \\ For instance, extracting code and natural language separately from developer emails at a company can give key insights about how the company codebase has evolved and can help future developers access the code of emails directly. Separation of code and natural language is also helpful as training data for natural language and code completion models which can used the separated text and code to give better results. It creates a structured view of the code and textual data which can then further be used to create an organized view of the code and associated natural language. 
 
 
@@ -157,8 +161,9 @@ Consider the following image of an educational web page containing interspersed 
     \label{fig:high-level-arch}
 \end{figure}
 
-Here it becomes useful to extract just the code or just the natural language separately if one just wants to run the code on their own machine or just wants the natural language descriptions for their notes. A naive approach would be to take the HTML of the page into consideration, but here we will consider any possible text source with generality. 
-
+Here it becomes useful to extract just the code or just the natural language separately if one just wants to run the code on their own machine or just wants the natural language descriptions for their notes or to get an overview of the idea being conveyed. Using HTML based separation of the text and code snippets, or trying to use regular expressions severely restricts the generalisability and accuracy of the system in extracting natural language and code separately.\\
+\\ INSERT STUFF HERE!!!!!!!\\
+\\ Towards this purpose, we will create a Naive Bayes classifier for classifying a particular line as natural language or code and creating two separate sections for all the natural language and all the code
 
 \chapter{Literature Survey}
 
@@ -187,20 +192,13 @@ Here it becomes useful to extract just the code or just the natural language sep
 % The given web page is made of text and code snippets, which we need to scrape and extract separately into a \texttt{.docx} file containing the text portions and a \texttt{.txt} file which has the code snippets. \\ For this, we need to fetch the given web page, parse and analyze it,so that we can effectively separate them into different documents.
 
 
-\section{Requirements}
+\section{Requirements/Objectives}
 
 \begin{enumerate}
     \item The user shall be able to give any text source as input.
     \item The scraper shall get all the code snippets of the source and write it into a Plaintext file.
     \item The scraper shall get all non-code text of the source and write it into a Word Document.
 \end{enumerate}
-
-
-
-
-
-% any URL means https and http but code just handles https
-\chapter{Specifications and Analysis}
 
 
 \section{Specifications}
@@ -264,6 +262,11 @@ Here it becomes useful to extract just the code or just the natural language sep
 % need to put functions into Lib and main stuff in main
 % mention directory structure here along with basic ideas of the functions and code what it's doing
 
+
+% ·        Scope, Methodology, and Design – Architecture, HLD / LLD, if applicable
+
+
+%  can have the design of the pipeline system from the text source to the two text files here. can do the results and stuff with the tables and the graphs later
 
 \section{High-Level Architecture}
 
