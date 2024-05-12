@@ -8,6 +8,8 @@ import Test.HUnit
 import Control.Exception (SomeException)
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 import qualified Data.Matrix as DM
+import Numeric.LinearAlgebra as NLA
+import GHC.Float (int2Double)
 
 import Data.List (sort)
 
@@ -73,13 +75,13 @@ testMatrixRow = TestList [
 -- testMyVectorizer :: Test
 testMyVectorizer = TestList [
     TestLabel "Empty vocabulary and documents" $
-    TestCase (assertEqual "myVectorizer [] [] should return an empty matrix" (DM.fromLists [[0]]) (myVectorizer [] [])),
+    TestCase (assertEqual "myVectorizer [] [] should return an empty matrix" (NLA.fromLists [[0.0]]) (myVectorizer [] [])),
 
     TestLabel "Non-empty vocabulary and documents" $
-    TestCase (assertEqual "myVectorizer vocab1 [doc1, doc2] should return [[1,0,0],[0,1,0]]" (DM.fromLists [[1,0,0],[0,1,0]]) (myVectorizer vocab1 [doc1, doc2])),
+    TestCase (assertEqual "myVectorizer vocab1 [doc1, doc2] should return [[1,0,0],[0,1,0]]" (NLA.fromLists [[1.0,0.0,0.0],[0.0,1.0,0.0]]) (myVectorizer vocab1 [doc1, doc2])),
 
     TestLabel "Multiple documents" $
-    TestCase (assertEqual "myVectorizer vocab1 [doc1, doc2, doc3] should return [[1,0,0],[0,1,0],[0,0,0]]" (DM.fromLists [[1,0,0],[0,1,0],[0,0,0]]) (myVectorizer vocab1 [doc1, doc2, doc3]))
+    TestCase (assertEqual "myVectorizer vocab1 [doc1, doc2, doc3] should return [[1,0,0],[0,1,0],[0,0,0]]" (NLA.fromLists [[1.0,0.0,0],[0.0,1.0,0.0],[0.0,0.0,0.0]]) (myVectorizer vocab1 [doc1, doc2, doc3]))
     ]
 
 

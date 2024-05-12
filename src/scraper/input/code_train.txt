@@ -1,10 +1,34 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <stdint.h>
+#include <assert.h>
+#include <math.h>
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#ifdef OMP
+#include <omp.h>
+#endif
+
+
+#include "utils.h"
+
+#include "tokenizer.h"
+
+
+
+
 
 void encoder_forward(float* out,
                    int* inp, float* wte, float* wpe,
                    int B, int T, int C) {
-                    
+    
+    
+    
+    
     for (int b = 0; b < B; b++) {
         for (int t = 0; t < T; t++) {
             
@@ -646,3 +670,520 @@ void gpt2_build_from_checkpoint(GPT2 *model, const char* checkpoint_path) {
     model->seq_len = 0;
     model->mean_loss = -1.0f; 
 }
+
+void gpt2_forward(GPT2 *model, int* inputs, int* targets, size_t B, size_t T) {
+    
+
+    
+    if (model->params_memory == NULL) {
+        printf("Error: model was not initialized properly.\n");
+        exit(1);
+    }
+
+    
+    size_t V = model->config.vocab_size;
+    size_t Vp = model->config.padded_vocab_size;
+    size_t L = model->config.num_layers;
+    size_t NH = model->config.num_heads;
+    size_t C = model->config.channels;
+
+    
+    for(int i = 0; i < B * T; i++) {
+        assert(0 <= inputs[i] && inputs[i] < V);
+        if (targets != NULL) {
+            assert(0 <= targets[i] && targets[i] < V);
+        }
+    }
+
+    
+    if(model->acts_memory == NULL) {
+        
+        model->batch_size = B;
+        model->seq_len = T;
+        
+        model->act_sizes[0] = B * T * C; 
+        model->act_sizes[1] = L * B * T * C; 
+        model->act_sizes[2] = L * B * T;  
+        model->act_sizes[3] = L * B * T;  
+        model->act_sizes[4] = L * B * T * 3*C; 
+        model->act_sizes[5] = L * B * T * C;  
+        model->act_sizes[6] = L * B * NH * T * T;  
+        model->act_sizes[7] = L * B * NH * T * T;  
+        model->act_sizes[8] = L * B * T * C; 
+        model->act_sizes[9] = L * B * T * C; 
+        model->act_sizes[10] = L * B * T * C; 
+        model->act_sizes[11] = L * B * T; 
+        model->act_sizes[12] = L * B * T; 
+        model->act_sizes[13] = L * B * T * 4*C; 
+        model->act_sizes[14] = L * B * T * 4*C; 
+        model->act_sizes[15] = L * B * T * C; 
+        model->act_sizes[16] = L * B * T * C; 
+        model->act_sizes[17] = B * T * C; 
+        model->act_sizes[18] = B * T; 
+        model->act_sizes[19] = B * T; 
+        model->act_sizes[20] = B * T * Vp; 
+        model->act_sizes[21] = B * T * Vp; 
+        model->act_sizes[22] = B * T; 
+        size_t num_activations = 0;
+        for (size_t i = 0; i < NUM_ACTIVATION_TENSORS; i++) {
+            num_activations += model->act_sizes[i];
+        }
+        printf("num_activations: %zu\n", num_activations);
+        model->num_activations = num_activations;
+        model->acts_memory = malloc_and_point_activations(&model->acts, model->act_sizes);
+        
+        model->inputs = (int*)mallocCheck(B * T * sizeof(int));
+        model->targets = (int*)mallocCheck(B * T * sizeof(int)); 
+    } else {
+        
+        
+        if (B != model->batch_size || T != model->seq_len) {
+            printf("Model: B=%d T=%d, Desired: B=%d T=%d\n", model->batch_size, model->seq_len, (int)B, (int)T);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    
+    memcpy(model->inputs, inputs, B * T * sizeof(int));
+    if (targets != NULL) {
+        memcpy(model->targets, targets, B * T * sizeof(int));
+    }
+
+    
+    ParameterTensors params = model->params; 
+    ActivationTensors acts = model->acts;
+    float* residual;
+    encoder_forward(acts.encoded, inputs, params.wte, params.wpe, B, T, C); 
+    for (int l = 0; l < L; l++) {
+
+        residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
+
+        
+        float* l_ln1w = params.ln1w + l * C;
+        float* l_ln1b = params.ln1b + l * C;
+        float* l_qkvw = params.qkvw + l * 3*C * C;
+        float* l_qkvb = params.qkvb + l * 3*C;
+        float* l_attprojw = params.attprojw + l * C * C;
+        float* l_attprojb = params.attprojb + l * C;
+        float* l_ln2w = params.ln2w + l * C;
+        float* l_ln2b = params.ln2b + l * C;
+        float* l_fcw = params.fcw + l * 4*C * C;
+        float* l_fcb = params.fcb + l * 4*C;
+        float* l_fcprojw = params.fcprojw + l * C * 4*C;
+        float* l_fcprojb = params.fcprojb + l * C;
+
+        
+        float* l_ln1 = acts.ln1 + l * B * T * C;
+        float* l_ln1_mean = acts.ln1_mean + l * B * T;
+        float* l_ln1_rstd = acts.ln1_rstd + l * B * T;
+        float* l_qkv = acts.qkv + l * B * T * 3*C;
+        float* l_atty = acts.atty + l * B * T * C;
+        float* l_preatt = acts.preatt + l * B * NH * T * T;
+        float* l_att = acts.att + l * B * NH * T * T;
+        float* l_attproj = acts.attproj + l * B * T * C;
+        float* l_residual2 = acts.residual2 + l * B * T * C;
+        float* l_ln2 = acts.ln2 + l * B * T * C;
+        float* l_ln2_mean = acts.ln2_mean + l * B * T;
+        float* l_ln2_rstd = acts.ln2_rstd + l * B * T;
+        float* l_fch = acts.fch + l * B * T * 4*C;
+        float* l_fch_gelu = acts.fch_gelu + l * B * T * 4*C;
+        float* l_fcproj = acts.fcproj + l * B * T * C;
+        float* l_residual3 = acts.residual3 + l * B * T * C;
+
+        
+        layernorm_forward(l_ln1, l_ln1_mean, l_ln1_rstd, residual, l_ln1w, l_ln1b, B, T, C);
+        matmul_forward(l_qkv, l_ln1, l_qkvw, l_qkvb, B, T, C, 3*C);
+        attention_forward(l_atty, l_preatt, l_att, l_qkv, B, T, C, NH);
+        matmul_forward(l_attproj, l_atty, l_attprojw, l_attprojb, B, T, C, C);
+        residual_forward(l_residual2, residual, l_attproj, B*T*C);
+        layernorm_forward(l_ln2, l_ln2_mean, l_ln2_rstd, l_residual2, l_ln2w, l_ln2b, B, T, C);
+        matmul_forward(l_fch, l_ln2, l_fcw, l_fcb, B, T, C, 4*C);
+        gelu_forward(l_fch_gelu, l_fch, B*T*4*C);
+        matmul_forward(l_fcproj, l_fch_gelu, l_fcprojw, l_fcprojb, B, T, 4*C, C);
+        residual_forward(l_residual3, l_residual2, l_fcproj, B*T*C);
+    }
+    residual = acts.residual3 + (L-1) * B * T * C; 
+    layernorm_forward(acts.lnf, acts.lnf_mean, acts.lnf_rstd, residual, params.lnfw, params.lnfb, B, T, C);
+    matmul_forward(acts.logits, acts.lnf, params.wte, NULL, B, T, C, Vp);
+    softmax_forward(acts.probs, acts.logits, B, T, V, Vp);
+
+    
+    if (targets != NULL) {
+        crossentropy_forward(model->acts.losses, model->acts.probs, targets, B, T, Vp);
+        
+        float mean_loss = 0.0f;
+        for (int i=0; i<B*T; i++) { mean_loss += model->acts.losses[i]; }
+        mean_loss /= B*T;
+        model->mean_loss = mean_loss;
+    } else {
+        
+        model->mean_loss = -1.0f;
+    }
+}
+
+void gpt2_zero_grad(GPT2 *model) {
+    if(model->grads_memory != NULL) { memset(model->grads_memory, 0, model->num_parameters * sizeof(float)); }
+    if(model->grads_acts_memory != NULL) { memset(model->grads_acts_memory, 0, model->num_activations * sizeof(float)); }
+}
+
+void gpt2_backward(GPT2 *model) {
+
+    
+    if (model->mean_loss == -1.0f) {
+        printf("Error: must forward with targets before backward\n");
+        exit(1);
+    }
+
+    
+    if (model->grads_memory == NULL) {
+        model->grads_memory = malloc_and_point_parameters(&model->grads, model->param_sizes);
+        model->grads_acts_memory = malloc_and_point_activations(&model->grads_acts, model->act_sizes);
+        gpt2_zero_grad(model);
+    }
+
+    
+    size_t B = model->batch_size;
+    size_t T = model->seq_len;
+    size_t V = model->config.vocab_size;
+    size_t Vp = model->config.padded_vocab_size;
+    size_t L = model->config.num_layers;
+    size_t NH = model->config.num_heads;
+    size_t C = model->config.channels;
+
+    
+    ParameterTensors params = model->params; 
+    ParameterTensors grads = model->grads;
+    ActivationTensors acts = model->acts;
+    ActivationTensors grads_acts = model->grads_acts;
+
+    
+    
+    
+    float dloss_mean = 1.0f / (B*T);
+    for (int i = 0; i < B*T; i++) { grads_acts.losses[i] = dloss_mean; }
+
+    crossentropy_softmax_backward(grads_acts.logits, grads_acts.losses, acts.probs, model->targets, B, T, V, Vp);
+    matmul_backward(grads_acts.lnf, grads.wte, NULL, grads_acts.logits, acts.lnf, params.wte, B, T, C, Vp);
+    float* residual = acts.residual3 + (L-1) * B * T * C; 
+    float* dresidual = grads_acts.residual3 + (L-1) * B * T * C; 
+    layernorm_backward(dresidual, grads.lnfw, grads.lnfb, grads_acts.lnf, residual, params.lnfw, acts.lnf_mean, acts.lnf_rstd, B, T, C);
+
+    for (int l = L-1; l >= 0; l--) {
+
+        residual = l == 0 ? acts.encoded : acts.residual3 + (l-1) * B * T * C;
+        dresidual = l == 0 ? grads_acts.encoded : grads_acts.residual3 + (l-1) * B * T * C;
+
+        
+        float* l_ln1w = params.ln1w + l * C;
+        float* l_qkvw = params.qkvw + l * 3*C * C;
+        float* l_attprojw = params.attprojw + l * C * C;
+        float* l_ln2w = params.ln2w + l * C;
+        float* l_fcw = params.fcw + l * 4*C * C;
+        float* l_fcprojw = params.fcprojw + l * C * 4*C;
+        
+        float* dl_ln1w = grads.ln1w + l * C;
+        float* dl_ln1b = grads.ln1b + l * C;
+        float* dl_qkvw = grads.qkvw + l * 3*C * C;
+        float* dl_qkvb = grads.qkvb + l * 3*C;
+        float* dl_attprojw = grads.attprojw + l * C * C;
+        float* dl_attprojb = grads.attprojb + l * C;
+        float* dl_ln2w = grads.ln2w + l * C;
+        float* dl_ln2b = grads.ln2b + l * C;
+        float* dl_fcw = grads.fcw + l * 4*C * C;
+        float* dl_fcb = grads.fcb + l * 4*C;
+        float* dl_fcprojw = grads.fcprojw + l * C * 4*C;
+        float* dl_fcprojb = grads.fcprojb + l * C;
+        
+        float* l_ln1 = acts.ln1 + l * B * T * C;
+        float* l_ln1_mean = acts.ln1_mean + l * B * T;
+        float* l_ln1_rstd = acts.ln1_rstd + l * B * T;
+        float* l_qkv = acts.qkv + l * B * T * 3*C;
+        float* l_atty = acts.atty + l * B * T * C;
+        float* l_att = acts.att + l * B * NH * T * T;
+        float* l_residual2 = acts.residual2 + l * B * T * C;
+        float* l_ln2 = acts.ln2 + l * B * T * C;
+        float* l_ln2_mean = acts.ln2_mean + l * B * T;
+        float* l_ln2_rstd = acts.ln2_rstd + l * B * T;
+        float* l_fch = acts.fch + l * B * T * 4*C;
+        float* l_fch_gelu = acts.fch_gelu + l * B * T * 4*C;
+        
+        float* dl_ln1 = grads_acts.ln1 + l * B * T * C;
+        float* dl_qkv = grads_acts.qkv + l * B * T * 3*C;
+        float* dl_atty = grads_acts.atty + l * B * T * C;
+        float* dl_preatt = grads_acts.preatt + l * B * NH * T * T;
+        float* dl_att = grads_acts.att + l * B * NH * T * T;
+        float* dl_attproj = grads_acts.attproj + l * B * T * C;
+        float* dl_residual2 = grads_acts.residual2 + l * B * T * C;
+        float* dl_ln2 = grads_acts.ln2 + l * B * T * C;
+        float* dl_fch = grads_acts.fch + l * B * T * 4*C;
+        float* dl_fch_gelu = grads_acts.fch_gelu + l * B * T * 4*C;
+        float* dl_fcproj = grads_acts.fcproj + l * B * T * C;
+        float* dl_residual3 = grads_acts.residual3 + l * B * T * C;
+
+        
+        residual_backward(dl_residual2, dl_fcproj, dl_residual3, B*T*C);
+        matmul_backward(dl_fch_gelu, dl_fcprojw, dl_fcprojb, dl_fcproj, l_fch_gelu, l_fcprojw, B, T, 4*C, C);
+        gelu_backward(dl_fch, l_fch, dl_fch_gelu, B*T*4*C);
+        matmul_backward(dl_ln2, dl_fcw, dl_fcb, dl_fch, l_ln2, l_fcw, B, T, C, 4*C);
+        layernorm_backward(dl_residual2, dl_ln2w, dl_ln2b, dl_ln2, l_residual2, l_ln2w, l_ln2_mean, l_ln2_rstd, B, T, C);
+        residual_backward(dresidual, dl_attproj, dl_residual2, B*T*C);
+        matmul_backward(dl_atty, dl_attprojw, dl_attprojb, dl_attproj, l_atty, l_attprojw, B, T, C, C);
+        attention_backward(dl_qkv, dl_preatt, dl_att, dl_atty, l_qkv, l_att, B, T, C, NH);
+        matmul_backward(dl_ln1, dl_qkvw, dl_qkvb, dl_qkv, l_ln1, l_qkvw, B, T, C, 3*C);
+        layernorm_backward(dresidual, dl_ln1w, dl_ln1b, dl_ln1, residual, l_ln1w, l_ln1_mean, l_ln1_rstd, B, T, C);
+    }
+    encoder_backward(grads.wte, grads.wpe, grads_acts.encoded, model->inputs, B, T, C);
+}
+
+void gpt2_update(GPT2 *model, float learning_rate, float beta1, float beta2, float eps, float weight_decay, int t) {
+    
+
+    
+    if (model->m_memory == NULL) {
+        model->m_memory = (float*)calloc(model->num_parameters, sizeof(float));
+        model->v_memory = (float*)calloc(model->num_parameters, sizeof(float));
+    }
+
+    for (size_t i = 0; i < model->num_parameters; i++) {
+        float param = model->params_memory[i];
+        float grad = model->grads_memory[i];
+
+        
+        float m = beta1 * model->m_memory[i] + (1.0f - beta1) * grad;
+        
+        float v = beta2 * model->v_memory[i] + (1.0f - beta2) * grad * grad;
+        
+        float m_hat = m / (1.0f - powf(beta1, t));
+        float v_hat = v / (1.0f - powf(beta2, t));
+
+        
+        model->m_memory[i] = m;
+        model->v_memory[i] = v;
+        model->params_memory[i] -= learning_rate * (m_hat / (sqrtf(v_hat) + eps) + weight_decay * param);
+    }
+}
+
+void gpt2_free(GPT2 *model) {
+    free(model->params_memory);
+    free(model->grads_memory);
+    free(model->m_memory);
+    free(model->v_memory);
+    free(model->acts_memory);
+    free(model->grads_acts_memory);
+    free(model->inputs);
+    free(model->targets);
+}
+
+#ifndef TESTING
+
+
+
+
+
+
+typedef struct {
+    
+    int B; 
+    int T; 
+    
+    FILE* tokens_file;
+    long file_size;
+    long current_position;
+    
+    int* batch;
+    int* inputs;
+    int* targets;
+    
+    int num_batches;
+} DataLoader;
+
+void dataloader_init(DataLoader *loader, const char* filename, int B, int T) {
+    loader->B = B;
+    loader->T = T;
+
+    
+    loader->tokens_file = fopen(filename, "rb");
+    if (loader->tokens_file == NULL) {
+        printf("Error opening tokens file\n");
+        exit(1);
+    }
+
+    
+    fseekCheck(loader->tokens_file, 0, SEEK_END);
+    loader->file_size = ftell(loader->tokens_file);
+    fseekCheck(loader->tokens_file, 0, SEEK_SET);
+    if (loader->file_size < (B * T + 1) * sizeof(int)) {
+        printf("Error: file size is too small for the batch size and sequence length\n");
+        exit(1);
+    }
+    loader->current_position = 0; 
+
+    
+    loader->batch = (int*) mallocCheck((B * T + 1) * sizeof(int));
+    loader->inputs = loader->batch;
+    loader->targets = loader->batch + 1; 
+    loader->num_batches = loader->file_size / (B * T * sizeof(int));
+}
+
+void dataloader_reset(DataLoader *loader) {
+    loader->current_position = 0;
+}
+
+void dataloader_next_batch(DataLoader *loader) {
+    int B = loader->B;
+    int T = loader->T;
+    
+    if (loader->current_position + (B*T+1) * sizeof(int) > loader->file_size) {
+        loader->current_position = 0;
+    }
+    
+    fseekCheck(loader->tokens_file, loader->current_position, SEEK_SET);
+    freadCheck(loader->batch, sizeof(int), B*T+1, loader->tokens_file);
+    
+    loader->current_position += B*T * sizeof(int);
+}
+
+void dataloader_free(DataLoader *loader) {
+    fcloseCheck(loader->tokens_file);
+    free(loader->batch);
+}
+
+
+
+
+
+#define GPT2_EOT 50256
+
+unsigned int random_u32(unsigned long long *state) {
+    
+    *state ^= *state >> 12;
+    *state ^= *state << 25;
+    *state ^= *state >> 27;
+    return (*state * 0x2545F4914F6CDD1Dull) >> 32;
+}
+float random_f32(unsigned long long *state) { 
+    return (random_u32(state) >> 8) / 16777216.0f;
+}
+
+int sample_mult(float* probabilities, int n, float coin) {
+    
+    
+    float cdf = 0.0f;
+    for (int i = 0; i < n; i++) {
+        cdf += probabilities[i];
+        if (coin < cdf) {
+            return i;
+        }
+    }
+    return n - 1; 
+}
+
+
+
+int main() {
+
+    
+    GPT2 model;
+    gpt2_build_from_checkpoint(&model, "gpt2_124M.bin");
+
+    
+    const char* tiny_stories_train = "data/TinyStories_train.bin";
+    const char* tiny_stories_val = "data/TinyStories_val.bin";
+    const char* tiny_shakespeare_train = "data/tiny_shakespeare_train.bin";
+    const char* tiny_shakespeare_val = "data/tiny_shakespeare_val.bin";
+    const char* train_tokens = access(tiny_shakespeare_train, F_OK) != -1 ? tiny_shakespeare_train : tiny_stories_train;
+    const char* val_tokens = access(tiny_shakespeare_val, F_OK) != -1 ? tiny_shakespeare_val : tiny_stories_val;
+    int B = 4; 
+    int T = 64; 
+    DataLoader train_loader;
+    dataloader_init(&train_loader, train_tokens, B, T);
+    printf("train dataset num_batches: %d\n", train_loader.num_batches);
+    DataLoader val_loader;
+    dataloader_init(&val_loader, val_tokens, B, T);
+    printf("val dataset num_batches: %d\n", val_loader.num_batches);
+    int val_num_batches = 5;
+
+    
+    Tokenizer tokenizer;
+    tokenizer_init(&tokenizer, "gpt2_tokenizer.bin");
+
+    
+    unsigned long long rng_state = 1337;
+    int* gen_tokens = (int*)mallocCheck(B * T * sizeof(int));
+    const int genT = 64; 
+
+    
+    struct timespec start, end;
+    for (int step = 0; step <= 40; step++) {
+
+        
+        if (step % 10 == 0) {
+            float val_loss = 0.0f;
+            dataloader_reset(&val_loader);
+            for (int i = 0; i < val_num_batches; i++) {
+                dataloader_next_batch(&val_loader);
+                gpt2_forward(&model, val_loader.inputs, val_loader.targets, B, T);
+                val_loss += model.mean_loss;
+            }
+            val_loss /= val_num_batches;
+            printf("val loss %f\n", val_loss);
+        }
+
+        
+        if (step > 0 && step % 20 == 0) {
+            
+            for(int i = 0; i < B * T; ++i) {
+                gen_tokens[i] = GPT2_EOT;
+            }
+            
+            printf("generating:\n---\n");
+            for (int t = 1; t < genT; t++) {
+                
+                
+                
+                
+                gpt2_forward(&model, gen_tokens, NULL, B, T);
+                
+                
+                
+                
+                float* probs = model.acts.probs + (t-1) * model.config.padded_vocab_size;
+                float coin = random_f32(&rng_state);
+                
+                
+                int next_token = sample_mult(probs, model.config.vocab_size, coin);
+                gen_tokens[t] = next_token;
+                
+                if (tokenizer.init_ok) {
+                    const char* token_str = tokenizer_decode(&tokenizer, next_token);
+                    safe_printf(token_str);
+                } else {
+                    
+                    printf("%d ", next_token);
+                }
+                fflush(stdout);
+            }
+            printf("\n---\n");
+        }
+
+        
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        dataloader_next_batch(&train_loader);
+        gpt2_forward(&model, train_loader.inputs, train_loader.targets, B, T);
+        gpt2_zero_grad(&model);
+        gpt2_backward(&model);
+        gpt2_update(&model, 1e-4f, 0.9f, 0.999f, 1e-8f, 0.0f, step+1);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double time_elapsed_s = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+        printf("step %d: train loss %f (took %f ms)\n", step, model.mean_loss, time_elapsed_s * 1000);
+    }
+
+    
+    dataloader_free(&train_loader);
+    dataloader_free(&val_loader);
+    tokenizer_free(&tokenizer);
+    gpt2_free(&model);
+    free(gen_tokens);
+    return 0;
+}
+#endif

@@ -3,8 +3,7 @@
 module Main (main) where
 
 import Lib
-import Numeric.LinearAlgebra as NLA
-import GHC.Float (int2Double)
+
 
 
 -- also need to be careful abt hyperparameter tuning and stuff
@@ -54,97 +53,6 @@ main = do
 
         let trainedModel = Lib.trainNaiveBayes natural_data source_data
 
-
-
-        -- let test = ["Hello world world world world", "World", "Test"]
-        -- let dummy = map wordCounts test
-        -- -- print dummy
-
-        -- let source_words = concat (getWords source_data)
-        -- let natural_words = concat (getWords natural_data)
-        -- let unique_src_words = getUniqueWords source_words
-        -- let unique_natural_words = getUniqueWords natural_words
-        -- let vocab = unique_src_words ++ unique_natural_words
-
-        -- -- source_data is an array of strings, where each string represents a new line in the file. So here each line here is a document here. 
-        -- let xTrain_src = myVectorizer vocab (source_data)
-        -- let xTrain_lang = myVectorizer vocab (natural_data)
-
-        -- let sourceCodeMatrix = xTrain_src
-        -- let naturalLanguageMatrix = xTrain_lang
-
-        -- -- NLA.Matrix Double -> [Int]
-        -- let sum_src_cols = sumCols sourceCodeMatrix
-        -- let sum_lang_cols = sumCols naturalLanguageMatrix
-
-
-        -- let src_len = length source_data
-        -- let natural_len = length natural_data
-
-        -- let xgivenY_src = calcXGivenY src_len sum_src_cols
-        -- let xgivenY_lang = calcXGivenY natural_len sum_lang_cols
-
-        -- -- print xgivenY_src
-
-
-
-
-
-
-        -- let lang_test_data = lines lang_test
-        -- let src_test_data = lines src_test
-
-        -- let vocab = snd trainedModel
-        
-        -- let xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))
-        -- let xTest_lang = (NLA.toLists (myVectorizer vocab (lang_test_data)))
-
-        -- let src_test_len = length (xTest_src)
-        -- let lang_test_len = length (xTest_lang)
-
-        -- let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-
-        -- let xTest = xTest_src ++ xTest_lang
-
-        -- let y = NLA.fromLists [(replicate (src_test_len + lang_test_len) (int2Double 0))]
-
-        -- let xgivenY_src = fst (snd (fst trainedModel))
-        -- let xgivenY_lang = snd (snd (fst trainedModel))
-        -- let prob_src_prior = fst (fst trainedModel)
-
-
-        -- let log_src = map log xgivenY_src
-        -- let log_lang = map log xgivenY_lang
-
-        -- let log_matrix = NLA.tr (NLA.fromLists [log_src, log_lang])
-
-        -- -- [Double,Double]
-        -- -- print (map typeOf (head (DM.toLists log_matrix)))
-
-        -- let prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
-
-        -- -- [Double,Double]
-        -- -- print (map typeOf (head (DM.toLists prob1)))
-
-        -- let logp = log prob_src_prior
-        -- let log_not_p = log (1 - prob_src_prior)
-
-        -- let prob1_trans = NLA.toLists (NLA.tr prob1)
-
-        -- let prob2 = map (\x -> x + logp) (head prob1_trans)
-        -- let prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
-
-        -- let combined = [prob2, prob3]
-        -- let combined_mat = NLA.tr (NLA.fromLists combined)
-        
-        -- let final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (NLA.toLists combined_mat)
-
-        -- print final_probs
-
-
-        -- print trained
-
-
         lang_test <- readFile "input/lang_test.txt"
         src_test <- readFile "input/code_test.txt"
 
@@ -159,10 +67,12 @@ main = do
         let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
         let test_accuracy_mapping = zip yTest final_probs
 
-
+        -- precision_code, recall_code, precision_lang, recall_lang
         let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
 
         print evals
+
+        -- print mapping
 
     print "DONE" {-
 

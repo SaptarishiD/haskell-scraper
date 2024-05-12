@@ -1,3 +1,45 @@
+
+    _parameter_constraints: dict = {**BaseLabelPropagation._parameter_constraints}
+    _parameter_constraints["alpha"] = [Interval(Real, 0, 1, closed="neither")]
+
+    def __init__(
+        self,
+        kernel="rbf",
+        *,
+        gamma=20,
+        n_neighbors=7,
+        alpha=0.2,
+        max_iter=30,
+        tol=1e-3,
+        n_jobs=None,
+    ):
+        # this one has different base parameters
+        super().__init__(
+            kernel=kernel,
+            gamma=gamma,
+            n_neighbors=n_neighbors,
+            alpha=alpha,
+            max_iter=max_iter,
+            tol=tol,
+            n_jobs=n_jobs,
+        )
+
+    def _build_graph(self):
+        """Graph matrix for Label Spreading computes the graph laplacian"""
+        # compute affinity matrix (or gram matrix)
+        if self.kernel == "knn":
+            self.nn_fit = None
+        n_samples = self.X_.shape[0]
+        affinity_matrix = self._get_kernel(self.X_)
+        laplacian = csgraph_laplacian(affinity_matrix, normed=True)
+        laplacian = -laplacian
+        if sparse.issparse(laplacian):
+            diag_mask = laplacian.row == laplacian.col
+            laplacian.data[diag_mask] = 0.0
+        else:
+            laplacian.flat[:: n_samples + 1] = 0.0  # set diag to 0.0
+        return laplacian
+      
     typedef struct Frob_t {
       int x;
       int y;

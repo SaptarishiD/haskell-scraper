@@ -8,4 +8,43 @@ opportunity to understand what is happening in a specific block of code.
 Further, such comments serve as a reminder for you later when you need to 
 revise your code.
 Comments involve placing backslashes into your code, followed by a comment. Modify your code as follows to integrate comments:
+Queues are one form of abstract data structure.
+Queues have specific properties. Namely, they are FIFO or “first in first out.” You can imagine yourself in a line for a ride at an amusement park. The first person in the line gets to go on the ride first. The last person gets to go on the ride last.
+Queues have specific actions associated with them. For example, an item can be enqueued; that is, the item can join the line or queue. Further, an item can be dequeued or leave the queue once it reaches the front of the line.
+Queues contrast a stack. Fundamentally, the properties of a stack are different than a queue. Specifically, it is LIFO or “last in first out.” Just like stacking trays in a cafeteria, a tray that is placed in a stack last is the first that may be picked up.
+Stacks have specific actions associated with them. For example, push places something on top of a stack. Pop is removing something from the top of the stack.
+In code, you might imagine a stack as follows:
+A pointer that is not assigned any value but NULL is known as the NULL pointer. If you don't have any address to be specified in the pointer at the time of declaration, you can assign NULL value. It will provide a better approach.
+Notice how the get_int function is utilized to obtain an integer from the user twice. One integer is stored in the int variable called x. Another is stored in the int variable called y. Then, the printf function prints the value of x + y, designated by the %i symbol.
+As you are coding, pay special attention to the types of variables you are using to avoid problems within your code.
+Summing Up
+In this lesson, you learned how to apply the building blocks you learned in Scratch to the C programming language. You learned…
+How to create your first program in C.
+Predefined functions that come natively with C and how to implement your own functions.
+How to use variables, conditionals, and loops.
+How to use the Linux command line.
+How to approach problem-solving for a computer science problem.
+How to integrate comments into your code.
+How to approach abstraction to simplify and improve your code.
+How to utilize types and operators.
+See you next time!
+A few things to note:
+The contraction 'm is split from i - this is common for English language splitters, which want things like 'm, 'll, 're as separate words.
+Whitespace is preserved and attached at the start of a word. Whitespace is important because tokens at the beginning of words sometimes have different semantic meaning from tokens not at the beginning of words. The choice of where it's attached is arbitrary. From this point on, whitespace bytes are considered like any other bytes in the BPE algorithm.
+Now is a good time for some terminology we'll be using while talking about BPE:
 
+Word: produced by the splitter in pre-processing, like the list shown above.
+Token: typically a sub-word sequence of bytes; the output of the tokenizer is a list of tokens, by ID.
+Token ID: unique numerical identifier for a token.
+Vocabulary: a mapping of token IDs --> token values learned by the tokenizer during the training process.
+Training: the process in which BPE learns a vocabulary from a corpus of text.
+Splitter regexp: regular expression used to split text into words during pre-processing. Given an algorithm (in this case BPE), the pair vocabulary + splitter regexp unambiguously defines how a given text will be tokenized.
+Encoder: given a vocabulary and a splitter regexp, tokenizes any text into a list of IDs from the vocabulary.
+Decoder: given a list of IDs and the vocabulary, reconstructs the original text.
+Training
+BPE training proceeds by first assuming each byte is its own token, and then successively merging pairs of tokens into longer tokens and adding these to the vocabulary, until the desired vocabulary size is achieved.
+Let's reuse our example, starting with these words:
+Argument passing
+I'm going to simplify the discussion here on purpose and focus on integer/pointer arguments [3]. According to the ABI, the first 6 integer or pointer arguments to a function are passed in registers. The first is placed in rdi, the second in rsi, the third in rdx, and then rcx, r8 and r9. Only the 7th argument and onwards are passed on the stack.
+The stack frame
+With the above in mind, let's see how the stack frame for this C function looks:
