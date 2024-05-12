@@ -36,8 +36,7 @@ dependencies:
 - containers
 - split
 - matrix
-- tasty
-- QuickCheck
+
 
 
 ghc-options:
@@ -75,3 +74,8 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - scraper
+    - tasty
+    - tasty-hunit
+    # - HUnit
+    - QuickCheck
+    - bytestring
