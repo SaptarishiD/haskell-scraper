@@ -1,6 +1,7 @@
 Comments are fundamental parts of a computer program, where you leave 
 explanatory remarks to yourself and others that may be collaborating with 
-you regarding your code.
+you regarding your 
+code.
 All code you create for this course must include robust comments.
 Typically each comment is a few words or more, providing the reader an 
 opportunity to understand what is happening in a specific block of code. 

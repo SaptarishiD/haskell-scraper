@@ -8,7 +8,7 @@
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, trainNaiveBayes, classifyNaiveBayes, evaluateNaiveBayes
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes, evaluateNaiveBayes
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -55,7 +55,6 @@ getHTML url = do
         let status_code = statusCode (Client.responseStatus response)
         if status_code /= 200
             then do
-                putStrLn "\nStatus code is not 200. Exiting..."
                 throwIO StatusCodeException
             else do
                 let response_html = Client.responseBody response
@@ -152,6 +151,15 @@ classifyNaiveBayes lang_test src_test trainedModel =
 
     in final_probs
 
+-- can try property based testing for the mathematical stuff like probabilities summing to 1 or smth. see properties of naive bayes
+
+
+
+readTraining :: String -> String -> IO ([String], [String])
+readTraining lang_file src_file = do
+    natural <- readFile "input/lang_train.txt"
+    src <- readFile "input/code_train.txt"
+    return (lines natural, lines src)
 
 
 -- trainNaiveBayes :: [String] -> [String] -> ( ( [String] , Double ), ( [Double] , [Double] ))
@@ -183,11 +191,13 @@ trainNaiveBayes natural_data source_data =
 
     in ((prob_src_prior, (xgivenY_src,xgivenY_lang)), vocab )
     
-    
+
+
+
+
 
 myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
 myVectorizer vocab docs = DM.fromLists [matrixRow vocab doc | doc <- docs]
-
 
 matrixRow :: Vocabulary -> Document -> [Int]
 matrixRow vocab doc = [fromMaybe 0 (lookup word counts) | word <- vocab]
@@ -197,18 +207,24 @@ wordCounts :: Document -> [(String, Int)]
 wordCounts doc = toList $ fromListWith (+) [(word, 1) | word <- words doc]
 
 
-
-sumCols :: DM.Matrix Int -> [Int]
-sumCols matrix = map sum (DM.toLists (DM.transpose matrix))
-
-
-calcXGivenY :: Int -> [Int] -> [Double]
-calcXGivenY mylen my_cols_len =  map (\x -> int2Double (x) + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
-
+getWords :: [String] -> [[String]]
+getWords [] = []
+getWords (x:xs)
+    | '\n' `elem` x && length x == 1 = ["NEWLINE"]:getWords(xs)
+    -- | words x == [] = x:getWords(xs) -- here need to check if newline to do newline, otherwise spaces also getting included which makes it bad 
+    | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
+    
 
 getUniqueWords :: [String] -> [String]
 -- get all unique strings from list of strings
 getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) []
+
+sumCols :: DM.Matrix Int -> [Int]
+sumCols matrix = map sum (DM.toLists (DM.transpose matrix))
+
+calcXGivenY :: Int -> [Int] -> [Double]
+calcXGivenY mylen my_cols_len =  map (\x -> int2Double (x) + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
+
 
 
 -- you have a list of words as a vocabulary and a list of strings/documents. for each string, count the occurence of each word in that string. You should output XTrain which is a n × V dimensional matrix describing the n documents used for training your Naive Bayes classifier where V is the number of words in the vocabulary. The entry XTrain[i,j] is 1 if word j appears in the ith training document and 0 otherwise.
@@ -263,14 +279,6 @@ regexTokenizer (x:xs)
     | otherwise = (x,x):regexTokenizer(xs)
 
 
-
-getWords :: [String] -> [[String]]
-getWords [] = []
-getWords (x:xs)
-    | '\n' `elem` x && length x == 1 = ["NEWLINE"]:getWords(xs)
-    -- | words x == [] = x:getWords(xs) -- here need to check if newline to do newline, otherwise spaces also getting included which makes it bad 
-    | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
-    
 
 getText :: [Soup.Tag String] -> [String]
 getText tagstrings = map Soup.fromTagText (Prelude.filter Soup.isTagText tagstrings)

@@ -76,6 +76,6 @@ tests:
     - scraper
     - tasty
     - tasty-hunit
-    # - HUnit
+    - HUnit
     - QuickCheck
     - bytestring

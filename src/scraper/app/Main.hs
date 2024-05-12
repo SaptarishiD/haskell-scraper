@@ -23,45 +23,52 @@ main = do
     -- let test_urls = ["https://www.baeldung.com/java-unit-test-private-methods", "https://eli.thegreenplace.net/2018/type-erasure-and-reification/", "https://docs.python.org/3/tutorial/datastructures.html", "https://www.google.com/teapot"]
     -- InvalidUrlException, http exception and some other exception
 
+    
+
+    
+
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
 
     case response_html of
       Left e -> do 
         putStrLn $ "\nERROR! The following exception occured:\n\n" ++ head (words (show e)) ++ "\n"
-      Right html -> do
-        let parsed_tags = parseTheTags html
+      Right myhtml -> do
+        let parsed_tags = parseTheTags myhtml
         let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
 
+        let lang_train = "input/lang_train.txt"
+        let code_train = "input/code_train.txt"
 
-        print html
-
-        print "DONE" {-
-
-
-    natural <- readFile "input/lang_train.txt"
-    let natural_data = lines natural
-    source <- readFile "input/code_train.txt"
-    let source_data = lines source
-
-    let trained = Lib.trainNaiveBayes natural_data source_data
+        mydata <- Lib.readTraining lang_train code_train
+        let natural_data = fst mydata
+        let source_data = snd mydata
+        let test = ["Hello World", "World", "Test"]
+        let dummy = getWords test
+        print dummy
 
 
-    lang_test <- readFile "input/lang_test.txt"
-    src_test <- readFile "input/code_test.txt"
+    print "DONE" {-
 
-    let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
-
-    let mapping = zip (lines src_test ++ lines lang_test) final_probs
-    let src_test_len = length (lines src_test)
-    let lang_test_len = length (lines lang_test)
-    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-    let test_accuracy_mapping = zip yTest final_probs
+        let trained = Lib.trainNaiveBayes natural_data source_data
 
 
-    let evals = Lib.evaluateNaiveBayes realVSpredicted
+        lang_test <- readFile "input/lang_test.txt"
+        src_test <- readFile "input/code_test.txt"
 
-    print evals
+        let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
+
+        let mapping = zip (lines src_test ++ lines lang_test) final_probs
+        let src_test_len = length (lines src_test)
+        let lang_test_len = length (lines lang_test)
+        let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+        let test_accuracy_mapping = zip yTest final_probs
+
+
+        let evals = Lib.evaluateNaiveBayes realVSpredicted
+
+        print evals
+
     -- num_code_correct, num_lang_correct, num_code_wrong, num_lang_wrong, total_actual_code, total_actual_lang)
     --(91,22,0,28,91,50)
     -- (precision_code, recall_code, precision_lang, recall_lang)
