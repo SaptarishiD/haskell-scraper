@@ -12,3 +12,5 @@ report/main.synctex.gz
 report/main.toc
 report/main.pyg
 report/_minted-main
+.metals
+.vscode
