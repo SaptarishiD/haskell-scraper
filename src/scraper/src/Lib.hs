@@ -170,6 +170,8 @@ trainNaiveBayes natural_data source_data =
         unique_src_words = getUniqueWords source_words
         unique_natural_words = getUniqueWords natural_words
         vocab = unique_src_words ++ unique_natural_words
+
+        -- source_data is an array of strings, where each string represents a new line in the file. So here each line here is a document here. 
         xTrain_src = myVectorizer vocab (source_data)
         xTrain_lang = myVectorizer vocab (natural_data)
 
@@ -195,18 +197,27 @@ trainNaiveBayes natural_data source_data =
 
 
 
-
+-- each row in matrix corresponds to a document and each column to a word in the vocabulary. So an entry (i,j) represents the word count of word j from the vocab in document i
 myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
-myVectorizer vocab docs = DM.fromLists [matrixRow vocab doc | doc <- docs]
+myVectorizer vocab docs
+    | vocab == [] = DM.fromLists [[0]] -- sinceFromlists doesn't accept empty lists
+    | docs == [] = DM.fromLists [[0]]
+    | otherwise = DM.fromLists [matrixRow vocab doc | doc <- docs]
 
+
+-- takes a vocab i.e. list of strings. for each word in the vocab, look it up in the wordcount map of that document. If found then return the count, if not then 0 since the vocab word is not in this particular document. So this array of ints corresponds to one row in the vectorized matrix i.e. represents the word counts of all the words in the vocabulary in this document. 
 matrixRow :: Vocabulary -> Document -> [Int]
-matrixRow vocab doc = [fromMaybe 0 (lookup word counts) | word <- vocab]
-  where counts = wordCounts doc
+matrixRow vocab doc = [fromMaybe 0 (lookup vocab_word mywordcounts) | vocab_word <- vocab]
+  where mywordcounts = wordCounts doc
 
+
+-- for a document i.e. (string), create list of (string, int) pairs which maps each word with it's count in the document. create tuple for each word in the form of (word, 1) then map with the addition function in order to count
 wordCounts :: Document -> [(String, Int)]
-wordCounts doc = toList $ fromListWith (+) [(word, 1) | word <- words doc]
+wordCounts doc = toList $ fromListWith (+) [(oneword, 1) | oneword <- words doc]
 
 
+
+-- individual words
 getWords :: [String] -> [[String]]
 getWords [] = []
 getWords (x:xs)

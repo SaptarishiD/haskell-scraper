@@ -43,8 +43,8 @@ main = do
         mydata <- Lib.readTraining lang_train code_train
         let natural_data = fst mydata
         let source_data = snd mydata
-        let test = ["Hello World", "World", "Test"]
-        let dummy = getWords test
+        let test = ["Hello world world world world", "World", "Test"]
+        let dummy = map wordCounts test
         print dummy
 
 
