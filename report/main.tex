@@ -114,17 +114,17 @@
     \rule{16cm}{5pt}\vskip1cm
     \begin{bfseries}
         \Huge{FUNCTIONAL PROGRAMMING \\ CS-IS-2010-1 \\ FINAL PROJECT REPORT }\\
-        \vspace{1.9cm}
-        Haskell Scraper and Code-Text Separation\\
-        \vspace{1.9cm}
+        \vspace{1.1cm}
+        Topic: Haskell Scraper and Code-Text Separation\\
+        \vspace{1.1cm}
         Name: Saptarishi Dhanuka\\
-        \vspace{1.9cm}
-        ID: 1020211525
-        \vspace{1.9cm}
-        Supervisor: Partha Pratim Das
-        \vspace{1.9cm}
-        Date: 13 May 2024
-        \vspace{1.9cm}
+        \vspace{1.1cm}
+        ID: 1020211525\\
+        \vspace{1.1cm}
+        Supervisor: Partha Pratim Das\\
+        \vspace{1.1cm}
+        Date: 13 May 2024\\
+        \vspace{1.1cm}
         Ashoka University\\
     \end{bfseries}
 \end{flushright}
@@ -132,8 +132,46 @@
 \tableofcontents
 
 
+\chapter{Acknowledgements}
 
-\chapter{Problem Statement and Requirements}
+I would like to thank Professor Das for taking this ISM and giving us the incentive to work on a software project in an unfamilar yet elegant language. I would also like to thank my fellow students as well as the teaching volunteers Gautam and Adwaiya for creating a wholesome learning environment. 
+
+
+\chapter{Introduction}
+
+%  cite stuff here cause references page is there and can't just say stuff in the air
+
+The large amounts of data in the form of interspersed code and natural language make it useful to extract knowledge from them in order to benefit various areas of software development. Examples like natural language comments accompanying code, stackoverflow questions and answers with code blocks, and developer emails containing discussions about code with reference to it are all important forms of such data. \\ 
+\\ For instance, extracting code and natural language separately from developer emails at a company can give key insights about how the company codebase has evolved and can help future developers access the code of emails directly. Separation of code and natural language is also helpful as training data for natural language and code completion models which can used the separated text and code to give better results. It creates a structured view of the code and textual data which can then further be used to create an organized view of the code and associated natural language. 
+
+
+\chapter{Background and Motivation}
+
+
+Consider the following image of an educational web page containing interspersed code and natural language:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/background-eg.png}
+    \caption{Example of Code and Language Together}
+    \label{fig:high-level-arch}
+\end{figure}
+
+Here it becomes useful to extract just the code or just the natural language separately if one just wants to run the code on their own machine or just wants the natural language descriptions for their notes. A naive approach would be to take the HTML of the page into consideration, but here we will consider any possible text source with generality. 
+
+
+\chapter{Literature Survey}
+
+
+
+
+%  gap analysis and research questions 
+
+
+
+
+
+\chapter{Problem Statement and Objectives}
 \begin{tcolorbox}[colback=white,colframe=gray,title={Assigned Project Statement}]
     Develop a scraper using Haskell to extract text and code snippets separately.
     \begin{enumerate}
@@ -394,6 +432,8 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 
 
+
+
 \chapter{Prototype Implementation Details}
 % this can give a broad overview of what the prototype can and cannot do. What the input and output of the prototype look like etc.
 
@@ -411,6 +451,11 @@ scraper
 
 
 \end{verbatim}
+
+
+
+
+% in limitations can mention that need newline separated lines and we can't go beyond the granularity of a line since we did lines as documents based analysis
 
 
 
@@ -700,6 +745,17 @@ writeToDocx nonPreTags = do
 
 
 
+
+\chapter{Conclusions}
+
+
+
+
+\chapter{Extensions and Future Work}
+
+
+
+\chapter{References}
 
 
 
