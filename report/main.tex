@@ -175,6 +175,7 @@ Here it becomes useful to extract just the code or just the natural language sep
 
 
 
+
 \chapter{Problem Statement and Objectives}
 \begin{tcolorbox}[colback=white,colframe=gray,title={Assigned Project Statement}]
     Develop a scraper using Haskell to extract text and code snippets separately.
@@ -242,6 +243,10 @@ Following from the analysis, the system will classify text sources on a line lev
 % ADD STUFF HEREEEEEE!!!!
 
 \section{Methodology}
+
+The broad methodology is to train a Naive Bayes classifier on some custom training data consisting of natural language and source code, and then using the calculated probabilities to classify each line in the given text source as being code or natural language, and then separating them based on that. A brief overview of Naive Bayes is given below.
+\subsection{Naive Bayes}
+
 
 
 
@@ -341,6 +346,7 @@ The lower level implementation details are mentioned in the implementations sect
 \chapter{Implementation Details}
 % this can give a broad overview of what the prototype can and cannot do. What the input and output of the prototype look like etc.
 
+
 \section{File Structure}
 
 % ?????????????????????????
@@ -365,7 +371,7 @@ The lower level implementation details are mentioned in the implementations sect
 
 
 
-\section{Prototype features and limitations}
+\section{Features and limitations}
 
 The prototype correctly identifies the code and text portions of the web page and writes them into the \texttt{.txt} and \texttt{.docx} files as per the requirements and specifications. 
 
@@ -382,9 +388,13 @@ The prototype correctly identifies the code and text portions of the web page an
 \end{enumerate}
 
 
-
+\newpage 
 \section{Core Implementation Details}
 
+Some important code and data features are shown that showcase the core implementation details of the project.
+
+
+%  NEED TO HAVE A SECTION ABOUT THE DETAILS OF THE TRAINING DATA CAUSE THAT IS OBVIOUSLY ESSENTIAL TO THE SYSTEM
 
 \subsection{Main.hs}
 
@@ -626,7 +636,19 @@ writeToDocx nonPreTags = do
 
 \end{minted}
 
+\newpage
 
+
+\section{Challenges and Mitigations}
+
+Initially, I started the project by separating the code and text based on their HTML tags for the midterm project evaluation, but after feedback from Professor I decided to make the project much more generalized to any given text source instead of just HTML content due to the fragile nature of a system based on the latter. \\ I decided to implement the Naive Bayes algorithm from scratch due to it's ease of interpretability, simplicity, lightweightedness and surprisingly strong results. A brief outline of some challenges and mitigations are as follows:
+\begin{enumerate}
+    \item Before deciding on implementing Naive Bayes from scratch, I thought about using various methods like Hidden Markov Models and Support Vector Machines to create an ensemble learning method to classify text and code. However, library support in Haskell for these was not of good quality, hence I decided to implement Naive Bayes on my own.
+    %  mention how good performance?
+    \item In the implementation of Naive Bayes, another hurdle I faced was the inefficiency of the default \ttt{matrix} library in doing calculations with extremely large and sparse matrices, which was restricting me to training and testing sets of very small sizes, albeit with considerably good performance. So I looked for more efficient libraries and found the \ttt{hmatrix} library, which sped up computations by a large extent. Earlier a training and classification that took 2.5 minutes overall, now happened in 2.5 seconds. 
+    \item The paucity of appropriate training data was also an issue. The few datasets that were relevant to the project, such as those containing source code along with some form of natural language (usually in the form of code comments) were all restricted to one language and were also immense for a classifier implemented from scratch without optimisations. Hence, I curated my own modestly size source code and natural language training data based on manual searching online
+    \item The Haskell language was itself relatively challenging to get used to throughout the project due to it's difference from the imperative languages I am used to. But after learning lambda calculus and spending time with the language, it became easier to use and I could appreciate the elegance of functional programming more, even though I am still not as accustommed to this paradigm as I would like to be. 
+\end{enumerate}
 
 
 
@@ -648,6 +670,8 @@ Only Haskell was used for the project as mentioned in the problem statement
 \begin{enumerate}
     \item The Glasgow Haskell Compiler (GHC) is used for compilation.
     \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
+    
+    % say that hmatrix was used cause fastest
     \item \textbf{Libraries}:
     \begin{enumerate}
         \item 
@@ -757,6 +781,15 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 \chapter{Results and Discussions}
 
+The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language, along with the F-measure were calculated. We found that even with the highlight simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language.
+
+%  graphs and stuff
+
+
+%  pie charts and stuff
+
+
+% tables and stuff 
 
 
 \chapter{Conclusions}
