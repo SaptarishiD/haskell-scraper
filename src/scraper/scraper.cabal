@@ -39,6 +39,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
+    , hmatrix
     , http-client
     , http-client-tls
     , http-types
@@ -67,6 +68,7 @@ executable scraper-exe
     , base >=4.7 && <5
     , bytestring
     , containers
+    , hmatrix
     , http-client
     , http-client-tls
     , http-types
@@ -99,6 +101,7 @@ test-suite scraper-test
     , base >=4.7 && <5
     , bytestring
     , containers
+    , hmatrix
     , http-client
     , http-client-tls
     , http-types

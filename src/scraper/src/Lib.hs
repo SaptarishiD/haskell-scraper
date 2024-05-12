@@ -8,7 +8,7 @@
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes, evaluateNaiveBayes
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes , evaluateNaiveBayes
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -33,6 +33,8 @@ import qualified Data.List.Split as DLS
 -- import Text.Regex.Posix
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
+
+import Numeric.LinearAlgebra as NLA
 
 data MyException = StatusCodeException
     deriving Show
@@ -97,6 +99,8 @@ evaluateNaiveBayes mydata =
 
 
 
+
+
 classifyNaiveBayes :: String -> String -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
 classifyNaiveBayes lang_test src_test trainedModel =
     let lang_test_data = lines lang_test
@@ -104,8 +108,8 @@ classifyNaiveBayes lang_test src_test trainedModel =
 
         vocab = snd trainedModel
         
-        xTest_src = map (map int2Double) (DM.toLists (myVectorizer vocab (src_test_data)))
-        xTest_lang = map (map int2Double) (DM.toLists (myVectorizer vocab (lang_test_data)))
+        xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))
+        xTest_lang = (NLA.toLists (myVectorizer vocab (lang_test_data)))
 
         src_test_len = length (xTest_src)
         lang_test_len = length (xTest_lang)
@@ -114,7 +118,8 @@ classifyNaiveBayes lang_test src_test trainedModel =
 
         xTest = xTest_src ++ xTest_lang
 
-        y = DM.zero 1 (src_test_len + lang_test_len)
+
+        y = NLA.fromLists [(replicate (src_test_len + lang_test_len) (int2Double 0))]
 
         -- [Double]
 
@@ -126,12 +131,12 @@ classifyNaiveBayes lang_test src_test trainedModel =
         log_src = map log xgivenY_src
         log_lang = map log xgivenY_lang
 
-        log_matrix = DM.transpose (DM.fromLists [log_src, log_lang])
+        log_matrix = NLA.tr (NLA.fromLists [log_src, log_lang])
 
         -- [Double,Double]
         -- print (map typeOf (head (DM.toLists log_matrix)))
 
-        prob1 = DM.multStrassen (DM.fromLists xTest) log_matrix
+        prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
 
         -- [Double,Double]
         -- print (map typeOf (head (DM.toLists prob1)))
@@ -139,15 +144,15 @@ classifyNaiveBayes lang_test src_test trainedModel =
         logp = log prob_src_prior
         log_not_p = log (1 - prob_src_prior)
 
-        prob1_trans = DM.toLists (DM.transpose prob1)
+        prob1_trans = NLA.toLists (NLA.tr prob1)
 
         prob2 = map (\x -> x + logp) (head prob1_trans)
         prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
 
         combined = [prob2, prob3]
-        combined_mat = DM.transpose (DM.fromLists combined)
+        combined_mat = NLA.tr (NLA.fromLists combined)
         
-        final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (DM.toLists combined_mat)
+        final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (NLA.toLists combined_mat)
 
     in final_probs
 
@@ -162,7 +167,6 @@ readTraining lang_file src_file = do
     return (lines natural, lines src)
 
 
--- trainNaiveBayes :: [String] -> [String] -> ( ( [String] , Double ), ( [Double] , [Double] ))
 trainNaiveBayes :: [String] -> [String] -> (( Double, ([Double] , [Double]) ), Vocabulary )
 trainNaiveBayes natural_data source_data = 
     let source_words = concat (getWords source_data)
@@ -178,7 +182,7 @@ trainNaiveBayes natural_data source_data =
         sourceCodeMatrix = xTrain_src
         naturalLanguageMatrix = xTrain_lang
 
-        -- DM.Matrix Int -> [Int]
+        -- NLA.Matrix Double -> [Int]
         sum_src_cols = sumCols sourceCodeMatrix
         sum_lang_cols = sumCols naturalLanguageMatrix
 
@@ -198,22 +202,22 @@ trainNaiveBayes natural_data source_data =
 
 
 -- each row in matrix corresponds to a document and each column to a word in the vocabulary. So an entry (i,j) represents the word count of word j from the vocab in document i
-myVectorizer :: Vocabulary -> [Document] -> DM.Matrix Int
+myVectorizer :: Vocabulary -> [Document] -> NLA.Matrix Double
 myVectorizer vocab docs
-    | vocab == [] = DM.fromLists [[0]] -- sinceFromlists doesn't accept empty lists
-    | docs == [] = DM.fromLists [[0]]
-    | otherwise = DM.fromLists [matrixRow vocab doc | doc <- docs]
+    | vocab == [] = NLA.fromLists [[int2Double 0]] -- sinceFromlists doesn't accept empty lists
+    | docs == [] = NLA.fromLists [[int2Double 0]]
+    | otherwise = NLA.fromLists [matrixRow vocab doc | doc <- docs]
 
 
 -- takes a vocab i.e. list of strings. for each word in the vocab, look it up in the wordcount map of that document. If found then return the count, if not then 0 since the vocab word is not in this particular document. So this array of ints corresponds to one row in the vectorized matrix i.e. represents the word counts of all the words in the vocabulary in this document. 
-matrixRow :: Vocabulary -> Document -> [Int]
-matrixRow vocab doc = [fromMaybe 0 (lookup vocab_word mywordcounts) | vocab_word <- vocab]
+matrixRow :: Vocabulary -> Document -> [Double]
+matrixRow vocab doc = [fromMaybe (int2Double 0) (lookup vocab_word mywordcounts) | vocab_word <- vocab]
   where mywordcounts = wordCounts doc
 
 
 -- for a document i.e. (string), create list of (string, int) pairs which maps each word with it's count in the document. create tuple for each word in the form of (word, 1) then map with the addition function in order to count
-wordCounts :: Document -> [(String, Int)]
-wordCounts doc = toList $ fromListWith (+) [(oneword, 1) | oneword <- words doc]
+wordCounts :: Document -> [(String, Double)]
+wordCounts doc = Data.Map.toList $ fromListWith (+) [(oneword, int2Double 1) | oneword <- words doc]
 
 
 
@@ -230,11 +234,11 @@ getUniqueWords :: [String] -> [String]
 -- get all unique strings from list of strings
 getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) []
 
-sumCols :: DM.Matrix Int -> [Int]
-sumCols matrix = map sum (DM.toLists (DM.transpose matrix))
+sumCols :: NLA.Matrix Double -> [Double]
+sumCols matrix = map sum (NLA.toLists (NLA.tr matrix))
 
-calcXGivenY :: Int -> [Int] -> [Double]
-calcXGivenY mylen my_cols_len =  map (\x -> int2Double (x) + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
+calcXGivenY :: Int -> [Double] -> [Double]
+calcXGivenY mylen my_cols_len =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
 
 
 
