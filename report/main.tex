@@ -170,6 +170,14 @@ Here it becomes useful to extract just the code or just the natural language sep
 %  gap analysis and research questions ?????????????????
 
 % basically that these guys did this and those guys did that and here's what I am gonna do and mention shortcomings and stuff later and say that did from scratch since haskell sde project
+% should i mention the results of the literature here or when comparing with my own results in the results section??
+
+
+
+Reseachers have used various methods to identify and distinguish code and natural language text, some of which I will discuss below. \\
+\\ Bacchelli et. al \cite{bachemail} attempted to extract source code from developer emails by first identifying emails that contained source code and then identifying code blocks by using regular expressions. The approach was very lightweight and programming language specific, with the use of end-of-line characters like semi-colons in order to find source code lines. \\ Bacchelli et. al \cite{bachcontent} also used Naive Bayes with bigrams, in combination with island parsing for classifying pieces of development emails as various categories like code, natural language, stack trace, patch or junk. It reached an accuracy ranging between 89 and 94 \% but, the source code island parser was specific to Java, which the authors acknowledged and stated that the approach could be easily generalized to other language as well. \\ Chatterjee et. al \cite{chattter} focused on extracting the code segments along with their natural language descriptions from research articles using various detailed linguistic and structural heuristics to identify important features to identifying sentences that would be relevant to code segments \\ Cerulo et. al \cite{cerulohmm} used an approach based on Hidden Markov Models (HMMs) for extracting "information islands" of code from natural language by recognising whether the sequence of observed strings would change between the source code and natural language states of the HMM. While this approach did not require parsing or complicated regular expressions, it only performed classification of tokens into code or text, and not further knowledge extraction in the form of an abstract syntax tree.\\
+\\ The Naive Bayes approach for text classification also has a long history and it is extensively used even today despite it's simplicity and strong assumptions. \\
+\\ ADD STUFF HERE!!!!!!!!!!!!!
 
 
 
@@ -803,9 +811,21 @@ The classifier was run on various natural language and source code files and the
 
 
 
-\chapter{References}
+\begin{thebibliography}{9}
 
+    \bibitem{bachemail}
+    A. Bacchelli, M. D’Ambros, and M. Lanza, “Extracting source code from e-mails,” in Program Comprehension (ICPC), 2010 IEEE 18th International Conference on, June 2010, pp. 24–33.
 
+    \bibitem{bachcontent}
+    A. Bacchelli, T. Dal Sasso, M. D'Ambros and M. Lanza, "Content classification of development emails," 2012 34th International Conference on Software Engineering (ICSE), Zurich, Switzerland, 2012, pp. 375-385, doi: 10.1109/ICSE.2012.6227177
+
+    \bibitem{chattter}
+    Chatterjee, Preetha \& Gause, Benjamin \& Hedinger, Hunter \& Pollock, Lori. (2017). Extracting Code Segments and Their Descriptions from Research Articles. 10.1109/MSR.2017.10. 
+
+    \bibitem{cerulohmm}
+    L. Cerulo, M. Ceccarelli, M. Di Penta, and G. Canfora, “A hidden markov model to detect coded information islands in free text,” in Source Code Analysis and Manipulation (SCAM), 2013 IEEE 13th International Working Conference on, Sept 2013, pp. 157–166.
+
+\end{thebibliography}
 
 
 
