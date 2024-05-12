@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Eta reduce" #-}
 {-# HLINT ignore "Redundant bracket" #-}
+{-# HLINT ignore "Redundant return" #-}
 
 -- maybe can also build a progress bar thing for the matrix multiplications stuff so know how long it's taking
 -- also need to do performance testing stuff and all
@@ -12,6 +13,8 @@ module Lib
 
 import qualified Network.HTTP.Client as Client
 import qualified Network.HTTP.Client.TLS as ClientTLS
+import Network.HTTP.Types.Status (statusCode)
+import Control.Exception
 
 import qualified Text.HTML.TagSoup as Soup
 import Text.Pandoc
@@ -32,12 +35,38 @@ import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
 
+
+data GetHTMLException
+  = InvalidUrlException String String
+  | InvalidStatusCodeException Int
+  deriving (Show)
+
+instance Exception GetHTMLException
+
+
 type Document = String
 type Vocabulary = [String]
 type Dummy  = String
 
 
--- 0 means code 1 means lang. left is actual right is predicted
+
+getHTML :: String -> IO (Either SomeException LBSC.ByteString)
+getHTML url = do
+    result <- try $ do
+        mymanager <- ClientTLS.newTlsManager
+        myrequest <- Client.parseRequest url
+        response <- Client.httpLbs myrequest mymanager
+        let response_html = Client.responseBody response
+        return response_html
+    return result
+
+
+parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
+parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
+
+
+
+-- 0 means code 1 means lang. left is truth right is predicted
 evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
 evaluateNaiveBayes mydata = 
     let total_actual_lang = sum (map fst mydata)
@@ -195,6 +224,15 @@ preProc splitted = filter (not . null) $ map unwords splitted
 
      
 
+
+
+
+
+
+
+
+
+
 -- trim :: String -> String
 -- trim = f . f
 --   where f = Prelude.reverse . Prelude.dropWhile isSpace
@@ -239,17 +277,7 @@ writeFullSrc :: [Soup.Tag String] -> IO ()
 writeFullSrc tagstrings = writeFile "output_files/full_text.txt" (Soup.innerText tagstrings)
 
 
-getHTML :: String -> IO LBSC.ByteString
-getHTML url = do
-    mymanager <- ClientTLS.newTlsManager
-    myrequest <- Client.parseRequest url
-    response <- Client.httpLbs myrequest mymanager
-    let response_html = Client.responseBody response
-    return response_html
 
-
-parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
-parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
 
 
 
@@ -266,18 +294,12 @@ fillTrue (True:False:xs) = True:fillTrue (True:xs)
 fillTrue (True:True:xs) = True:True:fillTrue (xs)
 
 
-
-
 -- inserts a delimiter before every closing <pre> tag for formatted output
 insertNewlines :: [Soup.Tag String] -> [Soup.Tag String]
 insertNewlines [] = []
 insertNewlines (x:xs) = if (Soup.isTagCloseName "pre" x)
     then Soup.TagText "\n\n=======================\n\n":x:insertNewlines (xs)
     else x:insertNewlines (xs)
-
-
-
-
 
 {-
     Idea: get all the elements of the list that are not enclosed between an open pre tag and a close pre tag

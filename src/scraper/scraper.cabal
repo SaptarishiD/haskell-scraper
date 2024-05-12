@@ -36,17 +36,20 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       HTTP
+    , QuickCheck
     , base >=4.7 && <5
     , bytestring
     , containers
     , http-client
     , http-client-tls
+    , http-types
     , matrix
     , pandoc
     , pandoc-types
     , regex-tdfa
     , split
     , tagsoup
+    , tasty
     , text
     , text-conversions
     , unordered-containers
@@ -63,11 +66,13 @@ executable scraper-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HTTP
+    , QuickCheck
     , base >=4.7 && <5
     , bytestring
     , containers
     , http-client
     , http-client-tls
+    , http-types
     , matrix
     , pandoc
     , pandoc-types
@@ -75,6 +80,7 @@ executable scraper-exe
     , scraper
     , split
     , tagsoup
+    , tasty
     , text
     , text-conversions
     , unordered-containers
@@ -92,11 +98,13 @@ test-suite scraper-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HTTP
+    , QuickCheck
     , base >=4.7 && <5
     , bytestring
     , containers
     , http-client
     , http-client-tls
+    , http-types
     , matrix
     , pandoc
     , pandoc-types
@@ -104,6 +112,7 @@ test-suite scraper-test
     , scraper
     , split
     , tagsoup
+    , tasty
     , text
     , text-conversions
     , unordered-containers

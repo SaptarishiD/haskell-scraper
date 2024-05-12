@@ -20,31 +20,40 @@ import Lib
 main :: IO ()
 main = do
 
-    -- let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    -- response_html <- getHTML url
-    -- let parsed_tags = parseTheTags response_html
-    -- let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+    -- let test_urls = ["https://www.baeldung.com/java-unit-test-private-methods", "https://eli.thegreenplace.net/2018/type-erasure-and-reification/", "https://docs.python.org/3/tutorial/datastructures.html"]
+    -- InvalidUrlException, http exception and some other exception
+    let url = "hts://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    response_html <- getHTML url
 
-    -- natural <- readFile "input/natural_language_text.txt"
-    -- let natural_data = lines natural
-    -- source <- readFile "input/source_code.txt"
-    -- let source_data = lines source
+    case response_html of
+      Left e -> putStrLn $ "\nERROR! The following exception occured:\n\n" ++ show e
+      Right html -> do
+        let parsed_tags = parseTheTags html
+        let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+        print response_html
 
-    -- let trained = Lib.trainNaiveBayes natural_data source_data
+        print "DONE" {-
 
 
-    -- lang_test <- readFile "input/lang_test.txt"
-    -- src_test <- readFile "input/code_test.txt"
+    natural <- readFile "input/lang_train.txt"
+    let natural_data = lines natural
+    source <- readFile "input/code_train.txt"
+    let source_data = lines source
 
-    -- let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
+    let trained = Lib.trainNaiveBayes natural_data source_data
 
-    -- let mapping = zip ((lines src_test) ++ (lines lang_test)) final_probs
-    -- let src_test_len = length (lines src_test)
-    -- let lang_test_len = length (lines lang_test)
-    -- let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-    -- let test_accuracy_mapping = zip yTest final_probs
 
-    let realVSpredicted = [(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(0,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,1),(1,1),(1,0),(1,1),(1,0),(1,1),(1,1),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,1),(1,1),(1,1),(1,0),(1,0),(1,0),(1,1),(1,1),(1,1),(1,1),(1,0),(1,1),(1,0),(1,0),(1,1),(1,1),(1,0),(1,0),(1,1),(1,0),(1,0),(1,0),(1,0)]
+    lang_test <- readFile "input/lang_test.txt"
+    src_test <- readFile "input/code_test.txt"
+
+    let final_probs = Lib.classifyNaiveBayes lang_test src_test trained
+
+    let mapping = zip (lines src_test ++ lines lang_test) final_probs
+    let src_test_len = length (lines src_test)
+    let lang_test_len = length (lines lang_test)
+    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    let test_accuracy_mapping = zip yTest final_probs
+
 
     let evals = Lib.evaluateNaiveBayes realVSpredicted
 
@@ -60,30 +69,19 @@ main = do
 
     -- print test_accuracy_mapping
 
-    print "DONE" {-
-
 
 
     -- can have smth like every sequence of 0s or 1s is separated by a newline to demarcate separate segments or smth
+
+    -- can do the actual separation into files later cause that's just for the final thing. Before that need to evaluate. Cause don't wanna manually do stuff earlier. So first evaluate and test on easily testable stuff jiska code and natural language already separated since going line by line
 
     -- need error percentages and other stuff like recall precision and stuff so that can make nice tables and stuff. Also need to cross-validate stuff
 
 
     let code_class = [x | x <- mapping, snd x == 0]
     let lang_class = [x | x <- mapping, snd x == 1]
-
     writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
     writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
-
-
-    -- print (mapping)
-
-
-    let prob2 = DM.mapCol (+ logp) 1 
-    let prob3 = DM.mapCol (\x -> x + log_not_p) 2 prob2
-
-
-    print (take 20 prob3)
 
 -}
 

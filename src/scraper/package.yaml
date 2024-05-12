@@ -22,6 +22,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - HTTP
+- http-types
 - text
 - pandoc
 - pandoc-types
@@ -35,6 +36,8 @@ dependencies:
 - containers
 - split
 - matrix
+- tasty
+- QuickCheck
 
 
 ghc-options:
