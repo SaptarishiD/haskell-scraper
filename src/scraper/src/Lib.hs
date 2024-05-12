@@ -136,6 +136,7 @@ classifyNaiveBayes lang_test src_test trainedModel =
         -- [Double,Double]
         -- print (map typeOf (head (DM.toLists log_matrix)))
 
+        -- mult
         prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
 
         -- [Double,Double]

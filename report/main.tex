@@ -167,10 +167,9 @@ Here it becomes useful to extract just the code or just the natural language sep
 
 \chapter{Literature Survey}
 
+%  gap analysis and research questions ?????????????????
 
-
-
-%  gap analysis and research questions 
+% basically that these guys did this and those guys did that and here's what I am gonna do and mention shortcomings and stuff later and say that did from scratch since haskell sde project
 
 
 
@@ -221,37 +220,28 @@ Here it becomes useful to extract just the code or just the natural language sep
             \item Lexical and semantic analysis with the use of regular expressions
             \item Using a large language model to differentiate the code and the rest of the text 
             \item Using computer vision to attempt to read text like a human and identify text from the code
+            \item Use the frequency of occurrence of different words in some sample data and use it to predict whether sections of unseen samples of text are natural language or source code. 
         \end{enumerate}
-    \item Analyzing the text source by considering not just it's underlying syntactical structure but also it's semantic meaning will add layers of complexity to the project.
-    \item Hence, we limit the scope of the project to text sources being HTML formatted web pages that have code snippets demarcated by particular tags. This gives us a more precise approach to the problem based on syntax and tag structure.
-    \item Consequently, we consider the text source to be a web page, supplied as input through a URL.
-    \item We also consider that the web page is formatted with HTML and that the code snippets are demarcated with certain tags that distinguish them from the rest of the textual content. 
-    \item The separation of the text from the code will be carried out based on the HTML tags that differentiate them from each other.
-    \item For readability, the output files will preserve the ordering and formatting of the source content.
+    \item Extracting the text and code snippets from a text source boils down to a classification task where we consider each new line as a line to be classified as natural language or code, and grouping them all into two separate sections depending on the class assigned to them.
+    \item Hence we consider that the text source will consist of different newlines which need to be classified as language or code, without going into further granular details as to whether a particular word or phrase is code or text.
+    %  we will take as input url but then just get the text from that url and nothing else. 
+    
+
 \end{enumerate}
 
 
 
-% \begin{enumerate}
-%     \item The scraper will use Haskell HTTP libraries for fetching the HTML content of the given web page.
-%     \item The scraper will separate the code snippets from the rest of the textual content using an algorithm that utilizes the \texttt{tagsoup} library to parse the HTML content, along with other standard libraries for string and text handling.
-%     \item The scraper will write the text into a Word document and the code snippets into a \texttt{.txt} file mainly using the \texttt{tagsoup} and \texttt{pandoc} libraries, along with some standard Haskell libraries.
-%     \item The \texttt{.txt} file will be formatted such that the code snippets are visibly delimited for readability purposes.
-%     \item The \texttt{.docx} file will be formatted in a manner similar to the original web page in terms of demarcating headings, footnotes and the order of the text. 
-% \end{enumerate}
 
 
 
+\chapter{Scope and Methodology}
 
-% \begin{enumerate}
-%     \item \textbf{Limitations} % should limitations go here or later on cause it's seeming out of place here
-%     % this can go in the design and architecture part or in the specs part
-%     \begin{enumerate}
-%         \item Since the HTML structure of different web pages can vary, it is not necessary that this particular scraper will work for all web pages. It is designed specifically for the given page and may work for some other pages. But no generalisation can be made about the correctness of its text and code extraction for other pages.
-%         \item Moreover, it will not necessarily work for web pages with malformed HTML or different structure.
-%         \item It is not designed to be robust to design changes, which is in line with the \href{https://hackage.haskell.org/package/tagsoup-0.6/src/tagsoup.htm#:~:text=Rule%202%3A%0ADo%20not%20be%20robust%20to%20design%20changes%2C%20do%20not%20even%20consider%20the%20possibility%20when%20writing%20the%20code.}{rule} stated on the \texttt{tagsoup} library's documentation example. If the site's HTML structure changes, for instance if the code snippets change from being enclosed in \texttt{<pre>} tags to \texttt{<code>} tags, then the scraper will not be able to separate out the code from the text and extract them accurately.
-%     \end{enumerate}
-% \end{enumerate}
+\section{Scope}
+Following from the analysis, the system will classify text sources on a line level of granularity, hence it assumes that there will be some newline separation of different lines and the text source will not be completely unstructured. This is still a fairly broad scope since most text sources that have natural language and code interspersed in them have a newline-structure that make it easy to split them on a line-by-line basis for classification. 
+
+% ADD STUFF HEREEEEEE!!!!
+
+\section{Methodology}
 
 
 
@@ -273,8 +263,8 @@ Here it becomes useful to extract just the code or just the natural language sep
 % insert image here
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.0\textwidth]{figures/new-high-arch.png}
-    \caption{High-Level Architecture}
+    \includegraphics[width=0.6\textwidth]{figures/NB-high-arch.png}
+    \caption{High-Level Architecture of Code-Text Separation Pipeline}
     \label{fig:high-level-arch}
 \end{figure}
 
@@ -282,7 +272,7 @@ Here it becomes useful to extract just the code or just the natural language sep
 % change this cause it is not consistent with the design later need to make it so that the actual things like the tags and the text tags are in the boxes and the processes are on the arrows. 
 The \textbf{high-level architecture} consists of the following:
 \begin{enumerate}
-    \item Get the contents of the web page specified by the URL.
+    \item Get the contents of the text source
     % \item Parsing the response obtained from the HTTP libraries into Tags from the \texttt{tagsoup} library.
     % \item Separating the text from the code snippets using the descriptions of each Tag from the above Tags
     \item Separate the code snippets from the text.
@@ -291,145 +281,56 @@ The \textbf{high-level architecture} consists of the following:
 \end{enumerate}
 
 
+\newpage 
+
 
 \section{High-Level Design}
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=1.0\textwidth]{figures/new-high-design.png}
-    \caption{High-Level Design}
+    \includegraphics[width=1.0\textwidth]{figures/NB-high-design.png}
+    \caption{High-Level Design of the Classifying Pipeline and Training Section}
     \label{fig:high-level-design}
 \end{figure}
 
-A more detailed description of the \textbf{high-level design} which implements the architecture consists of the following:
+A more detailed description of the \textbf{high-level design} which implements the architecture broadly consists of two sections:
 \begin{enumerate}
-    \item Execute an HTTPS request for fetching the HTML contents of the web page
-    % \item Parsing the url into a request
-    % \item Executing the request with the TLS manager
-    \item Get the body i.e. the HTML content from the response received after executing the request
-    \item Parse the HTML into a list of Tags according to the \texttt{tagsoup} library
-    \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content. We also remove images. 
-    \item Insert delimiters between each different code snippet for formatting purposes. 
-    % \item Convert the list of Tag Strings corresponding to the code and to the text each back into an HTML-formatted string, which we then convert into a \texttt{pandoc} document as intermediate representation
-    % \item Convert the pandocs into another intermediate string-like format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
-    \item Convert the Tags back to HTML
-    \item Write the code snippets to the \ttt{.txt} file
-    \item Write the non-code textual content to the \ttt{.docx} file
-\end{enumerate}
-
-The lower level implementation details are mentioned in the prototype implementation section.
-
-
-
-
-
-
-
-
-
-
-
-
-\chapter {Tools and Languages}
-% tech stack
-% need to be clear on cabal stack and haskell and stuff
-
-
-\section{Languages}
-
-Only Haskell was used for the project as mentioned in the problem statement
-
-\section{Tools}
-
-\begin{enumerate}
-    \item The Glasgow Haskell Compiler (GHC) is used for compilation.
-    \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
-    \item \textbf{Libraries}:
+    \item \textbf{Training Section : }
     \begin{enumerate}
-        \item \texttt{Network.HTTP.Client.TLS} was chosen for handling HTTPS connections in order to use the \texttt{newTlsManager} function
-        \item \texttt{Network.HTTP.Client} was chosen for parsing the url into a request, executing the request with the manager, and getting the body from the response. The functions used were \texttt{parseRequest, httpLbs, responseBody} respectively.
-        \item \texttt{Tagsoup} was used to parse the HTML into a list of Tag Strings, and then also to convert the separated Tag Strings back into an HTML-formatted string . It was also used in a helper function that inserted a delimiter between the code snippets. The functions used were \texttt{parseTags, isTagOpenName, isTagCloseName, renderTags}, along with the \texttt{TagText} constructor and \texttt{Tag} for \texttt{Tag String}.
-        \item \texttt{Pandoc} was used to read the HTML-formatted strings for both the code and the text into intermediate Pandoc representation. Then it was used to write the content into another intermediate string-like representation, which in turn was written into the final files with a standard library. The functions used were \texttt{readHtml, writePlain, writeDocx, runIO}.
-        \item \texttt{Data.ByteString.Lazy.Char8} was used to convert the ByteString obtained from the response body into a string for further processing. The function used was \texttt{unpack}
-        \item \texttt{Data.ByteString.Lazy} was used to write the ByteString obtained from the \texttt{writeDocx} function from \texttt{pandoc}, into the final \texttt{.docx} file. The function used was \texttt{writeFile}
-        \item \texttt{Data.Text.Conversions} was used to convert the separated HTML strings into the \texttt{Text} type defined under \texttt{Data.Text}, so that it could be converted into intermediate pandoc representation by \texttt{readHtml}. The function used was \texttt{convertText}.
-        \item \texttt{Data.Text} was used in order to use the \texttt{Text} type
-        \item \texttt{Data.Text.IO} was used to write the Text obtained from the \texttt{writePlain} function from \texttt{pandoc}, into the final \texttt{.txt} file. The function used was \texttt{writeFile}
-        \item The standard \texttt{Prelude} was used for various operations.
-    \end{enumerate} 
-\end{enumerate}
-
-
-
-
-
-
-\chapter{Test Plan}
-% test individual functions 
-% for the midterm eval at the end if have time (need to) then can write one big test 
-
-% \section{Tools to be used for Testing}
-
-
-
-\section{Test Suite Outline}
-
-\begin{enumerate}
-    \item \textbf{Unit Testing : } The following functions can be tested 
-    \begin{enumerate}
-        \item \texttt{getHTML : }
-        \begin{enumerate}
-            \item Test if the function returns the correct HTML for various URLs by using sample inputs and outputs.
-            \item Test if the function gracefully handles invalid URLs with error handling.
-            \item Test if the function handles network errors and HTTPS errors with error handling.
-        \end{enumerate}
-
-        \item \texttt{parseTheTags : }
-        \begin{enumerate}
-            \item Test if the function returns the correct list of Tag Strings for various HTML content.
-            \item Test if the function handles malformed HTML and erroneous inputs with error handling.
-        \end{enumerate}
-
-        \item \texttt{fillTrue : }
-        \begin{enumerate}
-            \item Test if the function correctly fills in True values for all elements within any two matching pair of True values corresponding to \texttt{<pre>} tags.
-            \item Test if the function handles edge cases with empty lists or single element lists.
-        \end{enumerate}
-
-        \item \texttt{insertNewLines : }
-        \begin{enumerate}
-            \item Test if the function correctly adds the delimiter before every closing \texttt{<pre>} tag.
-            \item Test if the function handles cases where there are no \texttt{<pre>} tags, or the Tag String is malformed 
-        \end{enumerate}
-
-        \item \texttt{separateTextCode : }
-        \begin{enumerate}
-            \item Test if the function correctly returns a tuple of two lists where one list has the Tag Strings corresponding to all the content enclosed within \texttt{<pre>} tags, and that the other list has all the other elements, excluding images.
-            \item Test edge cases of no \texttt{<pre>} tags, nested \texttt{<pre>} tags
-        \end{enumerate}
-
-        \item \texttt{writeToTxt : }
-        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
-        \begin{enumerate}
-            \item Test if the function correctly writes the content of the input Tag String with delimters to the \texttt{.txt} file using sample input output
-        \end{enumerate}
-
-        \item \texttt{writeToDocx : }
-        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
-        \begin{enumerate}
-            \item Test if the function correctly writes the content of the input Tag String to the \texttt{.docx} file using sample input output
-        \end{enumerate}
-
+        \item Use natural language and source code training data already pre-classified in order to calculate the conditional probabilities and the class priors which make up the trained Naive Bayes Model.
     \end{enumerate}
-    \item \textbf{Performance Testing : } 
+    
+
+
+
+    \item \textbf{Separatation Pipeline Section : }
     \begin{enumerate}
-        \item Test the time taken for the full system to execute from start to finish
-        \item Test the resource consumption of the system
+        \item Split the given text source into lines which will be considered as separate "documents" by the trained classificaton model.
+        \item Classify each different line as source code or natural language text depending on which class has the higher posterior probability given that line
+        \item Write the lines classified as source code into a \texttt{.txt} file
+        \item Write the lines classified as natural language text into a \texttt{.docx} file
+        % \item Execute an HTTPS request for fetching the HTML contents of the web page
+        % % \item Parsing the url into a request
+        % % \item Executing the request with the TLS manager
+        % \item Get the body i.e. the HTML content from the response received after executing the request
+        % \item Parse the HTML into a list of Tags according to the \texttt{tagsoup} library
+        % \item Separate the Tags corresponding to the code from the Tags corresponding to the textual content. By inspecting the HTML, we can see that the code snippets are within \texttt{<pre>} tags, so we need to separate everything enclosed within these tags from the rest of the HTML content. We also remove images. 
+        % \item Insert delimiters between each different code snippet for formatting purposes. 
+        % % \item Convert the list of Tag Strings corresponding to the code and to the text each back into an HTML-formatted string, which we then convert into a \texttt{pandoc} document as intermediate representation
+        % % \item Convert the pandocs into another intermediate string-like format which can then be written into the respective \texttt{.docx} and \texttt{.txt} files
+        % \item Convert the Tags back to HTML
+        % \item Write the code snippets to the \ttt{.txt} file
+        % \item Write the non-code textual content to the \ttt{.docx} file
     \end{enumerate}
-    \item \textbf{Functional Testing : } \\ Test whether the program meets the requirements by using sample input URLs and sample output files
+
 \end{enumerate}
 
+The lower level implementation details are mentioned in the implementations section. 
+
+%  should i specify network stuff here?
+
+% I don't think I should mention the evaluation section since that doesn't affect the system. That part should go into results and anyway not much to talk about over there
 
 
 
@@ -437,23 +338,25 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 
 
-\chapter{Prototype Implementation Details}
+\chapter{Implementation Details}
 % this can give a broad overview of what the prototype can and cannot do. What the input and output of the prototype look like etc.
 
-\section{Prototype File Structure}
+\section{File Structure}
 
-\begin{verbatim}
-scraper
-|-- app
-|   | -- Main.hs (main driver code)
-|-- src
-|   |-- Lib.hs (implementation of functions)
-|-- output_files
-|   | -- final_code.txt (delimited code snippets)
-|   | -- final_text.docx (textual content)
+% ?????????????????????????
+
+% \begin{verbatim}
+% scraper
+% |-- app
+% |   | -- Main.hs (main driver code)
+% |-- src
+% |   |-- Lib.hs (implementation of functions)
+% |-- output_files
+% |   | -- final_code.txt (delimited code snippets)
+% |   | -- final_text.docx (textual content)
 
 
-\end{verbatim}
+% \end{verbatim}
 
 
 
@@ -480,7 +383,7 @@ The prototype correctly identifies the code and text portions of the web page an
 
 
 
-\section{Implementation Details}
+\section{Core Implementation Details}
 
 
 \subsection{Main.hs}
@@ -728,6 +631,111 @@ writeToDocx nonPreTags = do
 
 
 
+% maybe this can go after implementation details
+\chapter{Tooling and Testing}
+
+\section {Tools and Languages}
+% tech stack
+% need to be clear on cabal stack and haskell and stuff
+
+
+\subsection{Languages}
+
+Only Haskell was used for the project as mentioned in the problem statement
+
+\subsection{Tools}
+
+\begin{enumerate}
+    \item The Glasgow Haskell Compiler (GHC) is used for compilation.
+    \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
+    \item \textbf{Libraries}:
+    \begin{enumerate}
+        \item 
+        % \item \texttt{Network.HTTP.Client.TLS} was chosen for handling HTTPS connections in order to use the \texttt{newTlsManager} function
+        % \item \texttt{Network.HTTP.Client} was chosen for parsing the url into a request, executing the request with the manager, and getting the body from the response. The functions used were \texttt{parseRequest, httpLbs, responseBody} respectively.
+        % \item \texttt{Tagsoup} was used to parse the HTML into a list of Tag Strings, and then also to convert the separated Tag Strings back into an HTML-formatted string . It was also used in a helper function that inserted a delimiter between the code snippets. The functions used were \texttt{parseTags, isTagOpenName, isTagCloseName, renderTags}, along with the \texttt{TagText} constructor and \texttt{Tag} for \texttt{Tag String}.
+        % \item \texttt{Pandoc} was used to read the HTML-formatted strings for both the code and the text into intermediate Pandoc representation. Then it was used to write the content into another intermediate string-like representation, which in turn was written into the final files with a standard library. The functions used were \texttt{readHtml, writePlain, writeDocx, runIO}.
+        % \item \texttt{Data.ByteString.Lazy.Char8} was used to convert the ByteString obtained from the response body into a string for further processing. The function used was \texttt{unpack}
+        % \item \texttt{Data.ByteString.Lazy} was used to write the ByteString obtained from the \texttt{writeDocx} function from \texttt{pandoc}, into the final \texttt{.docx} file. The function used was \texttt{writeFile}
+        % \item \texttt{Data.Text.Conversions} was used to convert the separated HTML strings into the \texttt{Text} type defined under \texttt{Data.Text}, so that it could be converted into intermediate pandoc representation by \texttt{readHtml}. The function used was \texttt{convertText}.
+        % \item \texttt{Data.Text} was used in order to use the \texttt{Text} type
+        % \item \texttt{Data.Text.IO} was used to write the Text obtained from the \texttt{writePlain} function from \texttt{pandoc}, into the final \texttt{.txt} file. The function used was \texttt{writeFile}
+        % \item The standard \texttt{Prelude} was used for various operations.
+    \end{enumerate} 
+\end{enumerate}
+
+
+
+
+
+
+\section{Testing}
+% test individual functions 
+% for the midterm eval at the end if have time (need to) then can write one big test 
+
+% \section{Tools to be used for Testing}
+
+
+
+\subsection{Test Suite Outline}
+
+\begin{enumerate}
+    \item \textbf{Unit Testing : } The following functions can be tested 
+    \begin{enumerate}
+        \item \texttt{getHTML : }
+        \begin{enumerate}
+            \item Test if the function returns the correct HTML for various URLs by using sample inputs and outputs.
+            \item Test if the function gracefully handles invalid URLs with error handling.
+            \item Test if the function handles network errors and HTTPS errors with error handling.
+        \end{enumerate}
+
+        \item \texttt{parseTheTags : }
+        \begin{enumerate}
+            \item Test if the function returns the correct list of Tag Strings for various HTML content.
+            \item Test if the function handles malformed HTML and erroneous inputs with error handling.
+        \end{enumerate}
+
+        \item \texttt{fillTrue : }
+        \begin{enumerate}
+            \item Test if the function correctly fills in True values for all elements within any two matching pair of True values corresponding to \texttt{<pre>} tags.
+            \item Test if the function handles edge cases with empty lists or single element lists.
+        \end{enumerate}
+
+        \item \texttt{insertNewLines : }
+        \begin{enumerate}
+            \item Test if the function correctly adds the delimiter before every closing \texttt{<pre>} tag.
+            \item Test if the function handles cases where there are no \texttt{<pre>} tags, or the Tag String is malformed 
+        \end{enumerate}
+
+        \item \texttt{separateTextCode : }
+        \begin{enumerate}
+            \item Test if the function correctly returns a tuple of two lists where one list has the Tag Strings corresponding to all the content enclosed within \texttt{<pre>} tags, and that the other list has all the other elements, excluding images.
+            \item Test edge cases of no \texttt{<pre>} tags, nested \texttt{<pre>} tags
+        \end{enumerate}
+
+        \item \texttt{writeToTxt : }
+        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
+        \begin{enumerate}
+            \item Test if the function correctly writes the content of the input Tag String with delimters to the \texttt{.txt} file using sample input output
+        \end{enumerate}
+
+        \item \texttt{writeToDocx : }
+        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
+        \begin{enumerate}
+            \item Test if the function correctly writes the content of the input Tag String to the \texttt{.docx} file using sample input output
+        \end{enumerate}
+
+    \end{enumerate}
+    \item \textbf{Performance Testing : } 
+    \begin{enumerate}
+        \item Test the time taken for the full system to execute from start to finish
+        \item Test the resource consumption of the system
+    \end{enumerate}
+    \item \textbf{Functional Testing : } \\ Test whether the program meets the requirements by using sample input URLs and sample output files
+\end{enumerate}
+
+
+\subsection{Test Report}
 
 
 
@@ -747,10 +755,14 @@ writeToDocx nonPreTags = do
 \end{itemize}
 
 
+\chapter{Results and Discussions}
+
 
 
 \chapter{Conclusions}
-
+%  should highlight contributions
+%  lightweight text and code separation in functional programming language so it can be easily verified or smth
+% it's also very interpretable and linear time complexity stuff
 
 
 
