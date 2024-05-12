@@ -34,21 +34,17 @@ import qualified Data.List.Split as DLS
 import Text.Regex.TDFA
 -- import Text.Regex.TDFA.Text ()
 
+data MyException = StatusCodeException
+    deriving Show
 
-
-data GetHTMLException
-  = InvalidUrlException String String
-  | InvalidStatusCodeException Int
-  deriving (Show)
-
-instance Exception GetHTMLException
-
+instance Exception MyException
 
 type Document = String
 type Vocabulary = [String]
 type Dummy  = String
 
 
+-- can do case by case exceptions for the InvalidUrlException, HttpExceptionRequest and lastly the status code one
 
 getHTML :: String -> IO (Either SomeException LBSC.ByteString)
 getHTML url = do
@@ -56,8 +52,14 @@ getHTML url = do
         mymanager <- ClientTLS.newTlsManager
         myrequest <- Client.parseRequest url
         response <- Client.httpLbs myrequest mymanager
-        let response_html = Client.responseBody response
-        return response_html
+        let status_code = statusCode (Client.responseStatus response)
+        if status_code /= 200
+            then do
+                putStrLn "\nStatus code is not 200. Exiting..."
+                throwIO StatusCodeException
+            else do
+                let response_html = Client.responseBody response
+                return response_html
     return result
 
 

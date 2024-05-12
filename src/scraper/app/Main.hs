@@ -20,13 +20,15 @@ import Lib
 main :: IO ()
 main = do
 
-    -- let test_urls = ["https://www.baeldung.com/java-unit-test-private-methods", "https://eli.thegreenplace.net/2018/type-erasure-and-reification/", "https://docs.python.org/3/tutorial/datastructures.html"]
+    -- let test_urls = ["https://www.baeldung.com/java-unit-test-private-methods", "https://eli.thegreenplace.net/2018/type-erasure-and-reification/", "https://docs.python.org/3/tutorial/datastructures.html", "https://www.google.com/teapot"]
     -- InvalidUrlException, http exception and some other exception
-    let url = "hts://eli.thegreenplace.net/2018/type-erasure-and-reification/"
+    
+    let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
 
     case response_html of
-      Left e -> putStrLn $ "\nERROR! The following exception occured:\n\n" ++ show e
+      Left e -> do 
+        putStrLn $ "\nERROR! The following exception occured:\n\n" ++ head (words (show e)) ++ "\n"
       Right html -> do
         let parsed_tags = parseTheTags html
         let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
