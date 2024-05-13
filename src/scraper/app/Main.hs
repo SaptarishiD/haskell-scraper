@@ -35,53 +35,36 @@ main = do
       Right myhtml -> do
         let parsed_tags = parseTheTags myhtml
         let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+        
 
         let lang_train = "input/lang_train.txt"
         let code_train = "input/code_train.txt"
-
         mydata <- Lib.readTraining lang_train code_train
         let natural_data = fst mydata
         let source_data = snd mydata
         let trainedModel = Lib.trainNaiveBayes natural_data source_data
 
 
-
-        lang_test <- readFile "input/lang_test.txt"
-        src_test <- readFile "input/code_test.txt"
-        let test_data = (lines src_test) ++ (lines lang_test)
-        print test_data
-
-
-        let final_probs = Lib.classifyNaiveBayes test_data trainedModel
-
-        let mapping = zip test_data final_probs
-
         
-        let src_test_len = length (lines src_test)
-        let lang_test_len = length (lines lang_test)
-        let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-        let test_accuracy_mapping = zip yTest final_probs
-
-        -- precision_code, recall_code, precision_lang, recall_lang
-        let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
-
-        print evals
-
-    print "DONE" {-
-        -- print mapping
-
+        -- lang_test <- readFile "input/lang_test.txt"
+        -- src_test <- readFile "input/code_test.txt"
+        -- let test_data = (lines src_test) ++ (lines lang_test)
+        -- print test_data
+        -- let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+        -- let mapping = zip test_data final_probs
+        -- let src_test_len = length (lines src_test)
+        -- let lang_test_len = length (lines lang_test)
+        -- let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+        -- let test_accuracy_mapping = zip yTest final_probs
+        -- -- precision_code, recall_code, precision_lang, recall_lang
+        -- let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
+        -- print evals
+      
 
     -- num_code_correct, num_lang_correct, num_code_wrong, num_lang_wrong, total_actual_code, total_actual_lang)
     --(91,22,0,28,91,50)
     -- (precision_code, recall_code, precision_lang, recall_lang)
     -- (0.7647058823529411,1.0,1.0,0.44)
-
-
-
-    -- print mapping
-
-    -- print test_accuracy_mapping
-
 
 
     -- can have smth like every sequence of 0s or 1s is separated by a newline to demarcate separate segments or smth
@@ -90,12 +73,14 @@ main = do
 
     -- need error percentages and other stuff like recall precision and stuff so that can make nice tables and stuff. Also need to cross-validate stuff
 
+        let final_probs = Lib.classifyNaiveBayes splitted trainedModel
+        let mapping = zip splitted final_probs
+        let code_class = [x | x <- mapping, snd x == 0]
+        let lang_class = [x | x <- mapping, snd x == 1]
+        writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
+        writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
 
-    -- let code_class = [x | x <- mapping, snd x == 0]
-    -- let lang_class = [x | x <- mapping, snd x == 1]
-    -- writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
-    -- writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
-
+        print "DONE" {-
 
 -}
 
