@@ -1,0 +1,39 @@
+Haskell
+Functional Programming (FP) and Object Oriented Programming (OOP) are the two most important programming paradigms in use today. In this article, we'll discuss these two different programming paradigms and compare their key differences, strengths and weaknesses. We'll also highlight a few specific ways Haskell fits into this discussion. Here's a quick outline if you want to skip around a bit!
+
+What is a Programming Paradigm?
+The Object Oriented Paradigm
+The Functional Paradigm
+Functional Programming vs. OOP
+OOP Languages
+FP Languages
+Advantages of Functional Programming
+Disadvantages of Functional Programming
+A Full Introduction to Haskell
+What is a Programming Paradigm?
+A paradigm is a way of thinking about a subject. It's a model against which we can compare examples of something.
+
+In programming, there are many ways to write code to solve a particular task. Our tasks normally involve taking some kind of input, whether data from a database or commands from a user. A program's job is then to produce outputs of some kind, like updates in that database or images on the user's screen.
+
+Programming paradigms help us to organize our thinking so that we can rapidly select an implementation path that makes sense to us and other developers looking at the code. Paradigms also provide mechanisms for reusing code, so that we don't have to start from scratch every time we write a new program.
+
+The two dominant paradigms in programming today are Object Oriented Programming (OOP) and Functional Programming (FP).
+
+The Object Oriented Paradigm
+In object oriented programming, our program's main job is to maintain objects. Objects almost always store data, and they have particular ways of acting on other objects and being acted on by other objects (these are the object's methods). Objects often have mutable data - many actions you take on your objects are capable of changing some of the object's underlying data.
+
+Object oriented programming allows code reuse through a system called inheritance. Objects belong to classes which share the same kinds of data and actions. Classes can inherit from a parent class (or multiple classes, depending on the language), so that they also have access to the data from the base class and some of the same code that manipulates it.
+
+The Functional Paradigm
+In functional programming, we think about programming in terms of functions. This idea is rooted in the mathematical idea of a function. A function in math is a process which takes some input (or a series of different inputs) and produces some kind of output. A simple example would be a function that takes an input number and produces the square of that number. Many functional languages emphasize pure functions, which produce the exact same output every time when given the same input.
+
+In programming, we may view our entire program as a function. It is a means by which some kind of input (file data or user commands), is transformed into some kind of output (new files, messages on our terminal). Individual functions within our program might take smaller portions of this input and produce some piece of our output, or some intermediate result that is needed to eventually produce this output.
+
+In functional programming, we still need to organize our data in some way. So some of the ideas of objects/classes are still used to combine separate pieces of data in meaningful ways. However, we generally do not attach "actions" to data in the same way that classes do in OOP languages.
+
+Since we don't perform actions directly on our data, functional languages are more likely to use immutable data as a default, rather than mutable data. (We should note though that both paradigms use both kinds of data in their own ways).
+
+Functional Programming vs. OOP
+The main point of separation between these paradigms is the question of "what is the fundamental building block of my program?" In object oriented programming, our programs are structured around objects. Functions are things we can do to an object or with an object.
+
+In functional programming, functions are always first class citizens - the main building block of our code. In object oriented programming, functions can be first class citizens, but they do not need to be. Even in languages where they can be, they often are not used in this way, since this isn't as natural within the object oriented paradigm.

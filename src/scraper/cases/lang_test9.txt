@@ -1,0 +1,32 @@
+Java
+I have been working with Java a couple of years, but up until recently I haven't run across this construct:
+This is probably a very simple question, but can someone explain it? How do I read it? I am pretty sure I know how it works.
+if isHere is true, getHereCount() is called,
+if isHere is false getAwayCount() is called.
+Correct? What is this construct called?
+Yes, it is a shorthand form of
+Yes, it is a shorthand form of
+
+int count;
+if (isHere)
+    count = getHereCount(index);
+else
+    count = getAwayCount(index);
+It's called the conditional operator. Many people (erroneously) call it the ternary operator, because it's the only ternary (three-argument) operator in Java, C, C++, and probably many other languages. But theoretically there could be another ternary operator, whereas there can only be one conditional operator.
+
+The official name is given in the Java Language Specification:
+
+§15.25 Conditional Operator ? :
+The conditional operator ? : uses the boolean value of one expression to decide which of two other expressions should be evaluated.
+
+Note that both branches must lead to methods with return values:
+
+It is a compile-time error for either the second or the third operand expression to be an invocation of a void method.
+
+In fact, by the grammar of expression statements (§14.8), it is not permitted for a conditional expression to appear in any context where an invocation of a void method could appear.
+Java Program to Find Inverse of a Matrix
+This is the java program to find the inverse of square invertible matrix. The matrix is invertible if its determinant is non zero.
+Here is the source code of the Java Program to Find Inverse of a Matrix. The Java program is successfully compiled and run on a Windows system. The program output is also shown below.
+
+
+

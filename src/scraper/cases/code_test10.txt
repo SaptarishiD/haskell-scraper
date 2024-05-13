@@ -1,0 +1,58 @@
+
+# Quick examples of inverse matrix
+
+import numpy as np
+
+# Example 1:Use numpy.linalg.inv() 
+# Calculate the inverse of the matrix
+inverse_matrix = np.linalg.inv(arr)
+
+# Example 2: Using scipy.linalg.inv()
+# Calculate the inverse of the matrix 
+inverse_matrix = inv(arr)
+
+# Example 3: Use np.linalg.inv() function 
+arr = np.array([[[2., 6.], [5., 8.]], 
+                [[3, 7], [4, 1]]])
+arr2 = np.linalg.inv(arr)
+
+# Import numpy
+import numpy as np
+
+# Creating an input array  
+arr = np.array([[7, 2,], [3, -5]])
+print("Original Matrix:\n",arr)
+               
+# Use numpy.linalg.inv() 
+# Calculate the inverse of the matrix
+inverse_matrix = np.linalg.inv(arr)
+print("After getting the inverse of a matrix:\n",inverse_matrix)
+import numpy as np
+from scipy.linalg import inv
+
+# Creating an input array  
+arr = np.array([[7, 2,], [3, -5]])
+print("Original Matrix:\n",arr)
+
+# Using scipy.linalg.inv()
+# Calculate the inverse of the matrix 
+inverse_matrix = inv(arr)
+print("After getting the inverse of a matrix:\n",inverse_matrix)
+import numpy as np
+
+# Inverse of 4X4 matrix   
+arr = np.array([[[2., 6.], [5., 8.]],
+               [[3, 7], [4, 1]]])
+print("Original Matrix:\n",arr)
+
+# Use np.linalg.inv() function 
+inverse_matrix = np.linalg.inv(arr)
+print("After getting the inverse of a matrix:\n",inverse_matrix)
+
+# Output:
+# After getting the inverse of a matrix:
+#  [[[-0.57142857  0.42857143]
+#  [ 0.35714286 -0.14285714]]
+
+# [[-0.04        0.28      ]
+#  [ 0.16       -0.12      ]]]
