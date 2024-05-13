@@ -101,25 +101,32 @@ evaluateNaiveBayes mydata =
 
 
 
-classifyNaiveBayes :: String -> String -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
-classifyNaiveBayes lang_test src_test trainedModel =
-    let lang_test_data = lines lang_test
-        src_test_data = lines src_test
-
-        vocab = snd trainedModel
+classifyNaiveBayes :: [String] -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
+classifyNaiveBayes test_data trainedModel =
+    let vocab = snd trainedModel
         
-        xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))
-        xTest_lang = (NLA.toLists (myVectorizer vocab (lang_test_data)))
-
-        src_test_len = length (xTest_src)
-        lang_test_len = length (xTest_lang)
-
-        yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-
-        xTest = xTest_src ++ xTest_lang
+        -- lang_test_data = lines lang_test
+        -- src_test_data = lines src_test
 
 
-        y = NLA.fromLists [(replicate (src_test_len + lang_test_len) (int2Double 0))]
+        -- test_data = src_test_data ++ lang_test_data
+        xTest = (NLA.toLists (myVectorizer vocab (test_data)))
+
+        
+        -- xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))
+        -- xTest_lang = (NLA.toLists (myVectorizer vocab (lang_test_data)))
+
+        -- src_test_len = length (xTest_src)
+        -- lang_test_len = length (xTest_lang)
+
+        -- yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+
+        -- xTest = xTest_src ++ xTest_lang
+
+        test_len = length xTest
+
+
+        y = NLA.fromLists [(replicate (test_len) (int2Double 0))]
 
         -- [Double]
 

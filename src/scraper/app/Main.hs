@@ -25,7 +25,7 @@ main = do
 
     -- let test_urls = ["https://www.baeldung.com/java-unit-test-private-methods", "https://eli.thegreenplace.net/2018/type-erasure-and-reification/", "https://docs.python.org/3/tutorial/datastructures.html", "https://www.google.com/teapot"]
     -- InvalidUrlException, http exception and some other exception
-    
+
     let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
     response_html <- getHTML url
 
@@ -42,19 +42,21 @@ main = do
         mydata <- Lib.readTraining lang_train code_train
         let natural_data = fst mydata
         let source_data = snd mydata
-
-
         let trainedModel = Lib.trainNaiveBayes natural_data source_data
+
+
 
         lang_test <- readFile "input/lang_test.txt"
         src_test <- readFile "input/code_test.txt"
-
-        let final_probs = Lib.classifyNaiveBayes lang_test src_test trainedModel
-
-
+        let test_data = (lines src_test) ++ (lines lang_test)
+        print test_data
 
 
-        let mapping = zip (lines src_test ++ lines lang_test) final_probs
+        let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+
+        let mapping = zip test_data final_probs
+
+        
         let src_test_len = length (lines src_test)
         let lang_test_len = length (lines lang_test)
         let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
@@ -65,9 +67,8 @@ main = do
 
         print evals
 
-        -- print mapping
-
     print "DONE" {-
+        -- print mapping
 
 
     -- num_code_correct, num_lang_correct, num_code_wrong, num_lang_wrong, total_actual_code, total_actual_lang)
@@ -90,10 +91,11 @@ main = do
     -- need error percentages and other stuff like recall precision and stuff so that can make nice tables and stuff. Also need to cross-validate stuff
 
 
-    let code_class = [x | x <- mapping, snd x == 0]
-    let lang_class = [x | x <- mapping, snd x == 1]
-    writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
-    writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
+    -- let code_class = [x | x <- mapping, snd x == 0]
+    -- let lang_class = [x | x <- mapping, snd x == 1]
+    -- writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
+    -- writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
+
 
 -}
 
