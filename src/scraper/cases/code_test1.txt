@@ -27,22 +27,18 @@ typedef struct Frob_t {
         objects[0] = 5;
       }
     }
-
     Exception in thread "main" java.lang.ArrayStoreException: java.lang.Integer
         at Main.main(Main.java:5)
-
     struct Base {
       virtual void basefunc() {
         printf("basefunc\n");
       }
     };
-
     struct Derived : public Base {
       void derivedfunc() {
         printf("derived\n");
       }
     };
-
     void call_derived(Base* b) {
       Derived* d = dynamic_cast<Derived*>(b);
       if (d != nullptr) {
@@ -51,18 +47,14 @@ typedef struct Frob_t {
         printf("cast failed\n");
       }
     }
-
     int main() {
       Derived d;
       call_derived(&d);
-
       Base b;
       call_derived(&b);
     }
-
     import java.util.List;
     import java.util.ArrayList;
-
     class Main {
       public static void main(String[] args) {
         List<String> list = new ArrayList<String>();
@@ -71,10 +63,8 @@ typedef struct Frob_t {
         System.out.println(x);
       }
     }
-
     import java.util.List;
     import java.util.ArrayList;
-
     class Main {
       public static void main(String[] args) {
         List list = new ArrayList();
@@ -83,7 +73,6 @@ typedef struct Frob_t {
         System.out.println(x);
       }
     }
-
     class Foo:
       def bar(self): pass
 

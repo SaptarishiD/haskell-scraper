@@ -128,7 +128,7 @@ classifyNaiveBayes test_data trainedModel =
 
 
         -- test_data = src_test_data ++ lang_test_data
-        xTest = (NLA.toLists (myVectorizer vocab (filter (not . null) test_data)))
+        xTest = (NLA.toLists (myVectorizer vocab test_data))
 
         
         -- xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))

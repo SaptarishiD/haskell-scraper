@@ -19,7 +19,7 @@ import Lib
 
 
 -- maybe can fix the old not matching errors with this let in stuff instead of let and return cause same errors were happening
-
+-- maybe mention that the training and testing data don't have any empty lines so everything has been put close together with newlines
 main :: IO ()
 main = do
 
@@ -55,14 +55,14 @@ main = do
         -- lang_test <- readFile "input/lang_test.txt"
         -- src_test <- readFile "input/code_test.txt"
 
-        src_test <- readFile "cases/code_test5.txt"
-        lang_test <- readFile "cases/lang_test5.txt"
+        src_test <- readFile "cases/code_test6.txt"
+        lang_test <- readFile "cases/lang_test6.txt"
 
         -- print (filter (not . null) (lines src_test))
 
         
 
-        let test_data = filter (not . null) ( (lines src_test) ++ (lines lang_test) )
+        let test_data = (lines src_test) ++ (lines lang_test)
         -- print test_data
         let final_probs = Lib.classifyNaiveBayes test_data trainedModel
         -- print (filter (not . null) test_data)
