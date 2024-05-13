@@ -246,7 +246,7 @@ sumCols :: NLA.Matrix Double -> [Double]
 sumCols matrix = map sum (NLA.toLists (NLA.tr matrix))
 
 calcXGivenY :: Int -> [Double] -> [Double]
-calcXGivenY mylen my_cols_len =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_len
+calcXGivenY mylen my_cols_sum =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_sum
 
 
 
@@ -391,9 +391,9 @@ writeToTxt preTags filepath = do
 
 writeToDocx :: String -> String -> IO ()
 writeToDocx filepath lang_class  = do
-    pandocNoPre <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
+    pandoc_lang <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
 
-    case pandocNoPre of
+    case pandoc_lang of
         Right x -> do
             y <- runIO $ writeDocx def x
             case y of
@@ -402,7 +402,7 @@ writeToDocx filepath lang_class  = do
 
                 Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
 
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc for non pre tags: " ++ show err
+        Left err -> Prelude.putStrLn $ "Error parsing pandoc for natural language " ++ show err
 
     putStrLn "Completed writing to docx"
 
