@@ -34,15 +34,24 @@ main = do
         putStrLn $ "\nERROR! The following exception occured:\n\n" ++ head (words (show e)) ++ "\n"
       Right myhtml -> do
         let parsed_tags = parseTheTags myhtml
-        let splitted = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
+        let text_source = preProc (splitOnNewline (concat (getWords (getText parsed_tags))))
         
 
         let lang_train = "input/lang_train.txt"
         let code_train = "input/code_train.txt"
         mydata <- Lib.readTraining lang_train code_train
-        let natural_data = fst mydata
-        let source_data = snd mydata
-        let trainedModel = Lib.trainNaiveBayes natural_data source_data
+        let lang_data = fst mydata
+        let code_data = snd mydata
+        let trainedModel = Lib.trainNaiveBayes lang_data code_data
+
+        let final_classes = Lib.classifyNaiveBayes text_source trainedModel
+        let mapping = zip text_source final_classes
+        let code_class = [x | x <- mapping, snd x == 0]
+        let lang_class = [x | x <- mapping, snd x == 1]
+        writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
+        writeToDocx "output_files/NB_lang_class.docx" (unlines (map fst lang_class))
+        
+        -- writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
 
 
         
@@ -73,12 +82,7 @@ main = do
 
     -- need error percentages and other stuff like recall precision and stuff so that can make nice tables and stuff. Also need to cross-validate stuff
 
-        let final_probs = Lib.classifyNaiveBayes splitted trainedModel
-        let mapping = zip splitted final_probs
-        let code_class = [x | x <- mapping, snd x == 0]
-        let lang_class = [x | x <- mapping, snd x == 1]
-        writeFile "output_files/NB_lang_class.txt" (unlines (map fst lang_class))
-        writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
+
 
         print "DONE" {-
 

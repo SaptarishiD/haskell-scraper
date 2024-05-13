@@ -389,10 +389,9 @@ writeToTxt preTags filepath = do
     putStrLn "Completed writing to txt"
 
 
-writeToDocx :: [Soup.Tag String] -> String -> IO ()
-writeToDocx nonPreTags filepath = do
-    let htmlNonPre = Soup.renderTags nonPreTags
-    pandocNoPre <- runIO $ readHtml def ( TextConv.convertText (htmlNonPre :: String ) :: T.Text )
+writeToDocx :: String -> String -> IO ()
+writeToDocx filepath lang_class  = do
+    pandocNoPre <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
 
     case pandocNoPre of
         Right x -> do
