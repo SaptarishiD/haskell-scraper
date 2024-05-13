@@ -8,6 +8,14 @@
 
 \usepackage{tcolorbox}
 \usepackage{hyperref}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+
+\DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
+
+\newcommand{\pr}{\mathbb{P}}
 
 \hypersetup{
     bookmarks=false,    % show bookmarks bar?
@@ -174,7 +182,7 @@ Here it becomes useful to extract just the code or just the natural language sep
 
 
 
-Reseachers have used various methods to identify and distinguish code and natural language text, some of which I will discuss below. \\
+Researchers have used various methods to identify and distinguish code and natural language text, some of which I will discuss below. \\
 \\ Bacchelli et. al \cite{bachemail} attempted to extract source code from developer emails by first identifying emails that contained source code and then identifying code blocks by using regular expressions. The approach was very lightweight and programming language specific, with the use of end-of-line characters like semi-colons in order to find source code lines. \\ Bacchelli et. al \cite{bachcontent} also used Naive Bayes with bigrams, in combination with island parsing for classifying pieces of development emails as various categories like code, natural language, stack trace, patch or junk. It reached an accuracy ranging between 89 and 94 \% but, the source code island parser was specific to Java, which the authors acknowledged and stated that the approach could be easily generalized to other language as well. \\ Chatterjee et. al \cite{chattter} focused on extracting the code segments along with their natural language descriptions from research articles using various detailed linguistic and structural heuristics to identify important features to identifying sentences that would be relevant to code segments \\ Cerulo et. al \cite{cerulohmm} used an approach based on Hidden Markov Models (HMMs) for extracting "information islands" of code from natural language by recognising whether the sequence of observed strings would change between the source code and natural language states of the HMM. While this approach did not require parsing or complicated regular expressions, it only performed classification of tokens into code or text, and not further knowledge extraction in the form of an abstract syntax tree.\\
 \\ The Naive Bayes approach for text classification also has a long history and it is extensively used even today despite it's simplicity and strong assumptions. \\
 \\ ADD STUFF HERE!!!!!!!!!!!!!
@@ -254,6 +262,20 @@ Following from the analysis, the system will classify text sources on a line lev
 
 The broad methodology is to train a Naive Bayes classifier on some custom training data consisting of natural language and source code, and then using the calculated probabilities to classify each line in the given text source as being code or natural language, and then separating them based on that. A brief overview of Naive Bayes is given below.
 \subsection{Naive Bayes}
+Our main goal with Naive Bayes is to find, for each line in the text source, the best class (code or natural language) for it. That is, for each line $l$ made of some $t_k$ terms and class $c$, we want to find \\ $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c \pr(c | t_1, t_2, ... t_k)$. Instead of just considering the terms occuring in the line, we will consider all words in the vocabulary from now and see if they are occuring in the line or not.\\
+\\ First we consider the vocabulary of all the words in the training data. Now for each line in the text source, we have a binary feature vector whose elements are set to 1 if a word in the vocabulary occurs in that line, otherwise being set to 0. That is, if there are $n$ words in the vocabulary, then the feature vector $l_i$ corresponding to the $i$-th line will have $l_{ij} = 1$ if the $j$-th word from vocabulary occurs in the $i$-th line, otherwise being 0.\\
+\\ Now we want to calculate $\mathbb{P}(l_i | y)$ where $y$ is a particular class like code or natural language. We make the strong Naive Bayes assumption that all the $l_{ij}$'s are conditionally independent given the class $y$. This is clearly not true in practice, but even with this assumption we get good performance. 
+Moreover, we consider each line as an unordered Bag of Words where word position doesn't matter and only it's frequency matters, which is another strong assumption that doesn't impact performance that much.\\
+\\ Hence $\mathbb{P}(l_{i1}...l_{in} | y)$ = $\prod_{j=1}^{n} \mathbb{P}(l_{ij} | y)$. \\
+\\ Considering a particular line $l$ and using Bayes Rule we get:\\
+\\  $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c \pr(l | c) \times \pr(c)  = \argmax_c  \pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c) $.\\
+\\ Usually, the probability numbers computed are very small, so we work in the logspace by using the natural logarithm to avoid issues with numerical underflow.\\
+
+$\therefore \hat{c} =  \argmax_c \log \pr(c | l) = \argmax_c \log \pr(l | c) \times \pr(c) = \argmax_c  \log \pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c)  \\
+\\ = \argmax_c (\log \pr(c) + \sum_{j=1}^{n} \pr(l_{j} | c)) $\\
+\\ \textbf{How to calculate these terms?}\\
+\\ We calculate $\pr(c)$ by just calculating what percentage of the training data belongs to that particular class. For each $\pr(l_j|c)$, we calculate the probability of the $j$-th word in the vocabulary being in the class $c$ by counting the number of times that word occurs in the class $c$ and dividing by the total number of words in the class $c$. Using a form of Laplace smoothing, we add small decimal numbers $\alpha$ and $\beta$ in the numerator and denominator to avoid 0 probability in case of completely unseen words for the unseen data.\\
+\\ Hence $\pr(l_j|c) = \dfrac{count(l_j, c) + \alpha}{\beta + \sum_{j=1}^{n} count(l_j, c)}$
 
 
 
@@ -317,7 +339,7 @@ A more detailed description of the \textbf{high-level design} which implements t
 
 
 
-    \item \textbf{Separatation Pipeline Section : }
+    \item \textbf{Separation Pipeline Section : }
     \begin{enumerate}
         \item Split the given text source into lines which will be considered as separate "documents" by the trained classificaton model.
         \item Classify each different line as source code or natural language text depending on which class has the higher posterior probability given that line
@@ -359,18 +381,22 @@ The lower level implementation details are mentioned in the implementations sect
 
 % ?????????????????????????
 
-% \begin{verbatim}
-% scraper
-% |-- app
-% |   | -- Main.hs (main driver code)
-% |-- src
-% |   |-- Lib.hs (implementation of functions)
-% |-- output_files
-% |   | -- final_code.txt (delimited code snippets)
-% |   | -- final_text.docx (textual content)
+\begin{verbatim}
+scraper
+|-- app
+|   | -- Main.hs (main driver code)
+|-- test
+|   |-- Spec.hs (tests)
+|-- src
+|   |-- Lib.hs (implementation of functions)
+|-- input
+|   | -- lang_train.txt (training data)
+|   | -- code_train.txt (training data)
+|-- output_files
+|   | -- NB_code_class.txt (code snippets)
+|   | -- NB_lang_class.docx (textual content)
 
-
-% \end{verbatim}
+\end{verbatim}
 
 
 
@@ -380,94 +406,137 @@ The lower level implementation details are mentioned in the implementations sect
 
 
 \section{Features and limitations}
-
-The prototype correctly identifies the code and text portions of the web page and writes them into the \texttt{.txt} and \texttt{.docx} files as per the requirements and specifications. 
+% why mentioning this here?
+The system correctly identifies the code and text portions of the web page and writes them into the \texttt{.txt} and \texttt{.docx} files as per the requirements and specifications. 
 
 \subsubsection{Limitations}
 
-
-
 \begin{enumerate}
-            \item The prototype has not been robustly tested, verified for correctness or structured to handle errors. However, this can be developed while making the final system since the prototype is already relatively modular.
-            \item Since the HTML structure of different web pages can vary, it is not necessary that this particular scraper will work for all web pages. It is designed specifically for the given page and may work for some other pages. But no generalisation can be made about the correctness of its text and code extraction for other pages.
-            \item Moreover, it will not necessarily work for web pages with malformed HTML or different structure.
-            \item It is not designed to be robust to design changes, which is in line with the \href{https://hackage.haskell.org/package/tagsoup-0.6/src/tagsoup.htm#:~:text=Rule%202%3A%0ADo%20not%20be%20robust%20to%20design%20changes%2C%20do%20not%20even%20consider%20the%20possibility%20when%20writing%20the%20code.}{rule} stated on the \texttt{tagsoup} library's documentation example, since the website's HTML can change in unpredictable ways. If the site's HTML structure changes, for instance if the code snippets change from being enclosed in \texttt{<pre>} tags to \texttt{<code>} tags, then the scraper will not be able to separate out the code from the text and extract them accurately.
-            \item It clearly does not work with text sources that are not HTML formatted web pages.
+    \item As mentioned, the system works on the granularity of a line and not a deeper token level granularity. Hence it can only attempt to classify whether a whole line is natural language or source code, without being able classify individual words or phrases within a line as being of a different class.
+    \item Moreover, it cannot be used effectively in the case that the text source has data that is not separated by newlines, since each line is a document that needs to be classified here. However, these cases are relatively rare since most instances where code and natural language are found interspersed, there is some degree of organisation in terms of newline-separation.
+    \item Since the system is relatively simplistic and unoptimized, along with the fact that it works on the Naive Bayes assumption of independence between features, it may not work well compared to other heavyweight methods in terms of accuracy. 
 \end{enumerate}
 
-
-\newpage 
 \section{Core Implementation Details}
 
-Some important code and data features are shown that showcase the core implementation details of the project.
+Some important code and data features that showcase the core implementation details of the project are shown.
 
 
 %  NEED TO HAVE A SECTION ABOUT THE DETAILS OF THE TRAINING DATA CAUSE THAT IS OBVIOUSLY ESSENTIAL TO THE SYSTEM
 
 \subsection{Main.hs}
 
-In-line with the design, architecture and choice of tools as mentioned above, the prototype obtains the HTML content of the url in line 2 and parses it into Tag Strings in line 3. Then we separate it into code tags and non-code textual tags in lines 4-6. Then we write the Tags to respective files in like 7-8.\\
-\\ The core structure of the \texttt{Main.hs} file is
-\begin{minted}{haskell}
+\subsubsection{Training and Main Classification Pipeline}
 
-    1. let url = "https://eli.thegreenplace.net/2018/type-erasure-and-reification/"
-    2. response_html <- getHTML url
-    3. let parsed_tags = parseTheTags response_html
-    4. let separated_text_code = separateTextCode parsed_tags
-    5. let preTags             = fst separated_text_code
-    6. let nonPreTags          = snd separated_text_code
-    7. writeToTxt preTags
-    8. writeToDocx nonPreTags
+In-line with the design, architecture and choice of tools as mentioned above, we first obtain the contents of the text source. Keeping in mind the assigned project statement that had a web page as text source, the user will supply input by giving a URL of the web page for which they wish the language and code to be separated. In principle, any text source can be used, which would just remove fetching the web page contents portion of the system. \\ 
+We first just get all the textual HTML content from the web page and split the content based on newline separators. \\ Everytime the system is called, training on the data will be done since we wish to keep the Naive Bayes classifier dynamic in terms of the words in accounts for. Since training for Naive Bayes is cheap, this can be done without much additional cost.\\
+\\ In the below code, we train the Naive Bayes Classifier, then predict the classes of every line of the text source and finally separate the text and the code into \ttt{.txt} and \ttt{.docx} files.
 
-\end{minted}
+\begin{minted}[%
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
+    -- text_source is newline separated list of lines of the text_source
+    let lang_train = "input/lang_train.txt"
+    let code_train = "input/code_train.txt"
+    mydata <- Lib.readTraining lang_train code_train
+    let lang_data = fst mydata
+    let code_data = snd mydata
+    let trainedModel = Lib.trainNaiveBayes lang_data code_data
+
+    let final_classes = Lib.classifyNaiveBayes text_source trainedModel
+    let mapping = zip text_source final_classes
+    let code_class = [x | x <- mapping, snd x == 0]
+    let lang_class = [x | x <- mapping, snd x == 1]
+    writeFile "output_files/NB_code_class.txt" (unlines (map fst code_class))
+    writeToDocx "output_files/NB_lang_class.docx" (unlines (map fst lang_class))
+   \end{minted}
+   
+
+\subsubsection{Evaluating the Classifier}
+
+We use various test sets to evaluate the performance of the classifier on various metrics, which will be further discussed in the Results section. 
+%  add various multiple kinds of test cases that have different kinds of languages and stuff
+
+\begin{minted}[%
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
+    -- text_source is newline separated list of lines of the text_source
+    lang_test <- readFile "input/lang_test.txt"
+    src_test <- readFile "input/code_test.txt"
+    let test_data = (lines src_test) ++ (lines lang_test)
+    print test_data
+    let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+    let mapping = zip test_data final_probs
+    let src_test_len = length (lines src_test)
+    let lang_test_len = length (lines lang_test)
+    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    let test_accuracy_mapping = zip yTest final_probs
+    -- precision_code, recall_code, precision_lang, recall_lang
+    let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
+   \end{minted}
+   
+
+
 
 \subsection{Lib.hs}
 
-\subsubsection{Imports and pragmas}
+\subsubsection{trainNaiveBayes}
+
+This takes the natural language and source code training data and returns the prior probability of a word being a source code word, the conditional probabilities and the vocabulary based on the training data. The description of the helper functions is given later on below. 
 
 \begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-{-# LANGUAGE OverloadedStrings #-}
-import qualified Network.HTTP.Client as Client
-import qualified Network.HTTP.Client.TLS as ClientTLS
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
 
-import qualified Text.HTML.TagSoup as Soup
-import Text.Pandoc
+-- NLA refers to the hmatrix library
+trainNaiveBayes :: [String] -> [String] -> (( Double, ([Double] , [Double]) ), Vocabulary )
+trainNaiveBayes natural_data source_data = 
+    let source_words = concat (getWords source_data)
+        natural_words = concat (getWords natural_data)
+        unique_src_words = getUniqueWords source_words
+        unique_natural_words = getUniqueWords natural_words
+        vocab = unique_src_words ++ unique_natural_words
 
-import qualified Data.Text.Conversions as TextConv
-import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
-import qualified Data.ByteString.Lazy as LBS
-import qualified Data.ByteString.Lazy.Char8 as LBSC
+        -- source_data is an array of strings, where each string represents a new line in the file. So here each line here is a document here. 
+        xTrain_src = myVectorizer vocab (source_data)
+        xTrain_lang = myVectorizer vocab (natural_data)
 
-\end{minted}
+        sourceCodeMatrix = xTrain_src
+        naturalLanguageMatrix = xTrain_lang
 
-\subsubsection{getHTML}
-\texttt{getHTML} takes the url as input and sets up a new TLS manager with \texttt{newTlsManager}, parses the url with \texttt{parseRequest} and then executes the request with \texttt{httpLbs}. \\ Then it gets the HTML content from the response using \texttt{responseBody}.
+        -- NLA.Matrix Double -> [Int]
+        sum_src_cols = sumCols sourceCodeMatrix
+        sum_lang_cols = sumCols naturalLanguageMatrix
 
-\begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-getHTML :: String -> IO LBSC.ByteString
-getHTML url = do
-    mymanager <- ClientTLS.newTlsManager
-    myrequest <- Client.parseRequest url
-    response <- Client.httpLbs myrequest mymanager
-    let response_html = Client.responseBody response
-    return response_html
+
+        src_len = length source_data
+        natural_len = length natural_data
+
+        xgivenY_src = calcXGivenY src_len sum_src_cols
+        xgivenY_lang = calcXGivenY natural_len sum_lang_cols
+
+        prob_src_prior = (int2Double src_len) / (int2Double src_len + fromIntegral natural_len)
+
+    in ((prob_src_prior, (xgivenY_src,xgivenY_lang)), vocab )
+    
     
 \end{minted}
 
@@ -475,126 +544,109 @@ getHTML url = do
 
 
 
+\subsubsection{classifyNaiveBayes}
 
+It takes the lines of the text source that we have to classify, along with the output of the trained Naive Bayes Model. Due to the conditional probabilities being very small numbers, we work in the logspace to prevent issues due to numerical underflow, as is the case with most Naive Bayes implementations. \\ 
+\\ TODO!!!!!!!!!!!!!!!!!!!!!!!!!
 
-\subsubsection{parseTheTags}
-\texttt{parseTheTags} takes the HTML ByteString and parses it into a list of Tag Strings using \texttt{parseTags} from Tagsoup.
 
 \begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
-parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
+   
+       
+-- NLA refers to the hmatrix library
+classifyNaiveBayes :: [String] -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
+classifyNaiveBayes test_data trainedModel =
+    let vocab = snd trainedModel
+        xTest = (NLA.toLists (myVectorizer vocab (test_data)))
+        test_len = length xTest
+        y = NLA.fromLists [(replicate (test_len) (int2Double 0))]
+
+        -- [Double]
+        xgivenY_src = fst (snd (fst trainedModel))
+        xgivenY_lang = snd (snd (fst trainedModel))
+        prob_src_prior = fst (fst trainedModel)
+
+        log_src = map log xgivenY_src
+        log_lang = map log xgivenY_lang
+
+        log_matrix = NLA.tr (NLA.fromLists [log_src, log_lang])
+
+        -- [Double,Double]
+        -- print (map typeOf (head (DM.toLists log_matrix)))
+
+        -- mult
+        prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
+
+        -- [Double,Double]
+        -- print (map typeOf (head (DM.toLists prob1)))
+        logp = log prob_src_prior
+        log_not_p = log (1 - prob_src_prior)
+
+        prob1_trans = NLA.toLists (NLA.tr prob1)
+
+        prob2 = map (\x -> x + logp) (head prob1_trans)
+        prob3 = map (\x -> x + log_not_p) (head (tail prob1_trans))
+
+        combined = [prob2, prob3]
+        combined_mat = NLA.tr (NLA.fromLists combined)
+        
+        final_probs = map (\x -> if (head x) > (head (tail x)) then 0 else 1) (NLA.toLists combined_mat)
+    in final_probs       
 \end{minted}
 
 
-
-
-
-
-
-\subsubsection{fillTrue}
-\texttt{fillTrue} is a helper function that fills in True for every element enclosed within a matching pair of True statements corresponding to an opening and closing \texttt{<pre>} tags
-
-\begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-fillTrue :: [Bool] -> [Bool]
-fillTrue [] = []
-fillTrue [a] = [a]
-fillTrue (False:False:xs) = False:fillTrue (False:xs)
-fillTrue (False:True:xs) = False:fillTrue (True:xs)
-
--- fill True for elements after a <pre> tag starts
-fillTrue (True:False:xs) = True:fillTrue (True:xs) 
-
--- seeing 2 consecutive Trues denotes end of <pre> tag, so skip them
-fillTrue (True:True:xs) = True:True:fillTrue (xs) 
-\end{minted}
-
-
-
-
-
-
-
-\subsubsection{insertNewlines}
-\texttt{insertNewLines} is a helper function that inserts a TagText for a delimiter before every closing \texttt{<pre>} tag for formatting purposes 
+\subsubsection{Important Helpers}
+\begin{enumerate}
+    \item \ttt{myVectorizer : } gives a matrix where each row corresponds to a document i.e. line and each column is a word in the vocabulary. So an entry $(i,j)$ represents the word count of word $j$ from the vocab in document $i$. If supplied empty lists then we return a dummy value.
+    \item \ttt{matrixRow : } It corresponds to one row in the above matrix. For each word in the vocabulary it gets the count of that word in the current document.
+    \item \ttt{wordCounts : } For a document, creates a mapping between each word in the document and the count of that word in the document.
+    \item \ttt{sumCols : } Finds the sum of every column in the matrix i.e. finds the total occurences of each word across all documents.
+    \item \ttt{calcXGivenY : } For each word in the vocabulary, we sum the number of times it has appeared in source code documents. We divide by the total number of source code documents to get the probability of each word being in source code. We do a similar thing for natural language. We add small decimal numbers as a form of Laplace smoothing to avoid 0 probability in case of completely unseen words for the unseen data.
+\end{enumerate}
 
 \begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-insertNewlines :: [Soup.Tag String] -> [Soup.Tag String]
-insertNewlines [] = []
-insertNewlines (x:xs) = if (Soup.isTagCloseName "pre" x)
-    then Soup.TagText "\n\n=======================\n\n":x:insertNewlines (xs)
-    else x:insertNewlines (xs)
-\end{minted}
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
+    myVectorizer :: Vocabulary -> [Document] -> NLA.Matrix Double
+    myVectorizer vocab docs
+        | vocab == [] = NLA.fromLists [[int2Double 0]] -- sinceFromlists doesn't accept empty lists
+        | docs == [] = NLA.fromLists [[int2Double 0]]
+        | otherwise = NLA.fromLists [matrixRow vocab doc | doc <- docs]
+
+    matrixRow :: Vocabulary -> Document -> [Double]
+    matrixRow vocab doc = [fromMaybe (int2Double 0) (lookup vocab_word mywordcounts) | vocab_word <- vocab]
+    where mywordcounts = wordCounts doc
+
+    wordCounts :: Document -> [(String, Double)]
+    wordCounts doc = Data.Map.toList $ fromListWith (+) [(oneword, int2Double 1) | oneword <- words doc]
+
+    sumCols :: NLA.Matrix Double -> [Double]
+    sumCols matrix = map sum (NLA.toLists (NLA.tr matrix))
+
+    calcXGivenY :: Int -> [Double] -> [Double]
+    calcXGivenY mylen my_cols_sum =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_sum
+
+   \end{minted}
 
 
-\subsubsection{separateTextCode}
-The idea of \texttt{separateTextCode} is as follows. Create a boolean list corresponding to every element of the list of Tag Strings. A boolean list element will be True if a Tag is a \texttt{<pre>} tag or within a \texttt{<pre>} tag. Then zip the boolean list with the original Tag list and get the Tags which have a correponding True value; this is the list of code tags. \\ Now mark elements to be true if the corresponding tags are \texttt{<img>} tags and create an overall boolean list which has false if the tag is not code and not an image. Extract the tags which have a false value; this is the list of non-code textual tags. \\ It essentially solves the parenthesization problem with the \ttt{<pre>} tags.
-
-\begin{minted}[%
- breaklines,
- mathescape,
- linenos,
- numbersep=5pt,
- frame=single,
- numbersep=5pt,
- xleftmargin=0pt,
- ]{haskell}
-separateTextCode :: [Soup.Tag String] -> ([Soup.Tag String], [Soup.Tag String])
-separateTextCode parsed_tags =
-    let bool_mapping_open = Prelude.map (Soup.isTagOpenName "pre") parsed_tags
-        bool_mapping_close = Prelude.map (Soup.isTagCloseName "pre") parsed_tags
-
-        -- do element-vise or of the two lists
-        bool_mapping1 =  Prelude.zipWith (||) bool_mapping_open bool_mapping_close
-
-        filled_true_pre = fillTrue bool_mapping1
-        combined_pre = Prelude.zip filled_true_pre parsed_tags
-        preTags = Prelude.map snd (Prelude.filter (fst) combined_pre)
-
-        bool_mapping_img_open = Prelude.map (Soup.isTagOpenName "img") parsed_tags
-        bool_mapping_img_close = Prelude.map (Soup.isTagCloseName "img") parsed_tags
-        bool_mapping2 =  Prelude.zipWith (||) bool_mapping_img_open bool_mapping_img_close
-
-        bool_mapping =  Prelude.zipWith (||) bool_mapping1 bool_mapping2
-
-        filled_true = fillTrue bool_mapping
-        -- zip parsed_tags list with the boolean list and Prelude.filter elements of the first list based on the second list to create tuple list
-        combined = Prelude.zip filled_true parsed_tags
-        -- get tags of tuples from combined where the boolean is false
-        nonPreTags = Prelude.map snd (Prelude.filter (\(a,_) -> not a) combined)
-
-    in (preTags, nonPreTags)
-
-
-\end{minted}
 
 
 \subsubsection{Writers to files}
-\texttt{writeToTxt} takes the code Tags and renders them as an HTML formatted string after delimiting the snippets. Then the string is converted into the Text type, which is then fed into \texttt{readHtml} which converts it into an intermediate Pandoc format.\\ \texttt{writePlain} converts this pandoc into Text, which is finally written to the \texttt{.txt} file. \\
-\\ \texttt{writeToDocx} takes the text Tags and renders them as an HTML formatted string. Then the string is converted into the Text type, which is then fed into \texttt{readHtml} which converts it into an intermediate Pandoc format.\\ \texttt{writeDocx} converts this pandoc into a ByteString, which is finally written to the \texttt{.txt} file. 
+\texttt{writeToDocx} takes the text that has been classified as natural language and writes it into a \texttt{.docx} file after some formatting in order to massage the text into a Pandoc-friendly format due to the absence of functionality to read a plainText document or string.
 
 \begin{minted}[%
  breaklines,
@@ -605,46 +657,52 @@ separateTextCode parsed_tags =
  numbersep=5pt,
  xleftmargin=0pt,
  ]{haskell}
-writeToTxt :: [Soup.Tag String] -> IO ()
-writeToTxt preTags = do
-    let htmlPre = Soup.renderTags (insertNewlines preTags)
-    pandocPre <- runIO $ readHtml def ( TextConv.convertText (htmlPre :: String ) :: T.Text )
-
-    case pandocPre of
-        Right x -> do
-            y <- runIO $ writePlain def x
-            case y of
-                Right direct_pan_pre -> do
-                    TIO.writeFile "output_files/final_code.txt" direct_pan_pre
-
-                Left err -> Prelude.putStrLn $ "Error with pandoc writePlain: " ++ show err
-
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc for pre tags: " ++ show err
-    
-    putStrLn "Completed writing to txt"
-
-
-writeToDocx :: [Soup.Tag String] -> IO ()
-writeToDocx nonPreTags = do
-    let htmlNonPre = Soup.renderTags nonPreTags
-    pandocNoPre <- runIO $ readHtml def ( TextConv.convertText (htmlNonPre :: String ) :: T.Text )
-
-    case pandocNoPre of
-        Right x -> do
-            y <- runIO $ writeDocx def x
-            case y of
-                Right direct_pan -> do
-                    LBS.writeFile "output_files/final_text.docx" direct_pan
-
-                Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
-
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc for non pre tags: " ++ show err
-
-    putStrLn "Completed writing to docx"
-
+ writeToDocx :: String -> String -> IO ()
+ writeToDocx filepath lang_class  = do
+     pandoc_lang <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
+ 
+     case pandoc_lang of
+         Right x -> do
+             y <- runIO $ writeDocx def x
+             case y of
+                 Right direct_pan -> do
+                     LBS.writeFile filepath direct_pan
+ 
+                 Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
+ 
+         Left err -> Prelude.putStrLn $ "Error parsing pandoc for natural language " ++ show err
+ 
+     putStrLn "Completed writing to docx"
 \end{minted}
 
-\newpage
+
+\newpage 
+\section{Training Data}
+
+Due to paucity of appropriate training data for this project, I curated my own small training dataset comprising of code and natural language that is typically seen accompanying the code. \\ I made sure to include a wide variety of programming languages in the source_code dataset to ensure wider generalisability. The statistics of the training data are given as follows, along with the sources where I took them from. The code was cleaned to remove comments and other non-code text.
+
+%  unskew this away from C
+
+%  can put a table here which summarises the training data
+
+% insert table here that has as headings the name of a programming language and the lines of code in the training dataset
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Programming Language} & \textbf{Lines of Code} & Source \\
+        \hline
+        C & 1171 & \href{https://github.com/karpathy/llm.c/blob/master/train_gpt2.c}{Andrej Karpathy's Github} \\
+        \hline
+        Python & 461 & \href{https://github.com/scikit-learn/scikit-learn/blob/main/sklearn/covariance/_robust_covariance.py}{Sklearn's Github} \\
+        \hline
+        Java & 201 & \href{https://github.com/jenkinsci/jenkins/tree/master}{Jenkins Github} \\
+        \hline
+    \end{tabular}
+    \caption{Training Data Statistics}
+    \label{tab:training-data}
+\end{table}
+
 
 
 \section{Challenges and Mitigations}
@@ -680,19 +738,11 @@ Only Haskell was used for the project as mentioned in the problem statement
     \item \href{https://docs.haskellstack.org/en/stable/}{Stack} is used as the build tool. This manages installing project dependencies, building and running the project and testing the project.
     
     % say that hmatrix was used cause fastest
-    \item \textbf{Libraries}:
+    \item \textbf{Notable Libraries}:
     \begin{enumerate}
-        \item 
-        % \item \texttt{Network.HTTP.Client.TLS} was chosen for handling HTTPS connections in order to use the \texttt{newTlsManager} function
-        % \item \texttt{Network.HTTP.Client} was chosen for parsing the url into a request, executing the request with the manager, and getting the body from the response. The functions used were \texttt{parseRequest, httpLbs, responseBody} respectively.
-        % \item \texttt{Tagsoup} was used to parse the HTML into a list of Tag Strings, and then also to convert the separated Tag Strings back into an HTML-formatted string . It was also used in a helper function that inserted a delimiter between the code snippets. The functions used were \texttt{parseTags, isTagOpenName, isTagCloseName, renderTags}, along with the \texttt{TagText} constructor and \texttt{Tag} for \texttt{Tag String}.
-        % \item \texttt{Pandoc} was used to read the HTML-formatted strings for both the code and the text into intermediate Pandoc representation. Then it was used to write the content into another intermediate string-like representation, which in turn was written into the final files with a standard library. The functions used were \texttt{readHtml, writePlain, writeDocx, runIO}.
-        % \item \texttt{Data.ByteString.Lazy.Char8} was used to convert the ByteString obtained from the response body into a string for further processing. The function used was \texttt{unpack}
-        % \item \texttt{Data.ByteString.Lazy} was used to write the ByteString obtained from the \texttt{writeDocx} function from \texttt{pandoc}, into the final \texttt{.docx} file. The function used was \texttt{writeFile}
-        % \item \texttt{Data.Text.Conversions} was used to convert the separated HTML strings into the \texttt{Text} type defined under \texttt{Data.Text}, so that it could be converted into intermediate pandoc representation by \texttt{readHtml}. The function used was \texttt{convertText}.
-        % \item \texttt{Data.Text} was used in order to use the \texttt{Text} type
-        % \item \texttt{Data.Text.IO} was used to write the Text obtained from the \texttt{writePlain} function from \texttt{pandoc}, into the final \texttt{.txt} file. The function used was \texttt{writeFile}
-        % \item The standard \texttt{Prelude} was used for various operations.
+        \item \textbf{hmatrix : } The fastest numerical linear algebra library that I could find in order to speed up the entire process, according to one benchmark. 
+        %  CITE THIS!!!!!!!
+        \item \textbf{hUnit : } The basic Haskell unit testing library
     \end{enumerate} 
 \end{enumerate}
 
@@ -712,43 +762,19 @@ Only Haskell was used for the project as mentioned in the problem statement
 \subsection{Test Suite Outline}
 
 \begin{enumerate}
-    \item \textbf{Unit Testing : } The following functions can be tested 
+    \item \textbf{Unit Testing : } The following functions were unit tested in the \ttt{Spec.hs} file
     \begin{enumerate}
+        \item \ttt{myVectorizer : }
+        \item \ttt{matrixRow : }
+        \item \ttt{wordCounts : }
+        \item \ttt{getWords : }
         \item \texttt{getHTML : }
+        \item \ttt{getUniqueWords}
+        \item \ttt{getHTML}
         \begin{enumerate}
             \item Test if the function returns the correct HTML for various URLs by using sample inputs and outputs.
             \item Test if the function gracefully handles invalid URLs with error handling.
             \item Test if the function handles network errors and HTTPS errors with error handling.
-        \end{enumerate}
-
-        \item \texttt{parseTheTags : }
-        \begin{enumerate}
-            \item Test if the function returns the correct list of Tag Strings for various HTML content.
-            \item Test if the function handles malformed HTML and erroneous inputs with error handling.
-        \end{enumerate}
-
-        \item \texttt{fillTrue : }
-        \begin{enumerate}
-            \item Test if the function correctly fills in True values for all elements within any two matching pair of True values corresponding to \texttt{<pre>} tags.
-            \item Test if the function handles edge cases with empty lists or single element lists.
-        \end{enumerate}
-
-        \item \texttt{insertNewLines : }
-        \begin{enumerate}
-            \item Test if the function correctly adds the delimiter before every closing \texttt{<pre>} tag.
-            \item Test if the function handles cases where there are no \texttt{<pre>} tags, or the Tag String is malformed 
-        \end{enumerate}
-
-        \item \texttt{separateTextCode : }
-        \begin{enumerate}
-            \item Test if the function correctly returns a tuple of two lists where one list has the Tag Strings corresponding to all the content enclosed within \texttt{<pre>} tags, and that the other list has all the other elements, excluding images.
-            \item Test edge cases of no \texttt{<pre>} tags, nested \texttt{<pre>} tags
-        \end{enumerate}
-
-        \item \texttt{writeToTxt : }
-        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
-        \begin{enumerate}
-            \item Test if the function correctly writes the content of the input Tag String with delimters to the \texttt{.txt} file using sample input output
         \end{enumerate}
 
         \item \texttt{writeToDocx : }
@@ -758,7 +784,9 @@ Only Haskell was used for the project as mentioned in the problem statement
         \end{enumerate}
 
     \end{enumerate}
+
     \item \textbf{Performance Testing : } 
+    % criterion and command line tools?
     \begin{enumerate}
         \item Test the time taken for the full system to execute from start to finish
         \item Test the resource consumption of the system
@@ -768,6 +796,11 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 
 \subsection{Test Report}
+
+\begin{enumerate}
+    \item \textbf{Unit Testing : }
+    
+\end{enumerate}
 
 
 
@@ -790,6 +823,8 @@ Only Haskell was used for the project as mentioned in the problem statement
 \chapter{Results and Discussions}
 
 The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language, along with the F-measure were calculated. We found that even with the highlight simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language.
+
+%  in the results can have one example of some natural language or code that gets misclassified
 
 %  graphs and stuff
 
