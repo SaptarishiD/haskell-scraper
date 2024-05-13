@@ -12,6 +12,10 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+% \renewcommand{\cleardoublepage}{}
+% \renewcommand{\clearpage}{}
+
+
 
 \DeclareMathOperator*{\argmax}{argmax} % thin space, limits underneath in displays
 
@@ -139,8 +143,13 @@
     \end{bfseries}
 \end{flushright}
 
+
+\newpage 
+
+
 \tableofcontents
 
+\newpage
 
 \chapter{Acknowledgements}
 
@@ -152,9 +161,9 @@ I would like to thank Professor Das for taking this Independent Study Module and
 %  cite stuff here cause references page is there and can't just say stuff in the air
 %  maybe some motivation part here can go into the motivation section instead of the intro 
 
-The large amounts of data in the form of interspersed code and natural language make it useful to extract knowledge from them in order to benefit various areas of software development. Examples like natural language comments accompanying code, stackoverflow questions and answers with code blocks, and developer emails containing discussions about code with reference to it are all important forms of such data. \\ 
-\\ INSERT STUFF HERE!!!!!!!\\   
-\\ For instance, extracting code and natural language separately from developer emails at a company can give key insights about how the company codebase has evolved and can help future developers access the code of emails directly. Separation of code and natural language is also helpful as training data for natural language and code completion models which can used the separated text and code to give better results. It creates a structured view of the code and textual data which can then further be used to create an organized view of the code and associated natural language. 
+In the course, I worked on the scraper project to separate text and code snippets from a text source. After initially going down a highly restrictive path of HTML based classification, the feedback obtained from the midterm evaluation made me switch track and try to make a more general separator that would work on any text source and not just HTML formatted web pages. \\ I developed a Naive Bayes classifier for this problem since I looked at it from the lens of document classification, where each line in the given text source could be classified as being source code or text, and then finally all the lines of the same class would be separated into their respective files.\\ In terms of learning outcomes, I had started from being a complete novice in Haskell. The project enabled me to immerse myself in the sometimes frustrating but mostly elegant frameworks of the Haskell language and appreciate it's deep connect with formalisms. It also made me aware of the importance and relevance of the topic I was working on, as I shall elucidate further.\\
+\\ The large amounts of data in the form of interspersed code and natural language make it useful to extract knowledge from them in order to benefit various areas of software development. Examples like natural language comments accompanying code, stackoverflow questions and answers with code blocks, and developer emails containing discussions about code with reference to it are all important forms of such data and contain valuable information that is waiting to be extracted. \\ 
+\\ For instance, extracting code and natural language separately from developer emails at a company can give key insights about how the company codebase has evolved and can help future developers access the code of emails directly. Separation of code and natural language is also helpful as training data for natural language and code completion models which can used the separated text and code to give better results. It creates a structured view of the code and textual data which can then further be used to create an organized view of the code and associated natural language. The tool that I have made, albeit simplistic, can help towards extracting useful knowledge for software development in a lightweight manner. 
 
 
 \chapter{Background and Motivation}
@@ -166,12 +175,11 @@ Consider the following image of an educational web page containing interspersed 
     \centering
     \includegraphics[width=0.7\textwidth]{figures/background-eg.png}
     \caption{Example of Code and Language Together}
-    \label{fig:high-level-arch}
+    \label{fig:code-lang}
 \end{figure}
 
-Here it becomes useful to extract just the code or just the natural language separately if one just wants to run the code on their own machine or just wants the natural language descriptions for their notes or to get an overview of the idea being conveyed. Using HTML based separation of the text and code snippets, or trying to use regular expressions severely restricts the generalisability and accuracy of the system in extracting natural language and code separately.\\
-\\ INSERT STUFF HERE!!!!!!!\\
-\\ Towards this purpose, we will create a Naive Bayes classifier for classifying a particular line as natural language or code and creating two separate sections for all the natural language and all the code
+Here it becomes useful to extract just the code or just the natural language separately if one just wants to run the code on their own machine or just wants the natural language descriptions for their notes or to get an overview of the idea being conveyed. \\ This is just one specific example where separating code and text yields valuable information extracted from a noisy text source. The project's domain extends to many other use cases as well. We already mentioned developer emails and stackoverflow Q \& A, but this information extraction can play an important role in just about any area where there is a large amount of code and natural language in one place, which further underlines the need for an efficient separator.
+
 
 \chapter{Literature Survey}
 
@@ -183,22 +191,21 @@ Here it becomes useful to extract just the code or just the natural language sep
 % should i mention the results of the literature here or when comparing with my own results in the results section??
 
 
-
-Researchers have used various methods to identify and distinguish code and natural language text, some of which I will discuss below. \\
-\\ Bacchelli et. al \cite{bachemail} attempted to extract source code from developer emails by first identifying emails that contained source code and then identifying code blocks by using regular expressions. The approach was very lightweight and programming language specific, with the use of end-of-line characters like semi-colons in order to find source code lines. \\ Bacchelli et. al \cite{bachcontent} also used Naive Bayes with bigrams, in combination with island parsing for classifying pieces of development emails as various categories like code, natural language, stack trace, patch or junk. It reached an accuracy ranging between 89 and 94 \% but, the source code island parser was specific to Java, which the authors acknowledged and stated that the approach could be easily generalized to other language as well. \\ Chatterjee et. al \cite{chattter} focused on extracting the code segments along with their natural language descriptions from research articles using various detailed linguistic and structural heuristics to identify important features to identifying sentences that would be relevant to code segments \\ Cerulo et. al \cite{cerulohmm} used an approach based on Hidden Markov Models (HMMs) for extracting "information islands" of code from natural language by recognising whether the sequence of observed strings would change between the source code and natural language states of the HMM. While this approach did not require parsing or complicated regular expressions, it only performed classification of tokens into code or text, and not further knowledge extraction in the form of an abstract syntax tree.\\
-\\ The Naive Bayes approach for text classification also has a long history and it is extensively used even today despite it's simplicity and strong assumptions. \\
-\\ ADD STUFF HERE!!!!!!!!!!!!!
+\section{Research}
 
 
+Researchers have used various methods to identify and distinguish code and natural language text, some of which I will discuss below. \\ Bacchelli et. al \cite{bachemail} attempted to extract source code from developer emails by first identifying emails that contained source code and then identifying code blocks by using regular expressions. The approach was very lightweight and programming language specific, with the use of end-of-line characters like semi-colons in order to find code lines. \\ Bacchelli et. al \cite{bachcontent} also used Naive Bayes with bigrams, in combination with island parsing for classifying pieces of development emails as various categories like code, natural language, stack trace, patch or junk. It reached an accuracy ranging between 89 and 94 \% but, the source code island parser was specific to Java, which the authors acknowledged and stated that the approach could be easily generalized to other languages too. \\ Chatterjee et. al \cite{chattter} focused on extracting the code segments along with their natural language descriptions from research articles using various detailed linguistic and structural heuristics to identify important features to identifying sentences that would be relevant to code segments. \\ Cerulo et. al \cite{cerulohmm} used an approach based on Hidden Markov Models (HMMs) for extracting "information islands" of code from natural language by recognising whether the sequence of observed strings would change between the source code and natural language states of the HMM. While this approach did not require parsing or complicated regular expressions, it only performed classification of tokens into code or text, and not further knowledge extraction in the form of an abstract syntax tree.\\ The Naive Bayes approach for text classification also has a long history and it is extensively used even today despite it's simplicity and strong assumptions \cite{juraf}, hence it is a promising candidate for this software project focused on learning Haskell.
 
+\section{Library Support}
 
+Before deciding to implement Naive Bayes from scratch, I attempted to look for lightweight libraries that could help me in separating code and text. First I tried the Hidden Markov Model library \href{https://hackage.haskell.org/package/hmm-0.1}{hmm}, I could not make to work properly. Searching for Naive Bayes in Haskell also led to very underdeveloped libraries such as \href{https://hackage.haskell.org/package/hext-0.1.0.4/docs/NLP-Hext-NaiveBayes.html}{NaiveBayes} or other individuals' projects that would not work efficiently with the task at hand. Not wanting to use other heavy ML methods, I decided to implement Naive Bayes from scratch in order to achieve maximum customisation and flexibility regarding my data and results.
 
 
 \chapter{Problem Statement and Objectives}
 \begin{tcolorbox}[colback=white,colframe=gray,title={Assigned Project Statement}]
     Develop a scraper using Haskell to extract text and code snippets separately.
     \begin{enumerate}
-        \item \textbf{Input}: Scrape the text and code snippets from the given text \href{https://eli.thegreenplace.net/2018/type-erasure-and-reification/}{source}
+        \item \textbf{Input}: Scrape the text and code snippets from the given text source.
         \item \textbf{Output}: A Word document containing the text and \texttt{.txt} file containing the code.
         \item \textbf{Method}: Write the algorithm to scrape (you can use the \texttt{tagsoup} library) and all the input-output facilities using Haskell. Do not use any other language.
     \end{enumerate}
@@ -241,8 +248,8 @@ Researchers have used various methods to identify and distinguish code and natur
             \item Using computer vision to attempt to read text like a human and identify text from the code
             \item Use the frequency of occurrence of different words in some sample data and use it to predict whether sections of unseen samples of text are natural language or source code. 
         \end{enumerate}
-    \item Extracting the text and code snippets from a text source boils down to a classification task where we consider each new line as a line to be classified as natural language or code, and grouping them all into two separate sections depending on the class assigned to them.
-    \item Hence we consider that the text source will consist of different newlines which need to be classified as language or code, without going into further granular details as to whether a particular word or phrase is code or text.
+    \item Extracting the text and code snippets from a text source can boil down to a classification task where we consider each new line as a line to be classified as natural language or code, and grouping them all into two separate sections depending on the class assigned to them.
+    \item Hence we restrict our project by considering that the text source will consist of different newlines which need to be classified as language or code, without going into further granular details as to whether a particular word or phrase is code or text. Our project will not consider that the text source will be devoid of newlines.
     %  we will take as input url but then just get the text from that url and nothing else. 
     
 
@@ -256,28 +263,29 @@ Researchers have used various methods to identify and distinguish code and natur
 \chapter{Scope and Methodology}
 
 \section{Scope}
-Following from the analysis, the system will classify text sources on a line level of granularity, hence it assumes that there will be some newline separation of different lines and the text source will not be completely unstructured. This is still a fairly broad scope since most text sources that have natural language and code interspersed in them have a newline-structure that make it easy to split them on a line-by-line basis for classification. 
+Following from the analysis, the system will classify text sources on a line level of granularity, hence it assumes that there will be some newline separation of different lines and the text source will not be completely unstructured. This is still a fairly broad scope since most text sources that have natural language and code interspersed in them have a newline-structure that make it easy to split them on a line-by-line basis for classification. Notwithstanding, we restrict our scope to exclude sources devoid of newlines since text and code separation in that case would need a more semantic approach that we will not consider.
 
 % ADD STUFF HEREEEEEE!!!!
 
 \section{Methodology}
 
-The broad methodology is to train a Naive Bayes classifier on some custom training data consisting of natural language and source code, and then using the calculated probabilities to classify each line in the given text source as being code or natural language, and then separating them based on that. A brief overview of Naive Bayes is given below.
-\subsection{Naive Bayes}
-Our main goal with Naive Bayes is to find, for each line in the text source, the best class (code or natural language) for it. That is, for each line $l$ made of some $t_k$ terms and class $c$, we want to find \\ $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c \pr(c | t_1, t_2, ... t_k)$. Instead of just considering the terms occuring in the line, we will consider all words in the vocabulary from now and see if they are occuring in the line or not.\\
+The broad methodology is to train a Naive Bayes classifier on some custom training data consisting of natural language and source code, and then using the calculated probabilities to classify each line in the given text source as being code or natural language, and then separating them based on that. A brief overview of Naive Bayes is given below with the design and architecture covered later.
+\subsection{Naive Bayes Overview}
+Our main goal with Naive Bayes is to find, for each line in the text source, the best class (code or natural language) for it. That is, for each line $l$ made of some $t_k$ terms and class $c$, we want to find \\ $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c \pr(c | t_1, t_2, ... t_k)$. \\ Instead of just considering the terms occuring in the line, we will consider all words in the vocabulary from now and see if they are occuring in the line or not.\\
 \\ First we consider the vocabulary of all the words in the training data. Now for each line in the text source, we have a binary feature vector whose elements are set to 1 if a word in the vocabulary occurs in that line, otherwise being set to 0. That is, if there are $n$ words in the vocabulary, then the feature vector $l_i$ corresponding to the $i$-th line will have $l_{ij} = 1$ if the $j$-th word from vocabulary occurs in the $i$-th line, otherwise being 0.\\
 \\ Now we want to calculate $\mathbb{P}(l_i | y)$ where $y$ is a particular class like code or natural language. We make the strong Naive Bayes assumption that all the $l_{ij}$'s are conditionally independent given the class $y$. This is clearly not true in practice, but even with this assumption we get good performance. 
-Moreover, we consider each line as an unordered Bag of Words where word position doesn't matter and only it's frequency matters, which is another strong assumption that doesn't impact performance that much.\\
+Moreover, we consider each line as an unordered Bag of Words where word position doesn't matter and only it's frequency matters, which is another strong assumption that the classifier operates under and performs surprisingly well.\\
 \\ Hence $\mathbb{P}(l_{i1}...l_{in} | y)$ = $\prod_{j=1}^{n} \mathbb{P}(l_{ij} | y)$. \\
 \\ Considering a particular line $l$ and using Bayes Rule we get:\\
-\\  $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c \pr(l | c) \times \pr(c)  = \argmax_c  \pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c) $.\\
+\\  $\hat{c}$ = $ \argmax_c \pr(c | l) = \argmax_c ( \pr(l | c) \times \pr(c) )  = \argmax_c ( \pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c) )$.\\
 \\ Usually, the probability numbers computed are very small, so we work in the logspace by using the natural logarithm to avoid issues with numerical underflow.\\
 
-$\therefore \hat{c} =  \argmax_c \log \pr(c | l) = \argmax_c \log \pr(l | c) \times \pr(c) = \argmax_c  \log \pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c)  \\
+$\therefore \hat{c} =  \argmax_c \log \pr(c | l) = \argmax_c \log( \pr(l | c) \times \pr(c)) = \argmax_c  \log (\pr(c) \times \prod_{j=1}^{n} \mathbb{P}(l_{j} | c) ) \\
 \\ = \argmax_c (\log \pr(c) + \sum_{j=1}^{n} \pr(l_{j} | c)) $\\
 \\ \textbf{How to calculate these terms?}\\
 \\ We calculate $\pr(c)$ by just calculating what percentage of the training data belongs to that particular class. For each $\pr(l_j|c)$, we calculate the probability of the $j$-th word in the vocabulary being in the class $c$ by counting the number of times that word occurs in the class $c$ and dividing by the total number of words in the class $c$. Using a form of Laplace smoothing, we add small decimal numbers $\alpha$ and $\beta$ in the numerator and denominator to avoid 0 probability in case of completely unseen words for the unseen data.\\
-\\ Hence $\pr(l_j|c) = \dfrac{count(l_j, c) + \alpha}{\beta + \sum_{j=1}^{n} count(l_j, c)}$
+\\ Hence $\pr(l_j|c) = \dfrac{count(l_j, c) + \alpha}{\beta + \sum_{j=1}^{n} count(l_j, c)}$ \\ 
+\\ Our implementation will use a matrix based approach for a more organized and efficient method of reasoning about the classifier.
 
 
 
@@ -375,7 +383,7 @@ The lower level implementation details are mentioned in the implementations sect
 
 
 
-\chapter{Implementation Details}
+\chapter{Work Done: Implementation Details}
 % this can give a broad overview of what the prototype can and cannot do. What the input and output of the prototype look like etc.
 
 
@@ -394,6 +402,9 @@ scraper
 |-- input
 |   | -- lang_train.txt (training data)
 |   | -- code_train.txt (training data)
+|-- cases
+|   | -- code_test{1-7}.txt
+|   | -- lang_test{1-7}.txt
 |-- output_files
 |   | -- NB_code_class.txt (code snippets)
 |   | -- NB_lang_class.docx (textual content)
@@ -409,7 +420,7 @@ scraper
 
 \section{Features and limitations}
 % why mentioning this here?
-The system correctly identifies the code and text portions of the web page and writes them into the \texttt{.txt} and \texttt{.docx} files as per the requirements and specifications. 
+The system mostly correctly identifies the code and text portions of the text source and writes them into the \texttt{.txt} and \texttt{.docx} files as per the requirements and specifications. While it doesn't meet the requirments to the fullest extent, some error will be unavoidable in such a lightweight yet generalizable approach. 
 
 \subsubsection{Limitations}
 
@@ -418,11 +429,12 @@ The system correctly identifies the code and text portions of the web page and w
     \item Moreover, it cannot be used effectively in the case that the text source has data that is not separated by newlines, since each line is a document that needs to be classified here. However, these cases are relatively rare since most instances where code and natural language are found interspersed, there is some degree of organisation in terms of newline-separation.
     \item Since the system is relatively simplistic and unoptimized, along with the fact that it works on the Naive Bayes assumption of independence between features, it may not work well compared to other heavyweight methods in terms of accuracy. 
     \item Comments in the code written primarily in natural language will be classified as language and not code due to the nature of the classifier and the training data.
+    \item It does not take into account the context in which a line has occurred, so the lines surrounding a particular line do not influence it's class, which is untrue in the real world.
 \end{enumerate}
 
 \section{Core Implementation Details}
 
-Some important code and data features that showcase the core implementation details of the project are shown.
+Some important code and data details are shown.
 
 
 % MAYBE ALSO REMOVE SOME OF THE EVALUATION STUFF CAUSE THE CODE GETTING TOO LONG    
@@ -432,9 +444,7 @@ Some important code and data features that showcase the core implementation deta
 \subsection{Main.hs}
 
 \subsubsection{Training and Main Classification Pipeline}
-
-In-line with the design, architecture and choice of tools as mentioned above, we first obtain the contents of the text source. Keeping in mind the assigned project statement that had a web page as text source, the user will supply input by giving a URL of the web page for which they wish the language and code to be separated. In principle, any text source can be used, which would just remove fetching the web page contents portion of the system. \\ 
-We first just get all the textual HTML content from the web page and split the content based on newline separators. \\ Everytime the system is called, training on the data will be done since we wish to keep the Naive Bayes classifier dynamic in terms of the words in accounts for. Since training for Naive Bayes is cheap, this can be done without much additional cost.\\
+In-line with the design, architecture and choice of tools as mentioned above, we first obtain the contents of the text source and split based on newlines. Training is done since we wish to keep the Naive Bayes classifier dynamic in terms of the words in accounts for. Since training for Naive Bayes is relatively cheap, this can be done without much additional cost, as we will encounter in the performance testing section.\\
 \\ In the below code, we train the Naive Bayes Classifier, then predict the classes of every line of the text source and finally separate the text and the code into \ttt{.txt} and \ttt{.docx} files.
 
 \begin{minted}[%
@@ -446,7 +456,8 @@ We first just get all the textual HTML content from the web page and split the c
     numbersep=5pt,
     xleftmargin=0pt,
     ]{haskell}
-    -- text_source is newline separated list of lines of the text_source
+    read_text_source <- readFile "input/sample.txt"
+    let text_source = lines read_text_source -- newlines
     let lang_train = "input/lang_train.txt"
     let code_train = "input/code_train.txt"
     mydata <- Lib.readTraining lang_train code_train
@@ -462,36 +473,11 @@ We first just get all the textual HTML content from the web page and split the c
     writeToDocx "output_files/NB_lang_class.docx" (unlines (map fst lang_class))
    \end{minted}
    
-
-\subsubsection{Evaluating the Classifier}
-
-We use various test sets to evaluate the performance of the classifier on various metrics, which will be further discussed in the Results section. 
-%  add various multiple kinds of test cases that have different kinds of languages and stuff
-
-\begin{minted}[%
-    breaklines,
-    mathescape,
-    linenos,
-    numbersep=5pt,
-    frame=single,
-    numbersep=5pt,
-    xleftmargin=0pt,
-    ]{haskell}
-
-    let testFiles = ["lang_test1.txt", "code_test1.txt","lang_test5.txt", "code_test5.txt", "lang_test6.txt", "code_test6.txt", "lang_test7.txt", "code_test7.txt", "lang_test8.txt", "code_test8.txt", "lang_test9.txt", "code_test9.txt", "lang_test10.txt", "code_test10.txt"]
-    let test_evals = Lib.evalTests trainedModel testFiles
-
-    test_results <- test_evals
-   \end{minted}
-   
-
-
-
 \subsection{Lib.hs}
 
 \subsubsection{trainNaiveBayes}
 
-This takes the natural language and source code training data and returns the prior probability of a word being a source code word, the conditional probabilities and the vocabulary based on the training data. The description of the helper functions is given later on below. 
+This takes the natural language and source code training data and returns the prior probability of a word being a source code word, the conditional probabilities and the vocabulary based on the training data. The description of the helper functions is given later below. 
 
 \begin{minted}[%
     breaklines,
@@ -505,14 +491,14 @@ This takes the natural language and source code training data and returns the pr
 
 -- NLA refers to the hmatrix library
 trainNaiveBayes :: [String] -> [String] -> (( Double, ([Double] , [Double]) ), Vocabulary )
+-- the strange output type is due to packaging various things together
 trainNaiveBayes natural_data source_data = 
-    let source_words = concat (getWords source_data)
+    let source_words = concat (getWords source_data) -- [String]
         natural_words = concat (getWords natural_data)
         unique_src_words = getUniqueWords source_words
         unique_natural_words = getUniqueWords natural_words
         vocab = unique_src_words ++ unique_natural_words
 
-        -- source_data is an array of strings, where each string represents a new line in the file. So here each line here is a document here. 
         xTrain_src = myVectorizer vocab (source_data)
         xTrain_lang = myVectorizer vocab (natural_data)
 
@@ -522,7 +508,6 @@ trainNaiveBayes natural_data source_data =
         -- NLA.Matrix Double -> [Int]
         sum_src_cols = sumCols sourceCodeMatrix
         sum_lang_cols = sumCols naturalLanguageMatrix
-
 
         src_len = length source_data
         natural_len = length natural_data
@@ -543,10 +528,7 @@ trainNaiveBayes natural_data source_data =
 
 \subsubsection{classifyNaiveBayes}
 
-It takes the lines of the text source that we have to classify, along with the output of the trained Naive Bayes Model. Due to the conditional probabilities being very small numbers, we work in the logspace to prevent issues due to numerical underflow, as is the case with most Naive Bayes implementations. \\ 
-\\ TODO!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+It takes the lines of the text source that we have to classify, along with the output of the trained Naive Bayes Model. Due to the conditional probabilities being very small numbers, we work in the logspace to prevent issues due to numerical underflow, as is the case with most Naive Bayes implementations.\\ 
 \begin{minted}[%
     breaklines,
     mathescape,
@@ -576,14 +558,12 @@ classifyNaiveBayes test_data trainedModel =
 
         log_matrix = NLA.tr (NLA.fromLists [log_src, log_lang])
 
-        -- [Double,Double]
-        -- print (map typeOf (head (DM.toLists log_matrix)))
+        -- (head (DM.toLists log_matrix))) :: [Double,Double]
 
-        -- mult
+        -- matrix mult
         prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
 
-        -- [Double,Double]
-        -- print (map typeOf (head (DM.toLists prob1)))
+        -- (head (DM.toLists prob1))) :: [Double,Double]
         logp = log prob_src_prior
         log_not_p = log (1 - prob_src_prior)
 
@@ -602,7 +582,7 @@ classifyNaiveBayes test_data trainedModel =
 
 \subsubsection{Important Helpers}
 \begin{enumerate}
-    \item \ttt{myVectorizer : } gives a matrix where each row corresponds to a document i.e. line and each column is a word in the vocabulary. So an entry $(i,j)$ represents the word count of word $j$ from the vocab in document $i$. If supplied empty lists then we return a dummy value.
+    \item \ttt{myVectorizer : } Gives a matrix where each row corresponds to a document i.e. line and each column is a word in the vocabulary. So an entry $(i,j)$ represents the word count of word $j$ from the vocab in document $i$. If supplied empty lists then we return a dummy value due to constraints arising from the matrix library.
     \item \ttt{matrixRow : } It corresponds to one row in the above matrix. For each word in the vocabulary it gets the count of that word in the current document.
     \item \ttt{wordCounts : } For a document, creates a mapping between each word in the document and the count of that word in the document.
     \item \ttt{sumCols : } Finds the sum of every column in the matrix i.e. finds the total occurences of each word across all documents.
@@ -673,7 +653,7 @@ classifyNaiveBayes test_data trainedModel =
 \end{minted}
 
 
-\subsubsection{Evaluating Functions}
+\subsubsection{Functions used for Evaluations with Test Cases}
 
 \begin{minted}[%
     breaklines,
@@ -684,7 +664,6 @@ classifyNaiveBayes test_data trainedModel =
     numbersep=5pt,
     xleftmargin=0pt,
     ]{haskell}
-
     evalTests :: (( Double, ([Double] , [Double]) ), Vocabulary ) -> [String] -> IO [(Double, Double, Double, Double)]
     evalTests _ [] = return []
     evalTests trainedModel (x:y:xs) = do
@@ -697,8 +676,8 @@ classifyNaiveBayes test_data trainedModel =
         let lang_test_len = length (lines lang_test)
         let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
         let test_accuracy_mapping = zip yTest final_probs
-        -- precision_code, recall_code, precision_lang, recall_lang
         rest <- evalTests trainedModel xs
+        -- precision_code, recall_code, precision_lang, recall_lang
         return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
 
     evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
@@ -714,28 +693,18 @@ classifyNaiveBayes test_data trainedModel =
             num_lang_correct = length lang_correct
             num_code_wrong = length code_wrong
             num_lang_wrong = length lang_wrong
-    
-            -- need to keep in mind that paper has used different metrics
-            
-    
             precision_code = int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong)
-    
             recall_code = int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong)
-    
             precision_lang = int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong)
-    
             recall_lang = int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong)
-    
         in (precision_code, recall_code, precision_lang, recall_lang)
-    
-        
    \end{minted}
-
-\newpage 
+ 
 \section{Training Data}
 
-Due to paucity of appropriate training data for this project with respect to scope and relevance, I curated my own small training dataset comprising of code and natural language that is typically seen accompanying the code. While there were datasets with source code and natural language, they were of a larger scale than I intended, and I also wanted to train the model on a smaller dataset to see how lightweight it can be \\ 
-\\ I made sure to include a variety of programming languages in the source_code dataset to ensure wider generalisability. The statistics of the training data are given as follows, along with the sources where I took them from. The code was cleaned to remove comments and other non-code text.
+Due to paucity of appropriate training data for this project with respect to scope and relevance, I curated my own small training dataset comprising of code and natural language that is typically seen accompanying the code. While there were datasets with source code and natural language, they were of a larger scale than I intended, and I also wanted to train the model on a smaller dataset to show that it can be lightweight not just with respect to time, but also training data required for good performance.\\ 
+\\ While I covered some variety of programming languages, I deliberately excluded some popular paradigms like functional and database programming in order to observe the performance of the classifier on code that was unlike the code it had seen before.  I also skewed the training data in favour of the C programming language to see the relatively good results even on skewed training data. The statistics of the training data are given as follows, along with the sources where I took them from. The code was cleaned to remove comments and other non-code text.
+%  BUT I DIDN'T INCLUDE VARIETY OF PROGRAMMING LANGUAGES
 
 %  unskew this away from C
 
@@ -794,14 +763,14 @@ Initially, I started the project by separating the code and text based on their 
     %  mention how good performance?
     \item In the implementation of Naive Bayes, another hurdle I faced was the inefficiency of the default \ttt{matrix} library in doing calculations with extremely large and sparse matrices, which was restricting me to training and testing sets of very small sizes, albeit with considerably good performance. So I looked for more efficient libraries and found the \ttt{hmatrix} library, which sped up computations by a large extent. Earlier a training and classification that took 2.5 minutes overall, now happened in 2.5 seconds. 
     \item The paucity of appropriate training data was also an issue. The few datasets that were relevant to the project, such as those containing source code along with some form of natural language (usually in the form of code comments) were all restricted to one language and were also immense for a classifier implemented from scratch without optimisations. Hence, I curated my own modestly size source code and natural language training data based on manual searching online. The small size of the dataset also highlighted how the lightweight model was still performing relatively well. 
-    \item The Haskell language was itself relatively challenging to get used to throughout the project due to it's difference from the imperative languages I am used to. But after learning lambda calculus and spending time with the language, it became easier to use and I could appreciate the elegance of functional programming more, even though I am still not as accustommed to this paradigm as I would like to be. 
+    \item The Haskell language was itself relatively challenging to get used to throughout the project due to it's difference from the imperative languages I am used to. But after learning lambda calculus and spending time with the language, it became easier to use and I could appreciate the elegance of functional programming more, even though I am still not as accustomed to this paradigm as I would like to be. 
 \end{enumerate}
 
 
 
 
 % maybe this can go after implementation details
-\chapter{Tooling and Testing}
+\chapter{Work Done: Tooling and Testing}
 
 \section {Tools and Languages}
 % tech stack
@@ -810,7 +779,7 @@ Initially, I started the project by separating the code and text based on their 
 
 \subsection{Languages}
 
-Only Haskell was used for the project as mentioned in the problem statement
+Only Haskell was used for the project as mentioned in the problem statement.
 
 \subsection{Tools}
 
@@ -821,9 +790,9 @@ Only Haskell was used for the project as mentioned in the problem statement
     % say that hmatrix was used cause fastest
     \item \textbf{Notable Libraries}:
     \begin{enumerate}
-        \item \textbf{hmatrix : } The fastest numerical linear algebra library that I could find in order to speed up the entire process, according to one benchmark. 
-        %  CITE THIS!!!!!!!
-        \item \textbf{hUnit : } The basic Haskell unit testing library
+        \item \textbf{hmatrix : } The fastest numerical linear algebra library that I could find in order to speed up the entire process, according to one benchmark \cite{matrixbench}. 
+        %  CITE THIS!!!!!! cause which benchmark u talking abt
+        \item \textbf{hUnit : } The basic Haskell unit testing library.
     \end{enumerate} 
 \end{enumerate}
 
@@ -845,24 +814,7 @@ Only Haskell was used for the project as mentioned in the problem statement
 \begin{enumerate}
     \item \textbf{Unit Testing : } The following functions were unit tested in the \ttt{Spec.hs} file
     \begin{enumerate}
-        \item \ttt{myVectorizer : }
-        \item \ttt{matrixRow : }
-        \item \ttt{wordCounts : }
-        \item \ttt{getWords : }
-        \item \texttt{getHTML : }
-        \item \ttt{getUniqueWords}
-        \item \ttt{getHTML}
-        \begin{enumerate}
-            \item Test if the function returns the correct HTML for various URLs by using sample inputs and outputs.
-            \item Test if the function gracefully handles invalid URLs with error handling.
-            \item Test if the function handles network errors and HTTPS errors with error handling.
-        \end{enumerate}
-
-        \item \texttt{writeToDocx : }
-        While File I/O cannot be unit-tested in the traditional sense, we can still manually test the file outputs.
-        \begin{enumerate}
-            \item Test if the function correctly writes the content of the input Tag String to the \texttt{.docx} file using sample input output
-        \end{enumerate}
+        \item \ttt{myVectorizer}, \ttt{matrixRow}, \ttt{wordCounts}, \ttt{getWords}, \ttt{getUniqueWords} : Various sample inputs and expected outputs were provided and asserted to be equal. 
 
     \end{enumerate}
 
@@ -870,17 +822,9 @@ Only Haskell was used for the project as mentioned in the problem statement
     % criterion and command line tools?
     \begin{enumerate}
         \item Test the time taken for the full system to execute from start to finish
-        \item Test the resource consumption of the system
+        \item Test the memory consumption of the system
     \end{enumerate}
-    \item \textbf{Functional Testing : } \\ Test whether the program meets the requirements by using sample input URLs and sample output files
-\end{enumerate}
-
-
-\subsection{Test Report}
-
-\begin{enumerate}
-    \item \textbf{Unit Testing : }
-    
+    \item \textbf{Functional Testing : } \\ Test whether the program meets the requirements by using sample input text sources and sample output files
 \end{enumerate}
 
 
@@ -888,22 +832,25 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 
 
-\chapter{Plan for Completion}
-% will test. will do error handling. formal verification and validation stuff and maybe make more robust for other urls also idk. Getting better performance
+% \chapter{Plan for Completion}
+% % will test. will do error handling. formal verification and validation stuff and maybe make more robust for other urls also idk. Getting better performance
 
 
-\begin{itemize}
-    \item Implement error handling gracefully wherever possible so that no unhandled errors can occur.
-    \item Implement the test suite
-    \item Attempt to make the scraper more generalized so that it can work with other websites and other HTML structures.
-    \item Document the code well
-    \item Explore methods of separating the code from the non-code textual content that are independent of HTML structure. Such methods were mentioned in the analysis and implementation of these methods will make the scraper more generalizable. 
-\end{itemize}
+% \begin{itemize}
+%     \item Implement error handling gracefully wherever possible so that no unhandled errors can occur.
+%     \item Implement the test suite
+%     \item Attempt to make the scraper more generalized so that it can work with other websites and other HTML structures.
+%     \item Document the code well
+%     \item Explore methods of separating the code from the non-code textual content that are independent of HTML structure. Such methods were mentioned in the analysis and implementation of these methods will make the scraper more generalizable. 
+% \end{itemize}
 
 
 \chapter{Results and Discussions}
 
-The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language, along with the F-measure were calculated. We found that even with the highlight simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language, subject to the conditions that the code was present in the training data.
+
+\section{Testing the Naive Bayes Classifier}
+
+The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language were calculated. We found that even with the highly simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language, subject to the limitations mentioned earlier.
 
 
 % insert table here
@@ -916,24 +863,22 @@ The classifier was run on various natural language and source code files and the
         \hline
         Test 1 & \href{https://eli.thegreenplace.net/2018/type-erasure-and-reification/}{Supplied Web Page} containing C, Python, Java \\
         \hline
-        Test 5 & Assembly Code from the \href{https://github.com/chrislgarry/Apollo-11/blob/master/Luminary099/AOSTASK_AND_AOSJOB.agc}{Apollo Guidance Computer} \\
+        Test 2 & Assembly Code from the \href{https://github.com/chrislgarry/Apollo-11/blob/master/Luminary099/AOSTASK_AND_AOSJOB.agc}{Apollo Guidance Computer} \\
         \hline
-        Test 6 & SQL Code from \href{https://dev.to/tyzia/example-of-complex-sql-query-to-get-as-much-data-as-possible-from-database-9he}{this blog} \\
+        Test 3 & SQL Code from \href{https://dev.to/tyzia/example-of-complex-sql-query-to-get-as-much-data-as-possible-from-database-9he}{this blog} \\
         \hline
-        Test 7 & Haskell Code from \href{https://github.com/koalaman/shellcheck}{ShellCheck}\\
+        Test 4 & Haskell Code from \href{https://github.com/koalaman/shellcheck}{ShellCheck}\\
         \hline
-        Test 8 & Mix of Python and C Code\\
+        Test 5 & Mix of Python and C Code\\
         \hline
-        Test 9 & Java Code\\
+        Test 6 & Java Code\\
         \hline
-        Test 10 & Python Code\\
+        Test 7 & Python Code\\
         \hline
     \end{tabular}
     \caption{Test Case Details (Code)}
     \label{tab:results}
 \end{table}
-
-
 Details about the natural language test cases are not provided since difference in the data sources for natural language was found to not have much difference in accuracy.
 
 \begin{table}[h]
@@ -942,52 +887,57 @@ Details about the natural language test cases are not provided since difference 
         \hline
         \textbf{Test} & \textbf{Precision (Code)} & \textbf{Recall (Code)} & \textbf{Precision (Language)} & \textbf{Recall (Language)} \\
         \hline
-        1 & 0.93 & 0.98 & 0.96 & 0.86 \\
+        1 & 0.918 & 0.975 & 0.956 & 0.86 \\
         \hline
-        5 & 0.97 & 1.0 & 1.0 & 0.47 \\
+        2 & 0.997 & 1.0 & 1.0 & 0.889 \\
         \hline
-        6 & 0.87 & 0.92 & 0.67 & 0.53 \\
+        3 & 0.979 & 0.92 & 0.667 & 0.889 \\
         \hline
-        7 & 0.93 & 0.93 & 0.47 & 0.46 \\
+        4 & 0.967 & 0.93 & 0.474 & 0.667 \\
         \hline
-        8 & 0.95 & 0.89 & 0.38 & 0.58 \\
+        5 & 0.992 & 0.89 & 0.383 & 0.9 \\
         \hline
-        9 & 0.89 & 0.99 & 0.89 & 0.5 \\
+        6 & 0.978 & 0.986 & 0.882 & 0.833 \\
         \hline
-        10 & 0.97 & 0.9 & 0.43 & 0.71 \\
+        7 & 0.956 & 0.869 & 0.435 & 0.714 \\
         \hline
     \end{tabular}
     \caption{Test Case Results}
     \label{tab:results}
 \end{table}
 
+\subsection{Discussion}
+
+As we can see in Table 10.2, we enjoy surprisingly good performance in a lot of cases. The precision and recall for the code is higher than that of natural language for most of the cases. The scores for natural language are mostly low, with only a few of the metrics going above the 80 \% mark while others are abysmal. Let's take a closer look at why some test cases have lower metrics. \\ 
+\\ Consider the language precision of test case 8. This is low since the code contained many natural language comments that should have been classified as code, but were classified as natural language due to the nature of the classifier, thus lowering the precision. To properly classify such comments as code we either need to have the context of the surrounding lines or use a regular expression based approach that looks for comment patterns in various languages. The first approach increases the compute and complexity of the system, while the second approach is prone to errors and could classify some natural language as code instead.\\
+\\ It is also important to note that the while classification accuracy is high, the format of the output files still leaves much to be desired in terms of the information that can be extracted from it, since it just comprises the code without any additional formattinng. However, in many cases, we have largelyn acheived the requirement of separating text and code snippets from a text source with relatively high accuracy.\\
+\\ Lastly, these high rates of accuracy were acheived despite the training data not having some programming languages and being skewed in favour of a particular programming language. A possible explanation for this behaviour can be that a line in any programming languages, even extending to SQL and Assembly, have particular patterns in terms of numbers, special symbols and characters that make it easily differentiable from a natural language line. However, this is purely a hypothesis and needs rigorous testing and analysis.
 
 
 
 
-\begin{table}[h]
-        \centering
-        \begin{tabular}{|c|c|c|c|c|}
-            \hline
-            \textbf{Test} & \textbf{Precision (Code)} & \textbf{Recall (Code)} & \textbf{Precision (Language)} & \textbf{Recall (Language)} \\
-            \hline
-            1 & 0.95 & 0.95 & 0.95 & 0.95 \\
-            \hline
-            5 & 0.75 & 0.75 & 0.75 & 0.75 \\
-            6 & 0.90 & 0.90 & 0.90 & 0.90 \\
-            \hline
-            7 & 0.85 & 0.85 & 0.85 & 0.85 \\
-            \hline
-            8 & 0.80 & 0.80 & 0.80 & 0.80 \\
-            \hline
-            9 & 0.80 & 0.80 & 0.80 & 0.80 \\
-            \hline
-            9 & 0.80 & 0.80 & 0.80 & 0.80 \\
-            \hline
-        \end{tabular}
-        \caption{Results of the Classifier}
-        \label{tab:results}
-\end{table}
+
+\section{Software Testing Report}
+
+\begin{enumerate}
+    \item \textbf{Unit Testing : } All the unit tests passed successfully.
+    \item \textbf{Performance Testing : }
+    \begin{enumerate}
+        \item With the command \ttt{stack run --profile -- +RTS -p} we can see the time and resource consumption on one particular run of the \ttt{stack run} command. Running it on the given text \href{https://eli.thegreenplace.net/2018/type-erasure-and-reification/}{source}, we see that it took \ttt{1.32} seconds to run and was allocated \ttt{5,774,171,368} bytes. \\ When it was given the entire text of Frankenstein comprising around 75,000 words and 1665 lines, it took \ttt{3.74} seconds to finish, which showcases it's relatively high speeds even considering training, due to the simplistic and linear nature of Naive Bayes.
+        % For varying lengths of input the system took the following amounts of time to run
+        % \item For varying lengths if input the system consumed the following amounts of resources
+    \end{enumerate}
+
+    \item \textbf{Functional Testing : } It meets the requirements that it needed to meet since it separates most of the code and natural language into separate files in many cases. But due to the limitations of the Naive Bayes classifier, it also has many erroneous cases which violate the requirments and specifications of having text and code separately. 
+    
+\end{enumerate}
+
+
+
+
+
+
+
 
 %  in the results can have one example of some natural language or code that gets misclassified
 
@@ -1005,11 +955,17 @@ Details about the natural language test cases are not provided since difference 
 %  lightweight text and code separation in functional programming language so it can be easily verified or smth
 % it's also very interpretable and linear time complexity stuff
 
+In this project, we saw a lightweight classifier being able to perform considerably well in the task of classifying lines of text and code. While more heavy-weight models will definitely perform better due to added concepts like bi-grams, context and larger and better training data, the Naive Bayes system that we have used is highly simple and interpretable. This in conjunction with it's considerably good performance, albeit with many caveats, make it a useful tool to have for the text and code separation task. Using this classifier with other methods in a unified manner can lead to better results, which need to be further investigated.
 
 
 \chapter{Extensions and Future Work}
 
-
+\begin{enumerate}
+    \item The system can be extended to overcome the various shortcomings of the Naive Bayes classifier. Some of the more important things that would need addressing in the future in order to make a better separator would be context and a wider window so that the classifier can make a more informed decision.
+    \item The newline requirement can be waived if a method to induce newlines can be found through semantic methods, which would make previously unstructured text now feasible for the Naive Bayes classifier. 
+    \item Better formatting and extracting knowledge from the output of the classifier also should be worked on in order to retrieve more information from the text sources. 
+    \item Find a way to write to the Word Document through pandoc without going through the readHTML function in order to preserve some formatting. 
+\end{enumerate}
 
 \begin{thebibliography}{9}
 
@@ -1025,17 +981,13 @@ Details about the natural language test cases are not provided since difference 
     \bibitem{cerulohmm}
     L. Cerulo, M. Ceccarelli, M. Di Penta, and G. Canfora, “A hidden markov model to detect coded information islands in free text,” in Source Code Analysis and Manipulation (SCAM), 2013 IEEE 13th International Working Conference on, Sept 2013, pp. 157–166.
 
+    \bibitem{matrixbench}
+    \href{https://github.com/Magalame/fastest-matrices}{https://github.com/Magalame/fastest-matrices}
+
+    \bibitem{juraf}
+    D. Jurafsky and J. H. Martin. Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics and Speech Recognition. Prentice Hall, 2nd edition, 2009.
+
 \end{thebibliography}
-
-
-
-
-
-
-
-
-
-
 
 
 
