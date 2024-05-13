@@ -105,13 +105,13 @@ evaluateNaiveBayes mydata =
         -- need to keep in mind that paper has used different metrics
         
 
-        precision_code = roundTo 2 (int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong))
+        precision_code = roundTo 3 (int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong))
 
-        recall_code = roundTo 2 (int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong))
+        recall_code = roundTo 3 (int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong))
 
-        precision_lang = roundTo 2 (int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong))
+        precision_lang = roundTo 3 (int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong))
 
-        recall_lang = roundTo 2 (int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong))
+        recall_lang = roundTo 3 (int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong))
 
     in (precision_code, recall_code, precision_lang, recall_lang)
 
