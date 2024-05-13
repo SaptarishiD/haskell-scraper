@@ -34,7 +34,7 @@ main = do
       let code_data = snd mydata
       let trainedModel = Lib.trainNaiveBayes lang_data code_data
 
-      -- let testFiles = ["lang_test1.txt", "code_test1.txt","lang_test5.txt", "code_test5.txt", "lang_test6.txt", "code_test6.txt", "lang_test7.txt", "code_test7.txt", "lang_test8.txt", "code_test8.txt", "lang_test9.txt", "code_test9.txt", "lang_test10.txt", "code_test10.txt"]
+      -- let testFiles = ["lang_test1.txt", "code_test1.txt","lang_test2.txt", "code_test2.txt", "lang_test3.txt", "code_test3.txt", "lang_test4.txt", "code_test4.txt", "lang_test5.txt", "code_test5.txt", "lang_test6.txt", "code_test6.txt", "lang_test7.txt", "code_test7.txt"]
       -- let test_evals = Lib.evalTests trainedModel testFiles
 
       -- test_results <- test_evals

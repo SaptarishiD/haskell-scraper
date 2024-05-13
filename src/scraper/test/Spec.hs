@@ -13,7 +13,7 @@ import GHC.Float (int2Double)
 
 import Data.List (sort)
 
--- Test data
+
 vocab1 = ["apple", "banana", "orange"]
 doc1 = "the apple is red"
 doc2 = "banana is yellow"

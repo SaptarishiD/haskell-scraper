@@ -1,613 +1,263 @@
-1/ACCSET	CAF	ZERO		
-		TS	AOSQ		
-		TS	AOSR
-		TS	ALPHAQ		
-		TS	ALPHAR
-
-1/ACCJOB	TC	BANKCALL	
-		CADR	1/ACCS 	+2	
-
-		TC	ENDOFJOB
-
-1/ACCS		CA	EBANK6		
-		TS	EBANK
-
-		TC	MAKECADR	
-		TS	ACCRETRN
-
-
-
-		CA	DAPBOOLS	
-		MASK	CSMDOCKD
-		TS	DOCKTEMP	
-		CCS	A
-		CS	CSMMASS		
-		AD	MASS		
-		TS	LEMMASS
-
-
-
-LEM-ALONE F(MASS) CALCULATIONS
-
-
-		INHINT
-		CAE	FLGWRD10	
-		MASK	APSFLBIT
-		EXTEND
-		BZF	DPSFLITE
-
-		CS	POSMAX		
-		TS	-2JETLIM	
-		CAF	OCT14		
-		TS	MPAC
-		CS	LEMMASS		
-		AD	HIASCENT
-		EXTEND
-		BZMF	MASSFIX
-		CS	LEMMASS		
-		AD	LOASCENT	
-		EXTEND
-		BZMF	F(MASS)
-
-MASSFIX		ADS	LEMMASS		
-		ZL			
-		CCS	DOCKTEMP	
-		CAE	CSMMASS		
-		AD	LEMMASS		
-		DXCH	MASS
-		TCF	F(MASS)
-
-DPSFLITE	CS	BIT10		
-		TS	-2JETLIM	
-		CAF	SIX		
-		TS	MPAC
-		CS	LEMMASS		
-		AD	HIDESCNT	
-		EXTEND			
-		BZMF	MASSFIX
-		CS	LEMMASS		
-		AD	LODESCNT	
-		AD	HIASCENT
-		EXTEND
-		BZMF	F(MASS)
-		TCF	MASSFIX
-
-
-
-F(MASS)		RELINT
-		CCS	DOCKTEMP
-		TCF	DOCKED		
-		CA	TWO
-STCTR		TS	MPAC 	+1	
-
-		CS	TWO
-		ADS	MPAC		
-
-STCTR1		CAE	LEMMASS
-		INDEX	MPAC
-		AD	INERCONC
-		TS	MPAC 	+2	
-
-		EXTEND
-		INDEX	MPAC
-		DCA	INERCONA
-		EXTEND
-		DV	MPAC 	+2
-		INDEX	MPAC
-		AD	INERCONB
-		INDEX	MPAC 	+1	
-		TS	1JACC		
-
-		CCS	MPAC 	+1
-		TCF	STCTR
-		TCF	COMMEQS
-		TCF	LRESC
-
-RESOLVE Q-R COMPONENTS INTO NON-ORTHOGONAL
-
-
-COMMEQS		CS	1JACCR
-		AD	1JACCQ
-		EXTEND
-		BZMF	BIGIQ
-		EXTEND			
-		DV	1JACCQ		
-		TS	EPSILON		
-		AD	-EPSMAX
-		EXTEND
-		BZMF	GOODEPS1
-		CS	-EPSMAX
-		TS	EPSILON		
-GOODEPS1	CA	EPSILON
-		EXTEND
-		MP	0.35356
-		AD	.7071
-		TS	COEFFR		
-		CS	POSMAX		
-		AD	EPSILON		
-		EXTEND
-		MP	COEFFR
-		TS	COEFFQ
-		TCF	JACCUV
-BIGIQ		EXTEND			
-		DV	1JACCR		
-		TS	-EPSILON	
-		CS	-EPSILON
-		AD	-EPSMAX
-		EXTEND
-		BZMF	GOODEPS2
-		CA	-EPSMAX
-		TS	-EPSILON	
-
-GOODEPS2	CA	-EPSILON
-		EXTEND
-		MP	0.35356
-		AD	-.7071
-		TS	COEFFQ		
-		CS	-EPSILON	
-		AD	NEGMAX		
-		EXTEND
-		MP	COEFFQ
-		TS	COEFFR
-JACCUV		CS	COEFFQ
-		EXTEND
-		MP	1JACCQ		
-		TS	1JACCU		
-		CA	COEFFR
-		EXTEND
-		MP	1JACCR
-		AD	1JACCU
-		EXTEND
-		MP	BIT14		
-		TS	1JACCU
-		TS	1JACCV		
-		CCS	MPAC		
-		CAF	ZERO		
-		TS	ALLOWGTS	
-		TCF	1/ACCONT -1
-
-		CS	TWO
-		TS	MPAC
-		CS	ONE
-		TS	MPAC 	+1
-		TCF	STCTR1
-
-ROTATION OF THE GIMBALS.  THE EQUATION
-TL/I*D(DELTA)/DT, WHERE
-
-
-
-
-LRESC		CAE	ABDELV		
-		EXTEND
-		MP	MASS		
-		TC	DVOVSUB		
-		ADRES	GFACTM
-
-OF IXX,IYY,IZZ, WHICH ARE SLUG-FT(2).
-SAME IN METRIC OR ENGINEERING UNITS, SO
-AT 2(14).
-
-		EXTEND
-		MP	L,PVT-CG	
-
-		INHINT
-		TS	MPAC
-		EXTEND
-		MP	1JACCR
-		TC	DVOVSUB		
-		ADRES	TORKJET1
-
-		TS	ACCDOTR		
-		CA	MPAC
-		EXTEND
-		MP	1JACCQ
-		TC	DVOVSUB		
-		ADRES	TORKJET1
-
-SPSCONT		TS	ACCDOTQ		
-		EXTEND
-		MP	DGBF		
-		TS	KQ
-		CAE	ACCDOTR		
-		EXTEND
-		MP	DGBF
-		TS	KRDAP
-		EXTEND			
-		READ	CHAN12		
-		TS	MPAC 	+1	
-		CAF	BIT2		
-		TCF	LOOP3
-		CAF	ZERO		
-LOOP3		TS	MPAC		
-		CA	MPAC 	+1
-		INDEX	MPAC		
-		MASK	GIMBLBTS
-		EXTEND
-		BZF	ZACCDOT		
-		CA	MPAC 	+1
-		INDEX	MPAC		
-		MASK	GIMBLBTS +1
-		EXTEND
-		BZF	FRSTZERO	
-		INDEX	MPAC		
-		CS	ACCDOTQ
-		TCF	STACCDOT
-FRSTZERO	INDEX	MPAC		
-		CA	ACCDOTQ
-		TCF	STACCDOT
-ZACCDOT		CAF	ZERO
-STACCDOT	INDEX	MPAC
-		TS	QACCDOT		
-		CCS	MPAC
-		TCF	LOOP3 	-1	
-
-		CS	DAPBOOLS	
-		MASK	USEQRJTS
-		EXTEND
-		BZF	DOWNGTS		
-		CS	T5ADR		
-		AD	PAXISADR
-		EXTEND
-		BZF	+2
-		TCF	DOWNGTS		
-		CCS	INGTS		
-		TCF	DOCKTEST	
-		TC	IBNKCALL	
-		CADR	TIMEGMBL
-
-DOCKTEST	CCS	DOCKTEMP	
-		TCF	1/ACCRET
-		TCF	1/ACCONT
-
-
-
-
-DIVISION OPERATION WHICH RETURNS
-
-
-WAS A ZERO DIVISOR.
-CONTAINS DVOVSUB.  E BANK MUST BE 6.
-STORAGE.  SIGN AGREEMENT IS
-IF THE A AND L REGISTERS ARE THE
-
-
-
-
-DESIGNATED BY "ADRES".
-UNSWITCHED ERASABLE.
-APPROPRIATE.
-EQUATED TO MPAC +4,+5, AND +6.)
-
-
-
-
-DVOVSUB		TS	SCRATCHY	
-		TS	SCRATCHX
-		INDEX	Q		
-		CA	0
-		INCR	Q		
-		INDEX	A
-		CA	0		
-		EXTEND			
-		BZF	MAXPLUS
-
-		TS	SCRATCHZ	
-
-		CCS	A		
-		AD	BIT1
-		TCF	ZEROPLUS
-		AD	BIT1
-
-ZEROPLUS	XCH	SCRATCHY	
-		EXTEND			
-		BZMF	GOODNEG		
-
-		CS	A
-
-GOODNEG		AD	SCRATCHY	
-		EXTEND
-		BZMF	MAKEMAX		
-
-		CA	SCRATCHX	
-		EXTEND
-		DV	SCRATCHZ	
-		TC	Q		
-
-MAKEMAX		CCS	SCRATCHX	
-		CCS	SCRATCHZ	
-		TCF	MAXPLUS
-		CCS	SCRATCHZ
-		CAF	NEGMAX		
-		TC	Q
-MAXPLUS		CAF	POSMAX		
-		TC	Q
-
-
-
-
-
-
-AND C IS SCALED AT B +16 KG.
-
-AT 8 FT B+16 KG, B IS SCALED AT 8 FT,
-
-
-		2DEC	+.0410511917	
-
-INERCONA	2DEC	+.0059347674	
-
-		2DEC	+.0014979264	
-
-		2DEC	+.0010451889	
-
-		2DEC	+.0065443852	
-
-		2DEC	+.0035784354	
-
-		2DEC	+.0056946631	
-
-		DEC	+.155044	
-		DEC	-.025233	
-
-INERCONB	DEC	+.002989	
-INERCONC	DEC	+.008721	
-		DEC	+.018791	
-		DEC	-.068163	
-		DEC	+.021345	
-		DEC	-.066027	
-
-		DEC	+.000032	
-		DEC	-.006923	
-		DEC	+.162862	
-		DEC	+.002588	
-		DEC	+.009312	
-		DEC	-.023608	
-
-GIMBLBTS	OCTAL	01400
-		OCTAL	01000
-		OCTAL	06000
-		OCTAL	04000
-DGBF		DEC	0.6		
-0.35356		DEC	0.35356		
-GFACTM		OCT	337		
-.7071		DEC	.70711
--.7071		DEC	-.70711
--EPSMAX		DEC	-.42265
-
-
-
-DOCKED		CA	ONE		
-SPSLOOP1	TS	COEFCTR		
-		CA	ONE		
-		TS	MASSCTR		
-
-		INDEX	COEFCTR
-		CA	COEFF 	-1	
-		EXTEND
-		MP	LEMMASS
-		EXTEND
-		MP	CSMMASS		
-
-		INDEX	COEFCTR
-		AD	COEFF		
-		TS	MPAC		
-		TCF	+4
-
-SPSLOOP2	TS	MASSCTR		
-		EXTEND			
-		DIM	COEFCTR		
-		INDEX	COEFCTR
-		CA	COEFF 	+2	
-		EXTEND
-
-		INDEX	MASSCTR
-		MP	LEMMASS
-		INDEX	COEFCTR
-		AD	COEFF 	+4	
-		EXTEND
-		INDEX	MASSCTR
-		MP	LEMMASS
-		ADS	MPAC
-
-		CCS	MASSCTR
-		TCF	SPSLOOP2
-		CCS	COEFCTR		
-		TCF	+7		
-TORQCONS	2DEC	0.51443 B-14	
-
-		CA	MPAC
-		TS	MPAC 	+1	
-		CA	SEVEN
-		TCF	SPSLOOP1
-
-		CA	1JACCCON	
-		ZL
-		TC	DVOVSUB
-		ADRES	MASS
-		TS	1JACC		
-
-		CA	POSMAX		
-		TS	1/ANETP		
-		TS	1/ANET2 +1
-		TS	1/ANET2 +2
-		TS	1/ANET2 +17D
-		TS	1/ANET2 +18D
-		EXTEND
-		DCA	TORQCONS
-		EXTEND
-		DV	MPAC 	+1
-		INHINT
-		TS	1JACCQ		
-		TS	1JACCR
-
-		CA	-.7071
-		TS	COEFFQ		
-		CA	.7071		
-		TS	COEFFR
-		CA	MASS		
-		EXTEND
-		MP	MPAC		
-		EXTEND
-		MP	ABDELV		
-		TC	DVOVSUB		
-
-		ADRES	MPAC 	+1
-
-		TS	ACCDOTR
-		TCF	SPSCONT		
-
-1JACCCON	OCT	00167		
-
-
-+F
-
-COEFF		DEC	.19518		
-		DEC	-.00529		
-		DEC	-.17670		
-		DEC	-.03709		
-		DEC	.06974		
-		DEC	.02569		
-
-		DEC	.20096		
-		DEC	.13564		
-		DEC	.75704		
-		DEC	-.37142		
-		DEC	-.63117		
-		DEC	.41179		
-
-
-
-COEFCTR 	EQUALS	MPAC 	+4
-MASSCTR		EQUALS	MPAC 	+5
-SCRATCHX	EQUALS	MPAC 	+4	
-SCRATCHY	EQUALS	SCRATCHX +1
-SCRATCHZ	EQUALS	SCRATCHX +2
-
-DOCKTEMP	EQUALS	MPAC 	+3	
-EPSILON		EQUALS	MPAC 	+1
--EPSILON	EQUALS	EPSILON
--.1875		DEC	-.18750
-
-
-		BANK	20
-		SETLOC	DAPS3
-		BANK
-
-		EBANK=	AOSQ
-
-		COUNT*	$$/DAPAO
-
- -1		TS	INGTS		
-1/ACCONT	CA	DB		
-		EXTEND
-		MP	BIT13
-		TS	L		
-		AD	A
-		TS	DBVAL3		
-		CS	DBVAL1
-		AD	L
-		TS	DBVAL2		
-
-GETAOSUV	INHINT
-		CAE	AOSR		
-		TS	L		
-		CAE	AOSQ
-		TC	IBNKCALL
-		CADR	ROT-TOUV
-		DXCH	AOSU
-
-		RELINT
-		CA	DAPBOOLS
-		MASK	DRIFTBIT	
-		CCS	A		
-		CA	ONE		
-		TS	DRIFTER		
-		AD	ALLOWGTS	
-		CCS	A
-		CA	FLATVAL		
-		TS	FLATEMP		
-		EXTEND
-		BZF	DOPAXIS		
-		CCS	DRIFTER		
-		CA	ZONE3MAX	
-		TS	Z3TEM
-
-DOPAXIS		CA	1JACC		
-					
-		AD	BIT9		
-		TS	FUNTEM
-
-		CA	1JACC
-
-		TC	INVERT
-		INHINT			
-		TS	1/ANETP		
-		TS	1/ANETP +1
-
-		CS	BIT9		
-		EXTEND
-		MP	1/ANETP		
-		EXTEND
-		DV	FUNTEM		
-		TS	PACCFUN
-		TS	PACCFUN +1
-
-		CA	1/.03		
-		TS	1/ACOSTP
-		TS	1/ACOSTP +1
-		RELINT
-
-		ZL
-		CCS	DRIFTER
-		DXCH	AOSU		
-
-UAXIS		CA	ZERO		
-		TS	UV		
-
-BOTHAXES	TS	SIGNAOS		
-		INDEX	UV
-		CCS	AOSU		
-		AD	ONE		
-		TCF	+3		
-		AD	ONE		
-		INCR	SIGNAOS		
-		TS	ABSAOS		
-		CS	SIGNAOS
-		TS	-SIGNAOS	
-
-		CA	DBVAL1		
-		TS	DBB1
-		TS	DBB2
-
-		CA	ABSAOS		
-		AD	-.03R/S2
-		EXTEND
-		BZMF	NOTMUCH		
-BIGAOS		CCS	FLATEMP		
-		TCF	SKIPDB1		
-
-		CA	DBVAL1
-		INDEX	-SIGNAOS
-
-		ADS	DBB2		
-		INDEX	SIGNAOS
-		TS	DBB4		
-		CA	-.1875		
-		AD	ABSAOS		
-		EXTEND
-		BZMF	+3
-		CS	DBVAL3		
-		TCF	DBONE
-		CS	ABSAOS
-		DOUBLE
-		DOUBLE
-		AD	BIT14
-		DOUBLE			
-		EXTEND
-		MP	DB
-DBONE		INDEX	SIGNAOS		
-		TS	DBB1		
-		CA	DBVAL2
-		INDEX	-SIGNAOS
-		TS	DBB3	
+#include <stdio.h>
+#include <string.h>
+#include<math.h>
+#include<stdlib.h>
+#include<time.h>
+#include<limits.h>
+
+float prob_func(int train_set[][192],int label[],int class,int feature,int value,float prob_class[] ){
+    int i,j;
+    float count1=0.0,count2=0.0;
+    for(i=0;i<6670;i++){
+        if(label[i]==class){
+            if(train_set[i][feature]==value){
+                count1++;
+            }
+            count2++;
+        
+        }
+    }
+    prob_class[class]=count2/6670.0;
+    return count1/count2;
+}
+
+int pred_func(int test[],float probability_matrix[][192][5],float prob_class[]){
+    float max= -99999.0;
+    float sum;
+    int i,j,index=-1;
+    for(i=0;i<10;i++){
+        sum=0.0;
+        for(j=0;j<192;j++){
+            sum=sum+log(probability_matrix[i][j][test[j]]);
+        }
+        sum=sum+log(prob_class[i]);
+        if(sum>max){
+            max = sum;
+            index= i;
+        }
+    }
+    return index;
+
+}
+
+int main(){
+    FILE *f1 =fopen("pp_tra.dat","r");
+    int train_set[6670][192];
+    int label[6670];
+    float prob_class[10];//matrix for storing priori prob
+    int i,j,k,c;
+    for(i=0;i<6670;i++){
+        for(j=0;j<192;j++){
+            fscanf(f1,"%d",&train_set[i][j]);
+        }
+        fscanf(f1,"%d",&label[i]);
+    }
+    float probability_matrix[10][192][5];
+
+
+    for(i=0;i<10;i++){
+        for(j=0;j<192;j++){
+            for(k=0;k<5;k++){
+                probability_matrix[i][j][k]=prob_func(train_set,label,i,j,k,prob_class);
+            }
+        }
+    }
+    for(i=0;i<10;i++){
+        printf("%d\n\n ",i);
+        for(j=0;j<192;j++){
+            printf("%d ",j);
+            for(k=0;k<5;k++){
+                printf("%f ",probability_matrix[i][j][k]);
+            }
+            printf("\n");
+
+        }
+        printf("\n");
+    }
+    FILE *f2 =fopen("pp_tes.dat","r");
+    int test[3333][192];
+    int label_predicted[3333];
+    int label_test[3333];
+    for(i=0;i<3333;i++){
+        for(j=0;j<192;j++){
+            fscanf(f2,"%d",&test[i][j]);
+        }
+        fscanf(f2,"%d",&label_test[i]);
+    }
+    for(i=0;i<3333;i++){
+        label_predicted[i]= pred_func(test[i],probability_matrix,prob_class);
+    }
+    int count=0;
+    for(i=0;i<3333;i++){
+        if(label_test[i]==label_predicted[i]){
+            count++;
+        }
+    }
+
+    for(i=0;i<3333;i++){
+        printf("%d %d %d\n",i,label_predicted[i],label_test[i]);
+    }
+
+    printf("%lf\n",(count/3333.0)*100);
+
+    return 0;
+}
+
+# Naive Bayes On The Iris Dataset
+from csv import reader
+from random import seed
+from random import randrange
+from math import sqrt
+from math import exp
+from math import pi
+
+# Load a CSV file
+def load_csv(filename):
+	dataset = list()
+	with open(filename, 'r') as file:
+		csv_reader = reader(file)
+		for row in csv_reader:
+			if not row:
+				continue
+			dataset.append(row)
+	return dataset
+
+# Convert string column to float
+def str_column_to_float(dataset, column):
+	for row in dataset:
+		row[column] = float(row[column].strip())
+
+# Convert string column to integer
+def str_column_to_int(dataset, column):
+	class_values = [row[column] for row in dataset]
+	unique = set(class_values)
+	lookup = dict()
+	for i, value in enumerate(unique):
+		lookup[value] = i
+	for row in dataset:
+		row[column] = lookup[row[column]]
+	return lookup
+
+# Split a dataset into k folds
+def cross_validation_split(dataset, n_folds):
+	dataset_split = list()
+	dataset_copy = list(dataset)
+	fold_size = int(len(dataset) / n_folds)
+	for _ in range(n_folds):
+		fold = list()
+		while len(fold) < fold_size:
+			index = randrange(len(dataset_copy))
+			fold.append(dataset_copy.pop(index))
+		dataset_split.append(fold)
+	return dataset_split
+
+# Calculate accuracy percentage
+def accuracy_metric(actual, predicted):
+	correct = 0
+	for i in range(len(actual)):
+		if actual[i] == predicted[i]:
+			correct += 1
+	return correct / float(len(actual)) * 100.0
+
+# Evaluate an algorithm using a cross validation split
+def evaluate_algorithm(dataset, algorithm, n_folds, *args):
+	folds = cross_validation_split(dataset, n_folds)
+	scores = list()
+	for fold in folds:
+		train_set = list(folds)
+		train_set.remove(fold)
+		train_set = sum(train_set, [])
+		test_set = list()
+		for row in fold:
+			row_copy = list(row)
+			test_set.append(row_copy)
+			row_copy[-1] = None
+		predicted = algorithm(train_set, test_set, *args)
+		actual = [row[-1] for row in fold]
+		accuracy = accuracy_metric(actual, predicted)
+		scores.append(accuracy)
+	return scores
+
+# Split the dataset by class values, returns a dictionary
+def separate_by_class(dataset):
+	separated = dict()
+	for i in range(len(dataset)):
+		vector = dataset[i]
+		class_value = vector[-1]
+		if (class_value not in separated):
+			separated[class_value] = list()
+		separated[class_value].append(vector)
+	return separated
+
+# Calculate the mean of a list of numbers
+def mean(numbers):
+	return sum(numbers)/float(len(numbers))
+
+# Calculate the standard deviation of a list of numbers
+def stdev(numbers):
+	avg = mean(numbers)
+	variance = sum([(x-avg)**2 for x in numbers]) / float(len(numbers)-1)
+	return sqrt(variance)
+
+# Calculate the mean, stdev and count for each column in a dataset
+def summarize_dataset(dataset):
+	summaries = [(mean(column), stdev(column), len(column)) for column in zip(*dataset)]
+	del(summaries[-1])
+	return summaries
+
+# Split dataset by class then calculate statistics for each row
+def summarize_by_class(dataset):
+	separated = separate_by_class(dataset)
+	summaries = dict()
+	for class_value, rows in separated.items():
+		summaries[class_value] = summarize_dataset(rows)
+	return summaries
+
+# Calculate the Gaussian probability distribution function for x
+def calculate_probability(x, mean, stdev):
+	exponent = exp(-((x-mean)**2 / (2 * stdev**2 )))
+	return (1 / (sqrt(2 * pi) * stdev)) * exponent
+
+# Calculate the probabilities of predicting each class for a given row
+def calculate_class_probabilities(summaries, row):
+	total_rows = sum([summaries[label][0][2] for label in summaries])
+	probabilities = dict()
+	for class_value, class_summaries in summaries.items():
+		probabilities[class_value] = summaries[class_value][0][2]/float(total_rows)
+		for i in range(len(class_summaries)):
+			mean, stdev, _ = class_summaries[i]
+			probabilities[class_value] *= calculate_probability(row[i], mean, stdev)
+	return probabilities
+
+# Predict the class for a given row
+def predict(summaries, row):
+	probabilities = calculate_class_probabilities(summaries, row)
+	best_label, best_prob = None, -1
+	for class_value, probability in probabilities.items():
+		if best_label is None or probability > best_prob:
+			best_prob = probability
+			best_label = class_value
+	return best_label
+
+# Naive Bayes Algorithm
+def naive_bayes(train, test):
+	summarize = summarize_by_class(train)
+	predictions = list()
+	for row in test:
+		output = predict(summarize, row)
+		predictions.append(output)
+	return(predictions)
+
+# Test Naive Bayes on Iris Dataset
+seed(1)
+filename = 'iris.csv'
+dataset = load_csv(filename)
+for i in range(len(dataset[0])-1):
+	str_column_to_float(dataset, i)
+# convert class column to integers
+str_column_to_int(dataset, len(dataset[0])-1)
+# evaluate algorithm
+n_folds = 5
+scores = evaluate_algorithm(dataset, naive_bayes, n_folds)
+print('Scores: %s' % scores)
+print('Mean Accuracy: %.3f%%' % (sum(scores)/float(len(scores))))

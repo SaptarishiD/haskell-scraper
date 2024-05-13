@@ -1,9 +1,18 @@
-SQL
-Start exploring data visualization using SQL with our practical guide. You’ll learn how to harness the powerful features of SQL to create effective visualizations that enhance your data analysis – and make it more understandable and impactful.
-SQL is a specialized programming language designed for managing and manipulating relational databases. It provides a standardized framework for querying, updating, and manipulating data. It is simple and yet offers a robust set of commands and functions to interact with data.
-In this article, we delve into the intersection of SQL and data visualization, exploring how these two domains intertwine to unlock insights and drive decision-making processes.
-Understanding SQL: The Backbone of Data Management
-At its core, SQL serves as a universal language for interacting with relational databases. Its significance lies in its ability to seamlessly retrieve, manipulate, and manage vast amounts of data with precision and efficiency. SQL-proficient data analysts can navigate through complex datasets with ease, performing operations ranging from simple queries to intricate data transformations.
-One of SQL's primary functions lies in data preparation, where it excels in extracting, transforming, and loading (ETL) data from disparate sources. Analysts leverage SQL queries to cleanse, filter, and aggregate data; this lays the groundwork for subsequent analysis and visualization.
-When it comes to preparing data specifically for visualization, SQL's importance can't be overstated. As analysts work to transform raw data into clear insights, they use SQL to optimize and refine the data to make the results as clear as possible.
-By mastering data visualization with SQL, analysts enhance their data preparation skills and improve the clarity and interpretability of the visual outcomes.
+Java
+I have been working with Java a couple of years, but up until recently I haven't run across this construct:
+This is probably a very simple question, but can someone explain it? How do I read it? I am pretty sure I know how it works.
+if isHere is true, getHereCount() is called,
+if isHere is false getAwayCount() is called.
+Correct? What is this construct called?
+Yes, it is a shorthand form of
+It's called the conditional operator. Many people (erroneously) call it the ternary operator, because it's the only ternary (three-argument) operator in Java, C, C++, and probably many other languages. But theoretically there could be another ternary operator, whereas there can only be one conditional operator.
+The official name is given in the Java Language Specification:
+§15.25 Conditional Operator ? :
+The conditional operator ? : uses the boolean value of one expression to decide which of two other expressions should be evaluated.
+Note that both branches must lead to methods with return values:
+It is a compile-time error for either the second or the third operand expression to be an invocation of a void method.
+In fact, by the grammar of expression statements (§14.8), it is not permitted for a conditional expression to appear in any context where an invocation of a void method could appear.
+Java Program to Find Inverse of a Matrix
+This is the java program to find the inverse of square invertible matrix. The matrix is invertible if its determinant is non zero.
+Here is the source code of the Java Program to Find Inverse of a Matrix. The Java program is successfully compiled and run on a Windows system. The program output is also shown below.
+
