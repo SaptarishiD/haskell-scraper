@@ -55,12 +55,17 @@ main = do
         -- lang_test <- readFile "input/lang_test.txt"
         -- src_test <- readFile "input/code_test.txt"
 
-        src_test <- readFile "cases/code_test1.txt"
-        lang_test <- readFile "cases/lang_test1.txt"
+        src_test <- readFile "cases/code_test5.txt"
+        lang_test <- readFile "cases/lang_test5.txt"
 
-        let test_data = (lines src_test) ++ (lines lang_test)
+        -- print (filter (not . null) (lines src_test))
+
+        
+
+        let test_data = filter (not . null) ( (lines src_test) ++ (lines lang_test) )
         -- print test_data
         let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+        -- print (filter (not . null) test_data)
         let mapping = zip test_data final_probs
         let src_test_len = length (lines src_test)
         let lang_test_len = length (lines lang_test)
@@ -69,6 +74,8 @@ main = do
         -- precision_code, recall_code, precision_lang, recall_lang
         let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
         print evals
+
+        -- print mapping
 
         print "DONE" {-
 
