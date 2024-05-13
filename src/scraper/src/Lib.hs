@@ -8,7 +8,7 @@
 -- also need to do performance testing stuff and all
 
 module Lib
-    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes , evaluateNaiveBayes
+    ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes , evaluateNaiveBayes, evalTests
     ) where
 
 import qualified Network.HTTP.Client as Client
@@ -66,6 +66,22 @@ getHTML url = do
 
 parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
 parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
+
+evalTests :: (( Double, ([Double] , [Double]) ), Vocabulary ) -> [String] -> IO [(Double, Double, Double, Double)]
+evalTests _ [] = return []
+evalTests trainedModel (x:y:xs) = do
+    lang_test <- readFile ("cases/" ++ x)
+    src_test <- readFile ("cases/" ++ y)
+    let test_data = (lines src_test) ++ (lines lang_test)
+    let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+    let mapping = zip test_data final_probs
+    let src_test_len = length (lines src_test)
+    let lang_test_len = length (lines lang_test)
+    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    let test_accuracy_mapping = zip yTest final_probs
+    -- precision_code, recall_code, precision_lang, recall_lang
+    rest <- evalTests trainedModel xs
+    return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
 
 
 

@@ -44,14 +44,22 @@ main = do
         let code_data = snd mydata
         let trainedModel = Lib.trainNaiveBayes lang_data code_data
 
+        let testFiles = ["lang_test1.txt", "code_test1.txt","lang_test5.txt", "code_test5.txt", "lang_test6.txt", "code_test6.txt", "lang_test7.txt", "code_test7.txt", "lang_test8.txt", "code_test8.txt", "lang_test9.txt", "code_test9.txt", "lang_test10.txt", "code_test10.txt"]
+        let test_evals = Lib.evalTests trainedModel testFiles
+
+        test_results <- test_evals
+        print test_results
         
 
 
-        
-        lang_test <- readFile "input/lang_test.txt"
-        src_test <- readFile "input/code_test.txt"
+        -- lang_test <- readFile "input/lang_test.txt"
+        -- src_test <- readFile "input/code_test.txt"
+
+        src_test <- readFile "cases/code_test1.txt"
+        lang_test <- readFile "cases/lang_test1.txt"
+
         let test_data = (lines src_test) ++ (lines lang_test)
-        print test_data
+        -- print test_data
         let final_probs = Lib.classifyNaiveBayes test_data trainedModel
         let mapping = zip test_data final_probs
         let src_test_len = length (lines src_test)
@@ -61,6 +69,9 @@ main = do
         -- precision_code, recall_code, precision_lang, recall_lang
         let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
         print evals
+
+        print "DONE" {-
+
       
 
     -- num_code_correct, num_lang_correct, num_code_wrong, num_lang_wrong, total_actual_code, total_actual_lang)
@@ -88,7 +99,6 @@ main = do
 
 
 
-        print "DONE" {-
 
 -}
 
