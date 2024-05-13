@@ -1,22 +1,30 @@
-Comments are fundamental parts of a computer program, where you leave 
-explanatory remarks to yourself and others that may be collaborating with 
-you regarding your 
-code.
-All code you create for this course must include robust comments.
-Typically each comment is a few words or more, providing the reader an 
-opportunity to understand what is happening in a specific block of code. 
-Further, such comments serve as a reminder for you later when you need to 
-revise your code.
-Comments involve placing backslashes into your code, followed by a comment. Modify your code as follows to integrate comments:
-Queues are one form of abstract data structure.
-Queues have specific properties. Namely, they are FIFO or “first in first out.” You can imagine yourself in a line for a ride at an amusement park. The first person in the line gets to go on the ride first. The last person gets to go on the ride last.
-Queues have specific actions associated with them. For example, an item can be enqueued; that is, the item can join the line or queue. Further, an item can be dequeued or leave the queue once it reaches the front of the line.
-Queues contrast a stack. Fundamentally, the properties of a stack are different than a queue. Specifically, it is LIFO or “last in first out.” Just like stacking trays in a cafeteria, a tray that is placed in a stack last is the first that may be picked up.
-Stacks have specific actions associated with them. For example, push places something on top of a stack. Pop is removing something from the top of the stack.
-In code, you might imagine a stack as follows:
-A pointer that is not assigned any value but NULL is known as the NULL pointer. If you don't have any address to be specified in the pointer at the time of declaration, you can assign NULL value. It will provide a better approach.
-Notice how the get_int function is utilized to obtain an integer from the user twice. One integer is stored in the int variable called x. Another is stored in the int variable called y. Then, the printf function prints the value of x + y, designated by the %i symbol.
-As you are coding, pay special attention to the types of variables you are using to avoid problems within your code.
+In our previous session, we learned about Scratch, a visual programming language.
+Indeed, all the essential programming concepts presented in Scratch will be utilized as you learn how to program any programming language.
+Recall that machines only understand binary. Where humans write source code, a list of instructions for the computer that is human readable, machines only understand what we can now call machine code. This machine code is a pattern of ones and zeros that produces a desired effect.
+It turns out that we can convert source code into machine code using a very special piece of software called a compiler. Today, we will be introducing you to a compiler that will allow you to convert source code in the programming language C into machine code.
+Today, in addition to learning about how to code, you will be learning about how to write good code.
+Code can be evaluated upon three axes. First, correctness refers to “does the code run as intended?” Second, design refers to “how well is the code designed?” Finally, style refers to “how aesthetically pleasing and consistent is the code?”
+The compiler that is utilized for this course is Visual Studio Code, affectionately referred to as , which can be accessed via that same url, or simply as *VS Code.*
+One of the most important reasons we utilize VS Code is that it has all the software required for the course already pre-loaded on it. This course and the instructions herein were designed with VS Code in mind. Best always to utilize VS Code for assignments in this course.
+You can open VS Code at code.cs50.io.
+The compiler can be divided into a number of regions:
+Notice that there is a file explorer on the left side where you can find your files. Further, notice that there is a region in the middle called a text editor where you can edit your program. Finally, there is a command line interface, known as a CLI, command line, or terminal window where we can send commands to the computer in the cloud.
+
+We can build your first program in C by typing code hello.c into the terminal window. Notice that we deliberately lowercased the entire filename and included the .c extension. Then, in the text editor that appears, write code as follows:
+Note that every single character above serves a purpose. If you type it incorrectly, the program will not run.
+
+Clicking back in the terminal window, you can compile your code by executing make hello. Notice that we are omitting .c. make is a compiler that will look for our hello.c file and turn it into a program called hello. If executing this command results in no errors, you can proceed. If not, double-check your code to ensure it matches the above.
+Now, type ./hello and your program will execute saying hello, world.
+Now, open the file explorer on the left. You will notice that there is now both a file called hello.c and another file called hello. hello.c is able to be read by the compiler: It’s where your code is stored. hello is an executable file that you can run, but cannot be read by the compiler.
+Let’s look at our code more carefully:
+Notice the semicolon is now gone.
+
+In your terminal window, run make hello. You will now be met with numerous errors! Placing the semicolon back in the correct position and running make hello again, the errors go away.
+Notice also the special symbol \n in your code. Try removing those characters and making your program again by executing make hello. Typing ./hello in the terminal window, how did your program change?
+Restore your program to the following:
+Everything we’ve discussed today has focused on various building-blocks of your work as a programmer.
+The following will help you orient toward working on a problem set for this class in general: How does one approach a computer science related problem?
+Imagine we wanted to emulate the visual of the game Super Mario Bros. Considering the four question-blocks pictured, how could we create code that roughly represents these four horizontal blocks?
 Summing Up
 In this lesson, you learned how to apply the building blocks you learned in Scratch to the C programming language. You learned…
 How to create your first program in C.
@@ -26,25 +34,617 @@ How to use the Linux command line.
 How to approach problem-solving for a computer science problem.
 How to integrate comments into your code.
 How to approach abstraction to simplify and improve your code.
-How to utilize types and operators.
-See you next time!
-A few things to note:
-The contraction 'm is split from i - this is common for English language splitters, which want things like 'm, 'll, 're as separate words.
-Whitespace is preserved and attached at the start of a word. Whitespace is important because tokens at the beginning of words sometimes have different semantic meaning from tokens not at the beginning of words. The choice of where it's attached is arbitrary. From this point on, whitespace bytes are considered like any other bytes in the BPE algorithm.
-Now is a good time for some terminology we'll be using while talking about BPE:
+How to utilize types and operators
+Up until this point, our programs in this course have been linear: sequential.
+It’s possible to have certain types of values not only have properties or attributes inside of them but have functions as well. In Python, these values are known as objects
+In C, we could create a struct where you could associate multiple variables inside a single self-created data type. In Python, we can do this and also include functions in a self-created data type. When a function belongs to a specific object, it is known as a method.
+For example, strs in Python have a built-in methods. Therefore, you could modify your code as follows:
+Returning to meow.c from weeks earlier, recall the following code:
+The above can be implemented within Python as:
+Similarly, using a for loop, we can write code as follows:
+Data types in Python do not need to be explicitly declared. For example, you saw how answer above is a string, but we did not have to tell the interpreter this was the case: It knew on its own.
+In Python, commonly used types include:
+Notice that long and double are missing. Python will handle what data type should be used for larger and smaller numbers.
+Some other data types in Python include:
+Each of these data types can be implemented in C, but in Python they can be implemented more simply.
 
-Word: produced by the splitter in pre-processing, like the list shown above.
-Token: typically a sub-word sequence of bytes; the output of the tokenizer is a list of tokens, by ID.
-Token ID: unique numerical identifier for a token.
-Vocabulary: a mapping of token IDs --> token values learned by the tokenizer during the training process.
-Training: the process in which BPE learns a vocabulary from a corpus of text.
-Splitter regexp: regular expression used to split text into words during pre-processing. Given an algorithm (in this case BPE), the pair vocabulary + splitter regexp unambiguously defines how a given text will be tokenized.
-Encoder: given a vocabulary and a splitter regexp, tokenizes any text into a list of IDs from the vocabulary.
-Decoder: given a list of IDs and the vocabulary, reconstructs the original text.
-Training
-BPE training proceeds by first assuming each byte is its own token, and then successively merging pairs of tokens into longer tokens and adding these to the vocabulary, until the desired vocabulary size is achieved.
-Let's reuse our example, starting with these words:
-Argument passing
-I'm going to simplify the discussion here on purpose and focus on integer/pointer arguments [3]. According to the ABI, the first 6 integer or pointer arguments to a function are passed in registers. The first is placed in rdi, the second in rsi, the third in rdx, and then rcx, r8 and r9. Only the 7th argument and onwards are passed on the stack.
-The stack frame
-With the above in mind, let's see how the stack frame for this C function looks:
+
+As we hinted at earlier today, you can further improve upon this code using functions. Modify your code as follows:
+
+Notice that the meow function abstracts away the print statement. Further, notice that the main function appears at the top of the file. At the bottom of the file, the main function is called. By convention, it’s expected that you create a main function in Python.
+
+Indeed, we can pass variables between our functions as follows:
+Notice how meow now takes a variable n. In the main function, you can call meow and pass a value like 3 to it. Then, meow utilizes the value of n in the for loop.
+
+Reading the above code, notice how you, as a C programmer, are able to quite easily make sense of the above code. While some conventions are different, the building blocks you previously learned are very apparent in this new programming language.
+
+
+Why should you learn to write programs?
+
+Writing programs (or programming) is a very creative 
+and rewarding activity.  You can write programs for 
+many reasons, ranging from making your living to solving
+a difficult data analysis problem to having fun to helping
+someone else solve a problem.  This book assumes that 
+everyone needs to know how to program, and that once 
+you know how to program you will figure out what you want 
+to do with your newfound skills.  
+
+We are surrounded in our daily lives with computers ranging 
+from laptops to cell phones.  We can think of these computers
+as our personal assistants who can take care of many things
+on our behalf.  The hardware in our current-day computers 
+is essentially built to continuously ask us the question, 
+What would you like me to do next?
+
+Programmers add an operating system and a set of applications
+to the hardware and we end up with a Personal Digital
+Assistant that is quite helpful and capable of helping
+us do many different things.
+
+Our computers are fast and have vast amounts of memory and 
+could be very helpful to us if we only knew the language to
+speak to explain to the computer what we would like it to 
+do next.  If we knew this language, we could tell the 
+computer to do tasks on our behalf that were repetitive.  
+Interestingly, the kinds of things computers can do best
+are often the kinds of things that we humans find boring
+and mind-numbing.
+
+For example, look at the first three paragraphs of this
+chapter and tell me the most commonly used word and how
+many times the word is used.  While you were able to read
+and understand the words in a few seconds, counting them
+is almost painful because it is not the kind of problem 
+that human minds are designed to solve.  For a computer
+the opposite is true, reading and understanding text 
+from a piece of paper is hard for a computer to do 
+but counting the words and telling you how many times
+the most used word was used is very easy for the
+computer:
+
+Our personal information analysis assistant quickly 
+told us that the word to was used sixteen times in the
+first three paragraphs of this chapter.
+
+This very fact that computers are good at things 
+that humans are not is why you need to become
+skilled at talking computer language.  Once you learn
+this new language, you can delegate mundane tasks
+to your partner (the computer), leaving more time 
+for you to do the 
+things that you are uniquely suited for.  You bring 
+creativity, intuition, and inventiveness to this
+partnership.  
+
+Creativity and motivation
+
+While this book is not intended for professional programmers, professional
+programming can be a very rewarding job both financially and personally.
+Building useful, elegant, and clever programs for others to use is a very
+creative activity.  Your computer or Personal Digital Assistant (PDA) 
+usually contains many different programs from many different groups of 
+programmers, each competing for your attention and interest.  They try 
+their best to meet your needs and give you a great user experience in the
+process.   In some situations, when you choose a piece of software, the 
+programmers are directly compensated because of your choice.
+
+If we think of programs as the creative output of groups of programmers,
+perhaps the following figure is a more sensible version of our PDA:
+
+For now, our primary motivation is not to make money or please end users, but
+instead for us to be more productive in handling the data and 
+information that we will encounter in our lives.
+When you first start, you will be both the programmer and the end user of
+your programs.  As you gain skill as a programmer and
+programming feels more creative to you, your thoughts may turn
+toward developing programs for others.
+
+Computer hardware architecture
+
+Before we start learning the language we 
+speak to give instructions to computers to 
+develop software, we need to learn a small amount about 
+how computers are built.  
+
+Central Processing Unit (or CPU) is 
+the part of the computer that is built to be obsessed 
+with what is next?  If your computer is rated
+at three Gigahertz, it means that the CPU will ask What next?
+three billion times per second.  You are going to have to 
+learn how to talk fast to keep up with the CPU.
+
+Main Memory is used to store information
+that the CPU needs in a hurry.  The main memory is nearly as 
+fast as the CPU.  But the information stored in the main
+memory vanishes when the computer is turned off.
+
+Secondary Memory is also used to store
+information, but it is much slower than the main memory.
+The advantage of the secondary memory is that it can
+store information even when there is no power to the
+computer.  Examples of secondary memory are disk drives
+or flash memory (typically found in USB sticks and portable
+music players).
+
+Input and Output Devices are simply our
+screen, keyboard, mouse, microphone, speaker, touchpad, etc.  
+They are all of the ways we interact with the computer.
+
+These days, most computers also have a
+Network Connection to retrieve information over a network.
+We can think of the network as a very slow place to store and
+retrieve data that might not always be up.  So in a sense,
+the network is a slower and at times unreliable form of
+Secondary Memory.
+
+While most of the detail of how these components work is best left 
+to computer builders, it helps to have some terminology
+so we can talk about these different parts as we write our programs.
+
+As a programmer, your job is to use and orchestrate 
+each of these resources to solve the problem that you need to solve
+and analyze the data you get from the solution.  As a programmer you will 
+mostly be talking to the CPU and telling it what to 
+do next.  Sometimes you will tell the CPU to use the main memory,
+secondary memory, network, or the input/output devices.
+
+You need to be the person who answers the CPU's What next? 
+question.  But it would be very uncomfortable to shrink you 
+down to five mm  tall and insert you into the computer just so you 
+could issue a command three billion times per second.  So instead,
+you must write down your instructions in advance.
+We call these stored instructions a program and the act 
+of writing these instructions down and getting the instructions to 
+be correct programming.
+
+Understanding programming
+
+In the rest of this book, we will try to turn you into a person
+who is skilled in the art of programming.  In the end you will be a 
+programmer --- perhaps not a professional programmer, but 
+at least you will have the skills to look at a data/information
+analysis problem and develop a program to solve the problem.
+
+problem solving
+
+In a sense, you need two skills to be a programmer:
+
+First, you need to know the programming language (Python) -
+you need to know the vocabulary and the grammar.  You need to be able 
+to spell the words in this new language properly and know how to construct 
+well-formed sentences in this new language.
+
+Second, you need to tell a story.  In writing a story,
+you combine words and sentences to convey an idea to the reader. 
+There is a skill and art in constructing the story, and skill in
+story writing is improved by doing some writing and getting some
+feedback.  In programming, our program is the story and the 
+problem you are trying to solve is the idea.
+
+itemize
+
+Once you learn one programming language such as Python, you will 
+find it much easier to learn a second programming language such
+as JavaScript or C++.  The new programming language has very different 
+vocabulary and grammar but the problem-solving skills 
+will be the same across all programming languages.
+
+You will learn the vocabulary and sentences of Python pretty quickly.
+It will take longer for you to be able to write a coherent program
+to solve a brand-new problem.  We teach programming much like we teach
+writing.  We start reading and explaining programs, then we write 
+simple programs, and then we write increasingly complex programs over time.
+At some point you get your muse and see the patterns on your own
+and can see more naturally how to take a problem and 
+write a program that solves that problem.  And once you get 
+to that point, programming becomes a very pleasant and creative process.  
+
+We start with the vocabulary and structure of Python programs.  Be patient
+as the simple examples remind you of when you started reading for the first
+time. 
+
+Words and sentences
+
+Unlike human languages, the Python vocabulary is actually pretty small.
+We call this vocabulary the reserved words.  These are words that
+have very special meaning to Python.  When Python sees these words in 
+a Python program, they have one and only one meaning to Python.  Later
+as you write programs you will make up your own words that have meaning to 
+you called variables.   You will have great latitude in choosing
+your names for your variables, but you cannot use any of Python's 
+reserved words as a name for a variable.
+
+When we train a dog, we use special words like
+sit, stay, and fetch.  When you talk to a dog and
+don't use any of the reserved words, they just look at you with a 
+quizzical look on their face until you say a reserved word.  
+For example, if you say, 
+I wish more people would walk to improve their overall health, 
+what most dogs likely hear is,
+blah blah blah walk blah blah blah blah.
+That is because walk is a reserved word in dog language.  
+
+The reserved words in the language where humans talk to 
+Python include the following:
+
+and       del       from      not       while    
+as        elif      global    or        with     
+assert    else      if        pass      yield    
+break     except    import    print              
+class     exec      in        raise              
+continue  finally   is        return             
+def       for       lambda    try
+
+That is it, and unlike a dog, Python is already completely trained.
+When you say try, Python will try every time you say it without
+fail.
+
+We will learn these reserved words and how they are used in good time,
+but for now we will focus on the Python equivalent of speak (in 
+human-to-dog language).  The nice thing about telling Python to speak
+is that we can even tell it what to say by giving it a message in quotes:
+
+And we have even written our first syntactically correct Python sentence.
+Our sentence starts with the reserved word print followed
+by a string of text of our choosing enclosed in single quotes.
+
+Conversing with Python
+
+Now that we have a word and a simple sentence that we know in Python,
+we need to know how to start a conversation with Python to test 
+our new language skills.
+
+Before you can converse with Python, you must first install the Python
+software on your computer and learn how to start Python on your 
+computer.  That is too much detail for this chapter so I suggest
+that you consult www.py4e.com where I have detailed
+instructions and screencasts of setting up and starting Python 
+on Macintosh and Windows systems.  At some point, you will be in 
+a terminal or command window and you will type python and 
+the Python interpreter will start executing in interactive mode
+and appear somewhat as follows:
+interactive mode
+
+The >>> prompt is the Python interpreter's way of asking you, What
+do you want me to do next?  Python is ready to have a conversation with
+you.  All you have to know is how to speak the Python language.
+
+Let's say for example that you did not know even the simplest Python language
+words or sentences. You might want to use the standard line that astronauts 
+use when they land on a faraway planet and try to speak with the inhabitants
+of the planet:
+
+This is not going so well.  Unless you think of something quickly,
+the inhabitants of the planet are likely to stab you with their spears, 
+put you on a spit, roast you over a fire, and eat you for dinner.
+
+At this point, you should also realize that while Python 
+is amazingly complex and powerful and very picky about 
+the syntax you use to communicate with it, Python is 
+not intelligent.  You are really just having a conversation
+with yourself, but using proper syntax.
+
+In a sense, when you use a program written by someone else
+the conversation is between you and those other
+programmers with Python acting as an intermediary.  Python
+is a way for the creators of programs to express how the 
+conversation is supposed to proceed.  And
+in just a few more chapters, you will be one of those
+programmers using Python to talk to the users of your program.
+
+Before we leave our first conversation with the Python 
+interpreter, you should probably know the proper way
+to say good-bye when interacting with the inhabitants
+of Planet Python:
+
+You will notice that the error is different for the first two
+incorrect attempts.   The second error is different because 
+if is a reserved word and Python saw the reserved word
+and thought we were trying to say something but got the syntax
+of the sentence wrong.
+
+Terminology: interpreter and compiler
+
+Python is a high-level language intended to be relatively
+straightforward for humans to read and write and for computers
+to read and process.  Other high-level languages include Java, C++,
+PHP, Ruby, Basic, Perl, JavaScript, and many more.  The actual hardware
+inside the Central Processing Unit (CPU) does not understand any
+of these high-level languages.
+
+The CPU understands a language we call machine language.  Machine
+language is very simple and frankly very tiresome to write because it 
+is represented all in zeros and ones.
+
+Machine language seems quite simple on the surface, given that there 
+are only zeros and ones, but its syntax is even more complex
+and far more intricate than Python.  So very few programmers ever write
+machine language.  Instead we build various translators to allow
+programmers to write in high-level languages like Python or JavaScript
+and these translators convert the programs to machine language for actual
+execution by the CPU.
+
+Since machine language is tied to the computer hardware, machine language
+is not portable across different types of hardware.  Programs written in 
+high-level languages can be moved between different computers by using a 
+different interpreter on the new machine or recompiling the code to create
+a machine language version of the program for the new machine.
+
+These programming language translators fall into two general categories:
+(one) interpreters and (two) compilers.
+
+An interpreter reads the source code of the program as written by the
+programmer, parses the source code, and interprets the instructions on the fly.
+Python is an interpreter and when we are running Python interactively, 
+we can type a line of Python (a sentence) and Python processes it immediately
+and is ready for us to type another line of Python.   
+
+Some of the lines of Python tell Python that you want it to remember some 
+value for later.   We need to pick a name for that value to be remembered and
+we can use that symbolic name to retrieve the value later.  We use the 
+term variable to refer to the labels we use to refer to this stored data.
+
+In this example, we ask Python to remember the value six and use the label x
+so we can retrieve the value later.   We verify that Python has actually remembered
+the value using x and multiply
+it by seven and put the newly computed value in y.  Then we ask Python to print out
+the value currently in y.
+
+Even though we are typing these commands into Python one line at a time, Python
+is treating them as an ordered sequence of statements with later statements able
+to retrieve data created in earlier statements.   We are writing our first 
+simple paragraph with four sentences in a logical and meaningful order.
+
+It is the nature of an interpreter to be able to have an interactive conversation
+as shown above.  A compiler needs to be handed the entire program in a file, and then 
+it runs a process to translate the high-level source code into machine language
+and then the compiler puts the resulting machine language into a file for later
+execution.
+
+If you have a Windows system, often these executable machine language programs have a
+suffix of .exe or .dll which stand for executable and dynamic link
+library respectively.  In Linux and Macintosh, there is no suffix that uniquely marks
+a file as executable.
+
+If you were to open an executable file in a text editor, it would look 
+completely crazy and be unreadable:
+
+It is not easy to read or write machine language, so it is nice that we have
+compilers that allow us to write in high-level
+languages like Python or C.
+
+Now at this point in our discussion of compilers and interpreters, you should 
+be wondering a bit about the Python interpreter itself.  What language is 
+it written in?  Is it written in a compiled language?  When we type
+python, what exactly is happening?
+
+The Python interpreter is written in a high-level language called C.  
+You can look at the actual source code for the Python interpreter by
+going to www.python.org and working your way to their source code.
+So Python is a program itself and it is compiled into machine code.
+When you installed Python on your computer (or the vendor installed it),
+you copied a machine-code copy of the translated Python program onto your
+system.   In Windows, the executable machine code for Python itself is likely
+in a file.
+
+That is more than you really need to know to be a Python programmer, but
+sometimes it pays to answer those little nagging questions right at 
+the beginning.
+
+Writing a program
+
+Typing commands into the Python interpreter is a great way to experiment 
+with Python's features, but it is not recommended for solving more complex problems.
+
+When we want to write a program, 
+we use a text editor to write the Python instructions into a file,
+which is called a script.  By
+convention, Python scripts have names that end with .py.
+
+script
+
+To execute the script, you have to tell the Python interpreter 
+the name of the file.  In a Unix or Windows command window, 
+you would type python hello.py as follows:
+
+We call the Python interpreter and tell it to read its source code from
+the file hello.py instead of prompting us for lines of Python code
+interactively.
+
+You will notice that there was no need to have quit() at the end of
+the Python program in the file.   When Python is reading your source code
+from a file, it knows to stop when it reaches the end of the file.
+
+What is a program?
+
+The definition of a program at its most basic is a sequence
+of Python statements that have been crafted to do something.
+Even our simple hello.py script is a program.  It is a one-line
+program and is not particularly useful, but in the strictest definition,
+it is a Python program.
+
+It might be easiest to understand what a program is by thinking about a problem 
+that a program might be built to solve, and then looking at a program
+that would solve that problem.
+
+Lets say you are doing Social Computing research on Facebook posts and 
+you are interested in the most frequently used word in a series of posts.
+You could print out the stream of Facebook posts and pore over the text
+looking for the most common word, but that would take a long time and be very 
+mistake prone.  You would be smart to write a Python program to handle the
+task quickly and accurately so you can spend the weekend doing something 
+fun.
+
+For example, look at the following text about a clown and a car.  Look at the 
+text and figure out the most common word and how many times it occurs.
+
+Then imagine that you are doing this task looking at millions of lines of 
+text.  Frankly it would be quicker for you to learn Python and write a 
+Python program to count the words than it would be to manually 
+scan the words.
+
+The even better news is that I already came up with a simple program to 
+find the most common word in a text file.  I wrote it,
+tested it, and now I am giving it to you to use so you can save some time.
+
+You don't even need to know Python to use this program.  You will need to get through 
+Chapter ten of this book to fully understand the awesome Python techniques that were
+used to make the program.  You are the end user, you simply use the program and marvel
+at its cleverness and how it saved you so much manual effort.
+You simply type the code 
+into a file called words.py and run it or you download the source 
+code from http://www.py4e.com/code/ and run it.
+
+This is a good example of how Python and the Python language are acting as an intermediary
+between you (the end user) and me (the programmer).  Python is a way for us to exchange useful
+instruction sequences (i.e., programs) in a common language that can be used by anyone who 
+installs Python on their computer.  So neither of us are talking to Python,
+instead we are communicating with each other through Python.
+
+The building blocks of programs
+
+In the next few chapters, we will learn more about the vocabulary, sentence structure,
+paragraph structure, and story structure of Python.  We will learn about the powerful
+capabilities of Python and how to compose those capabilities together to create useful
+programs.
+
+There are some low-level conceptual patterns that we use to construct programs.  These
+constructs are not just for Python programs, they are part of every programming language
+from machine language up to the high-level languages.
+
+description
+
+Get data from the outside world.  This might be 
+reading data from a file, or even some kind of sensor like 
+a microphone or GPS.  In our initial programs, our input will come from the user
+typing data on the keyboard.
+
+Display the results of the program on a screen
+or store them in a file or perhaps write them to a device like a
+speaker to play music or speak text.
+
+Perform statements one after
+another in the order they are encountered in the script.
+
+Check for certain conditions and
+then execute or skip a sequence of statements.
+
+Perform some set of statements 
+repeatedly, usually with
+some variation.
+
+Write a set of instructions once and give them a name
+and then reuse those instructions as needed throughout your program.
+
+description
+
+It sounds almost too simple to be true, and of course it is never
+so simple.  It is like saying that walking is simply
+putting one foot in front of the other.  The art 
+of writing a program is composing and weaving these
+basic elements together many times over to produce something
+that is useful to its users.
+
+The word counting program above directly uses all of 
+these patterns except for one.
+
+What could possibly go wrong?
+
+As we saw in our earliest conversations with Python, we must
+communicate very precisely when we write Python code.  The smallest
+deviation or mistake will cause Python to give up looking at your
+program.
+
+Beginning programmers often take the fact that Python leaves no
+room for errors as evidence that Python is mean, hateful, and cruel.
+While Python seems to like everyone else, Python knows them 
+personally and holds a grudge against them.  Because of this grudge,
+Python takes our perfectly written programs and rejects them as 
+unfit just to torment us.
+
+There is little to be gained by arguing with Python.  It is just a tool.
+It has no emotions and it is happy and ready to serve you whenever you
+need it.  Its error messages sound harsh, but they are just Python's
+call for help.  It has looked at what you typed, and it simply cannot
+understand what you have entered.
+
+Python is much more like a dog, loving you unconditionally, having a few
+key words that it understands, looking you with a sweet look on its
+face (>>>), and waiting for you to say something it understands.
+When Python says SyntaxError: invalid syntax, it is simply wagging
+its tail and saying, You seemed to say something but I just don't
+understand what you meant, but please keep talking to me (>>>).
+
+As your programs become increasingly sophisticated, you will encounter three 
+general types of errors:
+
+description
+
+These are the first errors you will make and the easiest
+to fix.  A syntax error means that you have violated the grammar rules of Python.
+Python does its best to point right at the line and character where 
+it noticed it was confused.  The only tricky bit of syntax errors is that sometimes
+the mistake that needs fixing is actually earlier in the program than where Python
+noticed it was confused.  So the line and character that Python indicates in 
+a syntax error may just be a starting point for your investigation.
+
+A logic error is when your program has good syntax but there is a mistake 
+in the order of the statements or perhaps a mistake in how the statements relate to one another.
+A good example of a logic error might be, take a drink from your water bottle, put it 
+in your backpack, walk to the library, and then put the top back on the bottle.
+
+A semantic error is when your description of the steps to take 
+is syntactically perfect and in the right order, but there is simply a mistake in 
+the program.  The program is perfectly correct but it does not do what
+you intended for it to do. A simple example would
+be if you were giving a person directions to a restaurant and said, ...when you reach
+the intersection with the gas station, turn left and go one mile and the restaurant
+is a red building on your left.  Your friend is very late and calls you to tell you that
+they are on a farm and walking around behind a barn, with no sign of a restaurant.  
+Then you say did you turn left or right at the gas station? and 
+they say, I followed your directions perfectly, I have 
+them written down, it says turn left and go one mile at the gas station.  Then you say,
+I am very sorry, because while my instructions were syntactically correct, they 
+sadly contained a small but undetected semantic error.. 
+
+description
+
+Again in all three types of errors, Python is merely trying its hardest to 
+do exactly what you have asked.
+
+The learning journey
+
+As you progress through the rest of the book, don't be afraid if the concepts 
+don't seem to fit together well the first time.  When you were learning to speak, 
+it was not a problem  for your first few years that you just made cute gurgling noises.
+And it was OK if it took six months for you to move from simple vocabulary to 
+simple sentences and took five or six more years to move from sentences to paragraphs, and a
+few more years to be able to write an interesting complete short story on your own.
+
+We want you to learn Python much more rapidly, so we teach it all at the same time
+over the next few chapters.  
+But it is like learning a new language that takes time to absorb and understand
+before it feels natural.
+That leads to some confusion as we visit and revisit
+topics to try to get you to see the big picture while we are defining the tiny
+fragments that make up that big picture.  While the book is written linearly, and
+if you are taking a course it will progress in a linear fashion, don't hesitate
+to be very nonlinear in how you approach the material.  Look forwards and backwards
+and read with a light touch.  By skimming more advanced material without 
+fully understanding the details, you can get a better understanding of the why? 
+of programming.  By reviewing previous material and even redoing earlier 
+exercises, you will realize that you actually learned a lot of material even 
+if the material you are currently staring at seems a bit impenetrable.
+
+Usually when you are learning your first programming language, there are a few
+wonderful Ah Hah! moments where you can look up from pounding away at some rock
+with a hammer and chisel and step away and see that you are indeed building 
+a beautiful sculpture.
+
+If something seems particularly hard, there is usually no value in staying up all 
+night and staring at it.   Take a break, take a nap, have a snack, explain what you 
+are having a problem with to someone (or perhaps your dog), and then come back to it with
+fresh eyes.  I assure you that once you learn the programming concepts in the book
+you will look back and see that it was all really easy and elegant and it simply 
+took you a bit of time to absorb it.

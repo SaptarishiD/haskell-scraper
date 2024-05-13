@@ -123,7 +123,7 @@
 \begin{flushright}
     \rule{16cm}{5pt}\vskip1cm
     \begin{bfseries}
-        \Huge{FUNCTIONAL PROGRAMMING \\ CS-IS-2010-1 \\ FINAL PROJECT REPORT }\\
+        \Huge{Functional Programming \\ CS-IS-2010-1 \\ Final Project Report }\\
         \vspace{1.1cm}
         Topic: Haskell Scraper and Code-Text Separation\\
         \vspace{1.1cm}
@@ -174,6 +174,8 @@ Here it becomes useful to extract just the code or just the natural language sep
 \\ Towards this purpose, we will create a Naive Bayes classifier for classifying a particular line as natural language or code and creating two separate sections for all the natural language and all the code
 
 \chapter{Literature Survey}
+
+%  maybe also see what all libraries and stuff for naive bayes and stuff are there in haskell rn
 
 %  gap analysis and research questions ?????????????????
 
@@ -415,12 +417,15 @@ The system correctly identifies the code and text portions of the web page and w
     \item As mentioned, the system works on the granularity of a line and not a deeper token level granularity. Hence it can only attempt to classify whether a whole line is natural language or source code, without being able classify individual words or phrases within a line as being of a different class.
     \item Moreover, it cannot be used effectively in the case that the text source has data that is not separated by newlines, since each line is a document that needs to be classified here. However, these cases are relatively rare since most instances where code and natural language are found interspersed, there is some degree of organisation in terms of newline-separation.
     \item Since the system is relatively simplistic and unoptimized, along with the fact that it works on the Naive Bayes assumption of independence between features, it may not work well compared to other heavyweight methods in terms of accuracy. 
+    \item Comments in the code written primarily in natural language will be classified as language and not code due to the nature of the classifier and the training data.
 \end{enumerate}
 
 \section{Core Implementation Details}
 
 Some important code and data features that showcase the core implementation details of the project are shown.
 
+
+% MAYBE ALSO REMOVE SOME OF THE EVALUATION STUFF CAUSE THE CODE GETTING TOO LONG    
 
 %  NEED TO HAVE A SECTION ABOUT THE DETAILS OF THE TRAINING DATA CAUSE THAT IS OBVIOUSLY ESSENTIAL TO THE SYSTEM
 
@@ -472,19 +477,11 @@ We use various test sets to evaluate the performance of the classifier on variou
     numbersep=5pt,
     xleftmargin=0pt,
     ]{haskell}
-    -- text_source is newline separated list of lines of the text_source
-    lang_test <- readFile "input/lang_test.txt"
-    src_test <- readFile "input/code_test.txt"
-    let test_data = (lines src_test) ++ (lines lang_test)
-    print test_data
-    let final_probs = Lib.classifyNaiveBayes test_data trainedModel
-    let mapping = zip test_data final_probs
-    let src_test_len = length (lines src_test)
-    let lang_test_len = length (lines lang_test)
-    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-    let test_accuracy_mapping = zip yTest final_probs
-    -- precision_code, recall_code, precision_lang, recall_lang
-    let evals = Lib.evaluateNaiveBayes test_accuracy_mapping
+
+    let testFiles = ["lang_test1.txt", "code_test1.txt","lang_test5.txt", "code_test5.txt", "lang_test6.txt", "code_test6.txt", "lang_test7.txt", "code_test7.txt", "lang_test8.txt", "code_test8.txt", "lang_test9.txt", "code_test9.txt", "lang_test10.txt", "code_test10.txt"]
+    let test_evals = Lib.evalTests trainedModel testFiles
+
+    test_results <- test_evals
    \end{minted}
    
 
@@ -676,10 +673,69 @@ classifyNaiveBayes test_data trainedModel =
 \end{minted}
 
 
+\subsubsection{Evaluating Functions}
+
+\begin{minted}[%
+    breaklines,
+    mathescape,
+    linenos,
+    numbersep=5pt,
+    frame=single,
+    numbersep=5pt,
+    xleftmargin=0pt,
+    ]{haskell}
+
+    evalTests :: (( Double, ([Double] , [Double]) ), Vocabulary ) -> [String] -> IO [(Double, Double, Double, Double)]
+    evalTests _ [] = return []
+    evalTests trainedModel (x:y:xs) = do
+        lang_test <- readFile ("cases/" ++ x)
+        src_test <- readFile ("cases/" ++ y)
+        let test_data = (lines src_test) ++ (lines lang_test)
+        let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+        let mapping = zip test_data final_probs
+        let src_test_len = length (lines src_test)
+        let lang_test_len = length (lines lang_test)
+        let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+        let test_accuracy_mapping = zip yTest final_probs
+        -- precision_code, recall_code, precision_lang, recall_lang
+        rest <- evalTests trainedModel xs
+        return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
+
+    evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
+    evaluateNaiveBayes mydata = 
+        let total_actual_lang = sum (map fst mydata)
+            total_actual_code = (length mydata) - total_actual_lang
+            code_correct = filter (== (0,0)) mydata
+            lang_correct = filter (== (1,1)) mydata
+            code_wrong  = filter (== (0,1)) mydata
+            lang_wrong  = filter (== (1,0)) mydata
+    
+            num_code_correct = length code_correct
+            num_lang_correct = length lang_correct
+            num_code_wrong = length code_wrong
+            num_lang_wrong = length lang_wrong
+    
+            -- need to keep in mind that paper has used different metrics
+            
+    
+            precision_code = int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong)
+    
+            recall_code = int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong)
+    
+            precision_lang = int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong)
+    
+            recall_lang = int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong)
+    
+        in (precision_code, recall_code, precision_lang, recall_lang)
+    
+        
+   \end{minted}
+
 \newpage 
 \section{Training Data}
 
-Due to paucity of appropriate training data for this project, I curated my own small training dataset comprising of code and natural language that is typically seen accompanying the code. \\ I made sure to include a wide variety of programming languages in the source_code dataset to ensure wider generalisability. The statistics of the training data are given as follows, along with the sources where I took them from. The code was cleaned to remove comments and other non-code text.
+Due to paucity of appropriate training data for this project with respect to scope and relevance, I curated my own small training dataset comprising of code and natural language that is typically seen accompanying the code. While there were datasets with source code and natural language, they were of a larger scale than I intended, and I also wanted to train the model on a smaller dataset to see how lightweight it can be \\ 
+\\ I made sure to include a variety of programming languages in the source_code dataset to ensure wider generalisability. The statistics of the training data are given as follows, along with the sources where I took them from. The code was cleaned to remove comments and other non-code text.
 
 %  unskew this away from C
 
@@ -699,9 +755,34 @@ Due to paucity of appropriate training data for this project, I curated my own s
         Java & 201 & \href{https://github.com/jenkinsci/jenkins/tree/master}{Jenkins Github} \\
         \hline
     \end{tabular}
-    \caption{Training Data Statistics}
+    \caption{Training Data Statistics (Code)}
     \label{tab:training-data}
 \end{table}
+
+
+
+
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Description} & \textbf{Words and Lines} & Source \\
+        \hline
+            
+        CS50 Lec1 & 780 and 37 & \href{https://cs50.harvard.edu/college/2023/spring/notes/1/}{CS50 Lecture 1} \\
+        \hline
+        CS50 Lec6 & 229 and 11 & \href{https://cs50.harvard.edu/x/2023/notes/6/}{CS50 Lecture 6} \\
+        \hline
+        Python 4 Everybody Text & 4910 and 589 & \href{https://www.py4e.com/code3/intro.txt}{Python 4 Everybody} \\
+        \hline
+
+    \end{tabular}
+    \caption{Training Data Statistics (Language)}
+    \label{tab:training-data}
+\end{table}
+
+
 
 
 
@@ -712,7 +793,7 @@ Initially, I started the project by separating the code and text based on their 
     \item Before deciding on implementing Naive Bayes from scratch, I thought about using various methods like Hidden Markov Models and Support Vector Machines to create an ensemble learning method to classify text and code. However, library support in Haskell for these was not of good quality, hence I decided to implement Naive Bayes on my own.
     %  mention how good performance?
     \item In the implementation of Naive Bayes, another hurdle I faced was the inefficiency of the default \ttt{matrix} library in doing calculations with extremely large and sparse matrices, which was restricting me to training and testing sets of very small sizes, albeit with considerably good performance. So I looked for more efficient libraries and found the \ttt{hmatrix} library, which sped up computations by a large extent. Earlier a training and classification that took 2.5 minutes overall, now happened in 2.5 seconds. 
-    \item The paucity of appropriate training data was also an issue. The few datasets that were relevant to the project, such as those containing source code along with some form of natural language (usually in the form of code comments) were all restricted to one language and were also immense for a classifier implemented from scratch without optimisations. Hence, I curated my own modestly size source code and natural language training data based on manual searching online
+    \item The paucity of appropriate training data was also an issue. The few datasets that were relevant to the project, such as those containing source code along with some form of natural language (usually in the form of code comments) were all restricted to one language and were also immense for a classifier implemented from scratch without optimisations. Hence, I curated my own modestly size source code and natural language training data based on manual searching online. The small size of the dataset also highlighted how the lightweight model was still performing relatively well. 
     \item The Haskell language was itself relatively challenging to get used to throughout the project due to it's difference from the imperative languages I am used to. But after learning lambda calculus and spending time with the language, it became easier to use and I could appreciate the elegance of functional programming more, even though I am still not as accustommed to this paradigm as I would like to be. 
 \end{enumerate}
 
@@ -822,7 +903,91 @@ Only Haskell was used for the project as mentioned in the problem statement
 
 \chapter{Results and Discussions}
 
-The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language, along with the F-measure were calculated. We found that even with the highlight simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language.
+The classifier was run on various natural language and source code files and the results were collected. Metrics like precison and recall with respect to code and language, along with the F-measure were calculated. We found that even with the highlight simplistic design and the strong Naive Bayes assumptions, the classifier could perform surprisingly well in classifying lines as code or natural language, subject to the conditions that the code was present in the training data.
+
+
+% insert table here
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Case} & Code Details \\
+        \hline
+        Test 1 & \href{https://eli.thegreenplace.net/2018/type-erasure-and-reification/}{Supplied Web Page} containing C, Python, Java \\
+        \hline
+        Test 5 & Assembly Code from the \href{https://github.com/chrislgarry/Apollo-11/blob/master/Luminary099/AOSTASK_AND_AOSJOB.agc}{Apollo Guidance Computer} \\
+        \hline
+        Test 6 & SQL Code from \href{https://dev.to/tyzia/example-of-complex-sql-query-to-get-as-much-data-as-possible-from-database-9he}{this blog} \\
+        \hline
+        Test 7 & Haskell Code from \href{https://github.com/koalaman/shellcheck}{ShellCheck}\\
+        \hline
+        Test 8 & Mix of Python and C Code\\
+        \hline
+        Test 9 & Java Code\\
+        \hline
+        Test 10 & Python Code\\
+        \hline
+    \end{tabular}
+    \caption{Test Case Details (Code)}
+    \label{tab:results}
+\end{table}
+
+
+Details about the natural language test cases are not provided since difference in the data sources for natural language was found to not have much difference in accuracy.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        \textbf{Test} & \textbf{Precision (Code)} & \textbf{Recall (Code)} & \textbf{Precision (Language)} & \textbf{Recall (Language)} \\
+        \hline
+        1 & 0.93 & 0.98 & 0.96 & 0.86 \\
+        \hline
+        5 & 0.97 & 1.0 & 1.0 & 0.47 \\
+        \hline
+        6 & 0.87 & 0.92 & 0.67 & 0.53 \\
+        \hline
+        7 & 0.93 & 0.93 & 0.47 & 0.46 \\
+        \hline
+        8 & 0.95 & 0.89 & 0.38 & 0.58 \\
+        \hline
+        9 & 0.89 & 0.99 & 0.89 & 0.5 \\
+        \hline
+        10 & 0.97 & 0.9 & 0.43 & 0.71 \\
+        \hline
+    \end{tabular}
+    \caption{Test Case Results}
+    \label{tab:results}
+\end{table}
+
+
+
+
+
+\begin{table}[h]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            \textbf{Test} & \textbf{Precision (Code)} & \textbf{Recall (Code)} & \textbf{Precision (Language)} & \textbf{Recall (Language)} \\
+            \hline
+            1 & 0.95 & 0.95 & 0.95 & 0.95 \\
+            \hline
+            5 & 0.75 & 0.75 & 0.75 & 0.75 \\
+            6 & 0.90 & 0.90 & 0.90 & 0.90 \\
+            \hline
+            7 & 0.85 & 0.85 & 0.85 & 0.85 \\
+            \hline
+            8 & 0.80 & 0.80 & 0.80 & 0.80 \\
+            \hline
+            9 & 0.80 & 0.80 & 0.80 & 0.80 \\
+            \hline
+            9 & 0.80 & 0.80 & 0.80 & 0.80 \\
+            \hline
+        \end{tabular}
+        \caption{Results of the Classifier}
+        \label{tab:results}
+\end{table}
 
 %  in the results can have one example of some natural language or code that gets misclassified
 

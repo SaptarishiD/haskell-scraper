@@ -1,58 +1,127 @@
 
-# Quick examples of inverse matrix
 
-import numpy as np
+class State:
+        label = None
+        next_state1 = None
+        next_state2 = None
 
-# Example 1:Use numpy.linalg.inv() 
-# Calculate the inverse of the matrix
-inverse_matrix = np.linalg.inv(arr)
 
-# Example 2: Using scipy.linalg.inv()
-# Calculate the inverse of the matrix 
-inverse_matrix = inv(arr)
+class nfa:
+    start, accept = None, None
+    def __init__(self, initial, accept):
+        self.start = initial
+        self.accept = accept
 
-# Example 3: Use np.linalg.inv() function 
-arr = np.array([[[2., 6.], [5., 8.]], 
-                [[3, 7], [4, 1]]])
-arr2 = np.linalg.inv(arr)
+def epsilonClosure(state):
+    eps_closure = set()
+    visited = set() 
+    state_stack = [state]
 
-# Import numpy
-import numpy as np
+    while (state_stack):
+        current_state = state_stack.pop()
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+        eps_closure.add(current_state) 
 
-# Creating an input array  
-arr = np.array([[7, 2,], [3, -5]])
-print("Original Matrix:\n",arr)
-               
-# Use numpy.linalg.inv() 
-# Calculate the inverse of the matrix
-inverse_matrix = np.linalg.inv(arr)
-print("After getting the inverse of a matrix:\n",inverse_matrix)
-import numpy as np
-from scipy.linalg import inv
+        
+        if (current_state.label is None):
 
-# Creating an input array  
-arr = np.array([[7, 2,], [3, -5]])
-print("Original Matrix:\n",arr)
+            if (current_state.next_state1 is not None):    
+                state_stack.append(current_state.next_state1)
 
-# Using scipy.linalg.inv()
-# Calculate the inverse of the matrix 
-inverse_matrix = inv(arr)
-print("After getting the inverse of a matrix:\n",inverse_matrix)
-import numpy as np
+            if (current_state.next_state2 is not None):
+                state_stack.append(current_state.next_state2)
 
-# Inverse of 4X4 matrix   
-arr = np.array([[[2., 6.], [5., 8.]],
-               [[3, 7], [4, 1]]])
-print("Original Matrix:\n",arr)
+    return eps_closure
 
-# Use np.linalg.inv() function 
-inverse_matrix = np.linalg.inv(arr)
-print("After getting the inverse of a matrix:\n",inverse_matrix)
 
-# Output:
-# After getting the inverse of a matrix:
-#  [[[-0.57142857  0.42857143]
-#  [ 0.35714286 -0.14285714]]
 
-# [[-0.04        0.28      ]
-#  [ 0.16       -0.12      ]]]
+def infix_to_postfix(inf_reg):
+    operator_precedence = {'*': 3, '.': 2, '+': 1} 
+    stack = []
+    post_reg = []
+    for char in inf_reg:
+        if (char in operator_precedence.keys()):
+                if len(stack) > 0:  #nonempty
+                    while (stack[-1] in operator_precedence.keys() and operator_precedence[stack[-1]] >= operator_precedence[char]): #while top operator has greater precedence
+                        post_reg.append(stack.pop())
+                        if (not stack): 
+                            break
+                stack.append(char)
+        elif char == '(':
+            stack.append(char)
+        elif char == ')':
+            if len(stack) > 0:
+                while (stack[-1] != "(")): 
+                    post_reg.append(stack.pop()) 
+                stack.pop()                 
+        else: 
+            post_reg.append(char)
+
+    while (stack):
+        post_reg.append(stack.pop())
+
+    return ''.join(post_reg)
+
+
+
+def regex_to_nfa(post_reg, alphabet):
+    NFA_stack = []
+
+    for char in post_reg:
+        
+        if char in alphabet:    
+            start, final = State(), State()
+            start.label = char
+            start.next_state1 = final
+            NFA_stack.append(nfa(start, final))
+
+        
+        elif char == '*':
+            old_nfa = NFA_stack.pop()
+            start, final = State(), State()
+            start.next_state1 = old_nfa.start
+            start.next_state2 = final 
+            old_nfa.accept.next_state1 = old_nfa.start
+            old_nfa.accept.next_state2 = final
+            NFA_stack.append(nfa(start, final))
+
+        
+        elif char == '+':
+            old_nfa2 = NFA_stack.pop()
+            old_nfa1 = NFA_stack.pop()
+            start, final = State(), State()
+
+            start.next_state1 = old_nfa1.start
+            start.next_state2 = old_nfa2.start
+            old_nfa1.accept.next_state1 = final
+            old_nfa2.accept.next_state1 = final
+            NFA_stack.append(nfa(start, final))
+
+        
+        elif char == '.':
+            old_nfa2 = NFA_stack.pop()
+            old_nfa1 = NFA_stack.pop()
+            old_nfa1.accept.next_state1 = old_nfa2.start
+            NFA_stack.append(nfa(old_nfa1.start, old_nfa2.accept))
+
+        
+    return NFA_stack.pop()
+
+            
+
+def run_NFA(mynfa, post_reg):
+    start = mynfa.start
+    curr_states = set()
+    curr_states |= epsilonClosure(start) 
+    for char in post_reg:
+        new_states = set()
+        for state in curr_states:
+            if state.label == char:
+                new_states |= epsilonClosure(state.next_state1)
+        curr_states = new_states
+    
+    return True if (mynfa.accept in curr_states) else False
+
+

@@ -83,6 +83,8 @@ evalTests trainedModel (x:y:xs) = do
     rest <- evalTests trainedModel xs
     return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
 
+roundTo :: Int -> Double -> Double
+roundTo n x = (fromInteger $ round $ x * (10^n)) / (10.0^^n)
 
 
 -- 0 means code 1 means lang. left is truth right is predicted
@@ -103,13 +105,13 @@ evaluateNaiveBayes mydata =
         -- need to keep in mind that paper has used different metrics
         
 
-        precision_code = int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong)
+        precision_code = roundTo 2 (int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong))
 
-        recall_code = int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong)
+        recall_code = roundTo 2 (int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong))
 
-        precision_lang = int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong)
+        precision_lang = roundTo 2 (int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong))
 
-        recall_lang = int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong)
+        recall_lang = roundTo 2 (int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong))
 
     in (precision_code, recall_code, precision_lang, recall_lang)
 
