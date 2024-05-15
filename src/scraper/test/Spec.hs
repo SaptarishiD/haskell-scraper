@@ -14,18 +14,16 @@ import GHC.Float (int2Double)
 import Data.List (sort)
 
 
-vocab1 = ["apple", "banana", "orange"]
-doc1 = "the apple is red"
-doc2 = "banana is yellow"
+vocab1 = ["car", "emojis", "carrot"]
+doc1 = "the car is red"
+doc2 = "emojis is yellow"
 doc3 = "this is a test document"
-
 
 
 testHTML :: Test
 testHTML = TestList [getHTMLValid, getHTMLBadURL, getHTMLNon200]
 
 testUniqueWords = TestList [testEmpty, testUnique, testWithDup]
-
 
 -- The main function that runs the tests
 main :: IO Counts
@@ -45,8 +43,6 @@ main = do
 
 
 
-
-
 -- trainingRelated ==========================================================
 -- testWordCounts :: Test
 testWordCounts = TestList [
@@ -57,7 +53,7 @@ testWordCounts = TestList [
     TestCase (assertEqual "wordCounts \"hello\" should return [(\"hello\",1)]" [("hello",1)] (wordCounts "hello")),
 
     TestLabel "Multiple words document" $
-    TestCase (assertEqual "wordCounts doc1 should return [(\"the\",1),(\"apple\",1),(\"is\",1),(\"red\",1)]" (sort [("the",1),("apple",1),("is",1),("red",1)]) (sort $ wordCounts doc1))
+    TestCase (assertEqual "wordCounts doc1 should return [(\"the\",1),(\"car\",1),(\"is\",1),(\"red\",1)]" (sort [("the",1),("car",1),("is",1),("red",1)]) (sort $ wordCounts doc1))
   ]
 
 -- testMatrixRow :: Test
@@ -109,8 +105,8 @@ testUnique = TestCase $ assertEqual "for (getUniqueWords [\"these\", \"are\", \"
     ["these", "are", "words"] (getUniqueWords ["these", "are", "words"])
 
 testWithDup :: Test
-testWithDup = TestCase $ assertEqual "for (getUniqueWords [\"apple\", \"banana\", \"apple\", \"banana\", \"cherry\", \"apple\"]),"
-    ["apple", "banana", "cherry"] (getUniqueWords ["apple", "banana", "apple", "banana", "cherry", "apple"])
+testWithDup = TestCase $ assertEqual "for (getUniqueWords [\"car\", \"emojis\", \"car\", \"emojis\", \"cherry\", \"car\"]),"
+    ["car", "emojis", "cherry"] (getUniqueWords ["car", "emojis", "car", "emojis", "cherry", "car"])
 
 
 -- GETHTML ==========================================================

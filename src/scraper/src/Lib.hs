@@ -4,8 +4,6 @@
 {-# HLINT ignore "Redundant bracket" #-}
 {-# HLINT ignore "Redundant return" #-}
 
-
-
 module Lib
     ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes , evaluateNaiveBayes, evalTests
     ) where
@@ -21,7 +19,6 @@ import Text.Pandoc
 import Data.Typeable
 import Data.Map (fromListWith, toList)
 import Data.Maybe (fromMaybe)
-import qualified Data.Matrix as DM
 import GHC.Float (int2Double)
 import qualified Data.Text.Conversions as TextConv
 import qualified Data.Text as T
@@ -29,9 +26,7 @@ import qualified Data.Text.IO as TIO
 import qualified Data.ByteString.Lazy as LBS
 import qualified Data.ByteString.Lazy.Char8 as LBSC
 import qualified Data.List.Split as DLS
--- import Text.Regex.Posix
 import Text.Regex.TDFA
--- import Text.Regex.TDFA.Text ()
 
 import Numeric.LinearAlgebra as NLA
 
@@ -42,115 +37,19 @@ instance Exception MyException
 
 type Document = String
 type Vocabulary = [String]
-type Dummy  = String
 
-
--- can do case by case exceptions for the InvalidUrlException, HttpExceptionRequest and lastly the status code one
-
-getHTML :: String -> IO (Either SomeException LBSC.ByteString)
-getHTML url = do
-    result <- try $ do
-        mymanager <- ClientTLS.newTlsManager
-        myrequest <- Client.parseRequest url
-        response <- Client.httpLbs myrequest mymanager
-        let status_code = statusCode (Client.responseStatus response)
-        if status_code /= 200
-            then do
-                throwIO StatusCodeException
-            else do
-                let response_html = Client.responseBody response
-                return response_html
-    return result
-
-
-parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
-parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
-
-evalTests :: (( Double, ([Double] , [Double]) ), Vocabulary ) -> [String] -> IO [(Double, Double, Double, Double)]
-evalTests _ [] = return []
-evalTests trainedModel (x:y:xs) = do
-    lang_test <- readFile ("cases/" ++ x)
-    src_test <- readFile ("cases/" ++ y)
-    let test_data = (lines src_test) ++ (lines lang_test)
-    let final_probs = Lib.classifyNaiveBayes test_data trainedModel
-    let mapping = zip test_data final_probs
-    let src_test_len = length (lines src_test)
-    let lang_test_len = length (lines lang_test)
-    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-    let test_accuracy_mapping = zip yTest final_probs
-    -- precision_code, recall_code, precision_lang, recall_lang
-    rest <- evalTests trainedModel xs
-    return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
-
-roundTo :: Int -> Double -> Double
-roundTo n x = (fromInteger $ round $ x * (10^n)) / (10.0^^n)
-
-
--- 0 means code 1 means lang. left is truth right is predicted
-evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
-evaluateNaiveBayes mydata = 
-    let total_actual_lang = sum (map fst mydata)
-        total_actual_code = (length mydata) - total_actual_lang
-        code_correct = filter (== (0,0)) mydata
-        lang_correct = filter (== (1,1)) mydata
-        code_wrong  = filter (== (0,1)) mydata
-        lang_wrong  = filter (== (1,0)) mydata
-
-        num_code_correct = length code_correct
-        num_lang_correct = length lang_correct
-        num_code_wrong = length code_wrong
-        num_lang_wrong = length lang_wrong
-
-        -- need to keep in mind that paper has used different metrics
-        
-
-        precision_code = roundTo 3 (int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong))
-
-        recall_code = roundTo 3 (int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong))
-
-        precision_lang = roundTo 3 (int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong))
-
-        recall_lang = roundTo 3 (int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong))
-
-    in (precision_code, recall_code, precision_lang, recall_lang)
-
-
-
+-- Functions actually used in the project ================================================
 
 
 classifyNaiveBayes :: [String] -> (( Double, ([Double] , [Double]) ), Vocabulary ) -> [Int]
 classifyNaiveBayes test_data trainedModel =
     let vocab = snd trainedModel
-        
-        -- lang_test_data = lines lang_test
-        -- src_test_data = lines src_test
 
-
-        -- test_data = src_test_data ++ lang_test_data
         xTest = (NLA.toLists (myVectorizer vocab test_data))
-
-        
-        -- xTest_src = (NLA.toLists (myVectorizer vocab (src_test_data)))
-        -- xTest_lang = (NLA.toLists (myVectorizer vocab (lang_test_data)))
-
-        -- src_test_len = length (xTest_src)
-        -- lang_test_len = length (xTest_lang)
-
-        -- yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
-
-        -- xTest = xTest_src ++ xTest_lang
-
-        test_len = length xTest
-
-
-        y = NLA.fromLists [(replicate (test_len) (int2Double 0))]
-
-        -- [Double]
 
         xgivenY_src = fst (snd (fst trainedModel))
         xgivenY_lang = snd (snd (fst trainedModel))
         prob_src_prior = fst (fst trainedModel)
-
 
         log_src = map log xgivenY_src
         log_lang = map log xgivenY_lang
@@ -158,13 +57,13 @@ classifyNaiveBayes test_data trainedModel =
         log_matrix = NLA.tr (NLA.fromLists [log_src, log_lang])
 
         -- [Double,Double]
-        -- print (map typeOf (head (DM.toLists log_matrix)))
+        -- print (map typeOf (head (NLA.toLists log_matrix)))
 
-        -- mult
+        -- multiplication
         prob1 = (NLA.fromLists xTest) NLA.<> (log_matrix)
 
         -- [Double,Double]
-        -- print (map typeOf (head (DM.toLists prob1)))
+        -- print (map typeOf (head (NLA.toLists prob1)))
 
         logp = log prob_src_prior
         log_not_p = log (1 - prob_src_prior)
@@ -181,16 +80,13 @@ classifyNaiveBayes test_data trainedModel =
 
     in final_probs
 
--- can try property based testing for the mathematical stuff like probabilities summing to 1 or smth. see properties of naive bayes
-
 
 
 readTraining :: String -> String -> IO ([String], [String])
 readTraining lang_file src_file = do
-    natural <- readFile "input/lang_train.txt"
-    src <- readFile "input/code_train.txt"
+    natural <- readFile lang_file
+    src <- readFile src_file
     return (lines natural, lines src)
-
 
 trainNaiveBayes :: [String] -> [String] -> (( Double, ([Double] , [Double]) ), Vocabulary )
 trainNaiveBayes natural_data source_data = 
@@ -223,7 +119,51 @@ trainNaiveBayes natural_data source_data =
     in ((prob_src_prior, (xgivenY_src,xgivenY_lang)), vocab )
     
 
+evalTests :: (( Double, ([Double] , [Double]) ), Vocabulary ) -> [String] -> IO [(Double, Double, Double, Double)]
+evalTests _ [] = return []
+evalTests trainedModel (x:y:xs) = do
+    lang_test <- readFile ("cases/" ++ x)
+    src_test <- readFile ("cases/" ++ y)
+    let test_data = (lines src_test) ++ (lines lang_test)
+    let final_probs = Lib.classifyNaiveBayes test_data trainedModel
+    let src_test_len = length (lines src_test)
+    let lang_test_len = length (lines lang_test)
+    let yTest = replicate src_test_len 0 ++ replicate lang_test_len 1
+    let test_accuracy_mapping = zip yTest final_probs
+    -- precision_code, recall_code, precision_lang, recall_lang
+    rest <- evalTests trainedModel xs
+    return $ (Lib.evaluateNaiveBayes test_accuracy_mapping):rest
 
+
+-- 0 means code 1 means lang. left is truth right is predicted
+evaluateNaiveBayes :: [(Int, Int)] -> (Double, Double, Double, Double)
+evaluateNaiveBayes mydata = 
+    let code_correct = filter (== (0,0)) mydata
+        lang_correct = filter (== (1,1)) mydata
+        code_wrong  = filter (== (0,1)) mydata
+        lang_wrong  = filter (== (1,0)) mydata
+
+        num_code_correct = length code_correct
+        num_lang_correct = length lang_correct
+        num_code_wrong = length code_wrong
+        num_lang_wrong = length lang_wrong
+
+        -- need to keep in mind that paper has used different metrics
+        
+
+        precision_code = roundTo 3 (int2Double num_code_correct / (int2Double num_code_correct + int2Double num_lang_wrong))
+
+        recall_code = roundTo 3 (int2Double num_code_correct / ((int2Double num_code_correct) + int2Double num_code_wrong))
+
+        precision_lang = roundTo 3 (int2Double num_lang_correct / (int2Double num_lang_correct + int2Double num_code_wrong))
+
+        recall_lang = roundTo 3 (int2Double num_lang_correct / ((int2Double num_lang_correct) + int2Double num_lang_wrong))
+
+    in (precision_code, recall_code, precision_lang, recall_lang)
+
+
+roundTo :: Int -> Double -> Double
+roundTo n x = (fromInteger $ round $ x * (10^n)) / (10.0^^n)
 
 
 -- each row in matrix corresponds to a document and each column to a word in the vocabulary. So an entry (i,j) represents the word count of word j from the vocab in document i
@@ -233,18 +173,14 @@ myVectorizer vocab docs
     | docs == [] = NLA.fromLists [[int2Double 0]]
     | otherwise = NLA.fromLists [matrixRow vocab doc | doc <- docs]
 
-
 -- takes a vocab i.e. list of strings. for each word in the vocab, look it up in the wordcount map of that document. If found then return the count, if not then 0 since the vocab word is not in this particular document. So this array of ints corresponds to one row in the vectorized matrix i.e. represents the word counts of all the words in the vocabulary in this document. 
 matrixRow :: Vocabulary -> Document -> [Double]
 matrixRow vocab doc = [fromMaybe (int2Double 0) (lookup vocab_word mywordcounts) | vocab_word <- vocab]
   where mywordcounts = wordCounts doc
 
-
 -- for a document i.e. (string), create list of (string, int) pairs which maps each word with it's count in the document. create tuple for each word in the form of (word, 1) then map with the addition function in order to count
 wordCounts :: Document -> [(String, Double)]
 wordCounts doc = Data.Map.toList $ fromListWith (+) [(oneword, int2Double 1) | oneword <- words doc]
-
-
 
 -- individual words
 getWords :: [String] -> [[String]]
@@ -254,7 +190,6 @@ getWords (x:xs)
     -- | words x == [] = x:getWords(xs) -- here need to check if newline to do newline, otherwise spaces also getting included which makes it bad 
     | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
     
-
 getUniqueWords :: [String] -> [String]
 -- get all unique strings from list of strings
 getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) []
@@ -266,38 +201,55 @@ calcXGivenY :: Int -> [Double] -> [Double]
 calcXGivenY mylen my_cols_sum =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_sum
 
 
+writeToDocx :: String -> String -> IO ()
+writeToDocx filepath lang_class  = do
+    pandoc_lang <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
 
--- you have a list of words as a vocabulary and a list of strings/documents. for each string, count the occurence of each word in that string. You should output XTrain which is a n × V dimensional matrix describing the n documents used for training your Naive Bayes classifier where V is the number of words in the vocabulary. The entry XTrain[i,j] is 1 if word j appears in the ith training document and 0 otherwise.
+    case pandoc_lang of
+        Right x -> do
+            y <- runIO $ writeDocx def x
+            case y of
+                Right direct_pan -> do
+                    LBS.writeFile filepath direct_pan
+
+                Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
+
+        Left err -> Prelude.putStrLn $ "Error parsing pandoc for natural language " ++ show err
+
+    putStrLn "Completed writing to docx"
+
+-- ================================================================================================
 
 
-
+-- Functions that were implemented on the project journey but not used in the final system =============================================
 
 
 splitOnNewline :: [String] -> [[String]]
 splitOnNewline = DLS.splitWhen (== "NEWLINE")
 
-
 preProc :: [[String]] -> [String]
 preProc splitted = filter (not . null) $ map unwords splitted
 
-     
+getHTML :: String -> IO (Either SomeException LBSC.ByteString)
+getHTML url = do
+    result <- try $ do
+        mymanager <- ClientTLS.newTlsManager
+        myrequest <- Client.parseRequest url
+        response <- Client.httpLbs myrequest mymanager
+        let status_code = statusCode (Client.responseStatus response)
+        if status_code /= 200
+            then do
+                throwIO StatusCodeException
+            else do
+                let response_html = Client.responseBody response
+                return response_html
+    return result
 
--- trim :: String -> String
--- trim = f . f
---   where f = Prelude.reverse . Prelude.dropWhile isSpace
 
-
--- define a function that takes a list of tag strings as input and returns a string that has as it's elements every single word of the textual content of the tag strings. Newlines should also be included here
-
-
+parseTheTags :: LBSC.ByteString -> [Soup.Tag String]
+parseTheTags response_html = (Soup.parseTags :: String -> [Soup.Tag String]) (LBSC.unpack response_html)
 regextest :: String -> String -> Bool
 regextest input regex = input =~ (regex:: String) :: Bool
-
--- for this can use regex more but even that won't capture everything then could use tokenize from library so will need to see how that works
--- need to also make more robust cause full stops and stuff so could make more granular and use NLP libraries
--- \169 is copyright sign
--- boundary \\b needed to match whole word and not substring like int in intuition
--- can add more detail to the regexTokenizer regexes later for stuff like fun() and struct->pointer and system.out etc
 
 regexTokenizer :: [String] -> [(String,String)]
 regexTokenizer [] = []
@@ -309,18 +261,11 @@ regexTokenizer (x:xs)
     | regextest x "\\b[0-9]+\\b" = (x,"NUMBER"):regexTokenizer(xs)
     | otherwise = (x,x):regexTokenizer(xs)
 
-
-
 getText :: [Soup.Tag String] -> [String]
 getText tagstrings = map Soup.fromTagText (Prelude.filter Soup.isTagText tagstrings)
 
 writeFullSrc :: [Soup.Tag String] -> IO ()
 writeFullSrc tagstrings = writeFile "output_files/full_text.txt" (Soup.innerText tagstrings)
-
-
-
-
-
 
 fillTrue :: [Bool] -> [Bool]
 fillTrue [] = []
@@ -396,21 +341,4 @@ writeToTxt preTags filepath = do
 
     putStrLn "Completed writing to txt"
 
-
-writeToDocx :: String -> String -> IO ()
-writeToDocx filepath lang_class  = do
-    pandoc_lang <- runIO $ readHtml def ( TextConv.convertText ("<p>" ++ lang_class ++ "</p>" :: String ) :: T.Text )
-
-    case pandoc_lang of
-        Right x -> do
-            y <- runIO $ writeDocx def x
-            case y of
-                Right direct_pan -> do
-                    LBS.writeFile filepath direct_pan
-
-                Left err -> Prelude.putStrLn $ "Error with pandoc writeDocx: " ++ show err
-
-        Left err -> Prelude.putStrLn $ "Error parsing pandoc for natural language " ++ show err
-
-    putStrLn "Completed writing to docx"
-
+-- ================================================================================================
