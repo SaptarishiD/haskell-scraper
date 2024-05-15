@@ -4,8 +4,7 @@
 {-# HLINT ignore "Redundant bracket" #-}
 {-# HLINT ignore "Redundant return" #-}
 
--- maybe can also build a progress bar thing for the matrix multiplications stuff so know how long it's taking
--- also need to do performance testing stuff and all
+
 
 module Lib
     ( writeFullSrc, getHTML, parseTheTags, separateTextCode, writeToTxt, writeToDocx, getText, getWords, regextest, regexTokenizer, splitOnNewline, preProc, getUniqueWords, wordCounts, matrixRow, myVectorizer, sumCols, calcXGivenY, readTraining, trainNaiveBayes, classifyNaiveBayes , evaluateNaiveBayes, evalTests
@@ -282,15 +281,6 @@ preProc :: [[String]] -> [String]
 preProc splitted = filter (not . null) $ map unwords splitted
 
      
-
-
-
-
-
-
-
-
-
 
 -- trim :: String -> String
 -- trim = f . f
