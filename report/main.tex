@@ -600,24 +600,45 @@ classifyNaiveBayes test_data trainedModel =
     numbersep=5pt,
     xleftmargin=0pt,
     ]{haskell}
-    myVectorizer :: Vocabulary -> [Document] -> NLA.Matrix Double
-    myVectorizer vocab docs
-        | vocab == [] = NLA.fromLists [[int2Double 0]] -- sinceFromlists doesn't accept empty lists
-        | docs == [] = NLA.fromLists [[int2Double 0]]
-        | otherwise = NLA.fromLists [matrixRow vocab doc | doc <- docs]
+   
+-- each row in matrix corresponds to a document and each column to a word in the vocabulary. So an entry (i,j) represents the word count of word j from the vocab in document i
+myVectorizer :: Vocabulary -> [Document] -> NLA.Matrix Double
+myVectorizer vocab docs
+    | vocab == [] = NLA.fromLists [[int2Double 0]] -- sinceFromlists doesn't accept empty lists
+    | docs == [] = NLA.fromLists [[int2Double 0]]
+    | otherwise = NLA.fromLists [matrixRow vocab doc | doc <- docs]
 
-    matrixRow :: Vocabulary -> Document -> [Double]
-    matrixRow vocab doc = [fromMaybe (int2Double 0) (lookup vocab_word mywordcounts) | vocab_word <- vocab]
-    where mywordcounts = wordCounts doc
 
-    wordCounts :: Document -> [(String, Double)]
-    wordCounts doc = Data.Map.toList $ fromListWith (+) [(oneword, int2Double 1) | oneword <- words doc]
+-- takes a vocab i.e. list of strings. for each word in the vocab, look it up in the wordcount map of that document. If found then return the count, if not then 0 since the vocab word is not in this particular document. So this array of ints corresponds to one row in the vectorized matrix i.e. represents the word counts of all the words in the vocabulary in this document. 
+matrixRow :: Vocabulary -> Document -> [Double]
+matrixRow vocab doc = [fromMaybe (int2Double 0) (lookup vocab_word mywordcounts) | vocab_word <- vocab]
+  where mywordcounts = wordCounts doc
 
-    sumCols :: NLA.Matrix Double -> [Double]
-    sumCols matrix = map sum (NLA.toLists (NLA.tr matrix))
 
-    calcXGivenY :: Int -> [Double] -> [Double]
-    calcXGivenY mylen my_cols_sum =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_sum
+-- for a document i.e. (string), create list of (string, int) pairs which maps each word with it's count in the document. create tuple for each word in the form of (word, 1) then map with the addition function in order to count
+wordCounts :: Document -> [(String, Double)]
+wordCounts doc = Data.Map.toList $ fromListWith (+) [(oneword, int2Double 1) | oneword <- words doc]
+
+
+
+-- individual words
+getWords :: [String] -> [[String]]
+getWords [] = []
+getWords (x:xs)
+    | '\n' `elem` x && length x == 1 = ["NEWLINE"]:getWords(xs)
+    -- | words x == [] = x:getWords(xs) -- here need to check if newline to do newline, otherwise spaces also getting included which makes it bad 
+    | otherwise = (words (T.unpack . T.toLower . T.pack $ x)):getWords(xs)
+    
+
+getUniqueWords :: [String] -> [String]
+-- get all unique strings from list of strings
+getUniqueWords = foldl (\seen x -> if x `elem` seen then seen else seen ++ [x]) []
+
+sumCols :: NLA.Matrix Double -> [Double]
+sumCols matrix = map sum (NLA.toLists (NLA.tr matrix))
+
+calcXGivenY :: Int -> [Double] -> [Double]
+calcXGivenY mylen my_cols_sum =  map (\x -> x + 0.001 / int2Double (mylen) + 0.9 ) my_cols_sum
 
    \end{minted}
 
@@ -911,7 +932,7 @@ Details about the natural language test cases are not provided since difference 
 \subsection{Discussion}
 
 As we can see in Table 10.2, we enjoy surprisingly good performance in a lot of cases. The precision and recall for the code is higher than that of natural language for most of the cases. The scores for natural language are mostly low, with only a few of the metrics going above the 80 \% mark while others are abysmal. Let's take a closer look at why some test cases have lower metrics. \\ 
-\\ Consider the language precision of test case 8. This is low since the code contained many natural language comments that should have been classified as code, but were classified as natural language due to the nature of the classifier, thus lowering the precision. To properly classify such comments as code we either need to have the context of the surrounding lines or use a regular expression based approach that looks for comment patterns in various languages. The first approach increases the compute and complexity of the system, while the second approach is prone to errors and could classify some natural language as code instead.\\
+\\ Consider the language precision of test case 5. This is low since the code contained many natural language comments that should have been classified as code, but were classified as natural language due to the nature of the classifier, thus lowering the precision. To properly classify such comments as code we either need to have the context of the surrounding lines or use a regular expression based approach that looks for comment patterns in various languages. The first approach increases the compute and complexity of the system, while the second approach is prone to errors and could classify some natural language as code instead.\\
 \\ It is also important to note that the while classification accuracy is high, the format of the output files still leaves much to be desired in terms of the information that can be extracted from it, since it just comprises the code without any additional formattinng. However, in many cases, we have largelyn acheived the requirement of separating text and code snippets from a text source with relatively high accuracy.\\
 \\ Lastly, these high rates of accuracy were acheived despite the training data not having some programming languages and being skewed in favour of a particular programming language. A possible explanation for this behaviour can be that a line in any programming languages, even extending to SQL and Assembly, have particular patterns in terms of numbers, special symbols and characters that make it easily differentiable from a natural language line. However, this is purely a hypothesis and needs rigorous testing and analysis.
 
